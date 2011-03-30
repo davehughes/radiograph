@@ -1,0 +1,3 @@
+*.pyc
+*~
+radiograph/solr/radiograph/data/

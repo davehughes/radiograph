@@ -1,0 +1,2 @@
+{{ object.species }}
+{{ object.subspecies }}

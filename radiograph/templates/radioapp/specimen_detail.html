@@ -1,0 +1,29 @@
+{% extends "radioapp/base.html" %}
+
+{% block title %}Specimen - {{ specimen.species }}{%endblock%}
+{% block content %}
+<h1>{{ specimen.species }} - {{ specimen.subspecies }}</h1>
+<table>
+  <tr>
+    <th>Sex</th>
+    <td>{{ specimen.get_sex_display }}</td>
+      </tr>
+  <tr>
+    <th>Comments</th>
+    <td>{{ specimen.comments }}</td>
+  </tr>
+  <tr>
+    <th>Settings</th>
+    <td>{{ specimen.settings }}</td>
+  </tr>
+  <tr>
+    <th>Images</th>
+    <td>
+      {% for image in images %}
+      <a href="/images/{{ image.id }}">{{ image.get_aspect_display }}</a>
+      <br/>
+      {% endfor %}
+    </td>
+  </tr>
+</table>
+{% endblock %}
