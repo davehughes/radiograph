@@ -10,7 +10,8 @@ setuptools.setup(
         'beautifulsoup >= 3.2',
         'django >= 1.2.3',
         'South >= 0.7.3',
-        'pysolr >= 2.0'
+        'pysolr >= 2.0',
+        'python-magic'
         ]
     )
 
