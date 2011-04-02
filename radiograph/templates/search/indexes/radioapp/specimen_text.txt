@@ -1,2 +1,4 @@
 {{ object.species }}
 {{ object.subspecies }}
+{{ object.specimen_id }}
+{{ object.comments }}

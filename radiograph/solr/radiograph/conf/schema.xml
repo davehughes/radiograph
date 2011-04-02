@@ -80,11 +80,19 @@
 
     <field name="subspecies_facet" type="string" indexed="true" stored="true" multiValued="false" />
 
+    <field name="settings" type="text" indexed="true" stored="true" multiValued="false" />
+
     <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
+
+    <field name="comments" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="species_facet" type="string" indexed="true" stored="true" multiValued="false" />
+
+    <field name="specimen_id" type="text" indexed="true" stored="true" multiValued="false" />
+
+    <field name="images" type="text" indexed="true" stored="true" multiValued="true" />
 
     <field name="subspecies" type="text" indexed="true" stored="true" multiValued="false" />
 
@@ -101,4 +109,5 @@
   <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
   <solrQueryParser defaultOperator="AND" />
 </schema>
+
 
