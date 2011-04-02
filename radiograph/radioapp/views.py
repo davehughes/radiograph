@@ -4,11 +4,25 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from haystack.query import SearchQuerySet
 import magic
 
 from radioapp.models import Specimen, Image
 
 MIME = magic.Magic(mime=True)
+
+
+def index(request):
+    if request.method == 'GET':
+        # do haystack search
+        # list all parameters as run through specimen results template
+        query = SearchQuerySet().all().facet('sex').facet('species_facet')
+        ctx = RequestContext(request, { 
+                'results': query,
+                'facets': query.facet_counts()
+                })
+        return render_to_response('radioapp/specimen_list.html',
+                                  context_instance=ctx)
 
 def specimen(request, specimen_id):
     if request.method == 'GET':

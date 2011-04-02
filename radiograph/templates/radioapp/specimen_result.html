@@ -1,0 +1,40 @@
+<div class="specimen-result"
+     style="clear: both;">
+
+<div class="specimen-result-images"
+     style="display: inline-block;">
+  {% for image_id in specimen.images %}
+  <a href="{% url image image_id 'medium' %}"
+     style="text-decoration: none">
+    <img src="{% url image image_id 'thumbnail' %}"
+	 style="border: 1px solid #000; padding: 5px;"/>
+  </a>
+  {% endfor %}
+</div>
+<div class="specimen-result-details"
+     style="display: inline-block">
+  <h2>
+    <span style="font-style: italic">
+      {{ specimen.species }} {{ specimen.subspecies|default:"" }}
+    </span>
+    - {{ specimen.specimen_id }}
+  </h2>
+  <table style="display: inline;">
+    <tr>
+      <th>Sex:</th>
+      <td>{{ specimen.sex }}</td>
+    </tr>
+    <tr>
+      <th>Settings:</th>
+      <td>{{ specimen.settings|default:"Unspecified/Unknown" }}</td>
+    </tr>
+    {% if specimen.comments %}
+    <tr>
+      <th>Comments:</th>
+      <td>{{ specimen.comments }}</td>
+    </tr>
+    {% endif %}
+  </table
+</div>
+
+</div>

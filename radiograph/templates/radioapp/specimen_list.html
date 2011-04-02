@@ -1,0 +1,17 @@
+{% extends "radioapp/base.html" %}
+
+{% block title %}Specimen List{%endblock%}
+{% block content %}
+
+{% for label, values in facets.fields.items %}
+  <h2>Facet: {{ label }}</h2>
+  {% for value, count in values %}
+  <span>{{ value }} ({{ count }})</span></br>
+  {% endfor %}
+{% endfor %}
+
+{% for specimen in results %}
+{% include 'radioapp/specimen_result.html' %}
+{% endfor %}
+
+{% endblock %}

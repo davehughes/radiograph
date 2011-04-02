@@ -20,4 +20,6 @@ urlpatterns = patterns('',
     url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
         'radioapp.views.image',
         name='image'),
+
+    url(r'^$', 'radioapp.views.index', name='index'),
 )
