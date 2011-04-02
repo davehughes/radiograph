@@ -41,12 +41,13 @@ class Image(models.Model):
     
     specimen = models.ForeignKey('Specimen', related_name='images')
 
-    file = models.FileField(upload_to='images/full')
+    # image and derivative files
+    image_full = models.FileField(upload_to='images/full')
     image_medium = models.FileField(upload_to='images/medium', null=True)
     image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True)
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
-        source_image = PILImage.open(self.file) 
+        source_image = PILImage.open(self.image_full) 
         tmpdir = tmpdir or tempfile.mkdtemp()
         
         derivatives = [
@@ -77,8 +78,3 @@ class Image(models.Model):
                 # finally, clean up the temporary image
                 if os.path.isfile(resized_tmp):
                     os.remove(resized_tmp)
-
-    
-    
-
-    
