@@ -1,9 +1,11 @@
 import os
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.decorators.http import require_http_methods
 from haystack.query import SearchQuerySet
 import magic
 
@@ -33,6 +35,9 @@ def specimen(request, specimen_id):
                 })
         return render_to_response('radioapp/specimen_detail.html',
                                   context_instance=ctx)
+    elif request.method == 'POST':
+        # TODO: implement update handling
+        pass
 
 def image(request, image_id, derivative='medium'):
     if request.method == 'GET':
@@ -57,8 +62,7 @@ def image(request, image_id, derivative='medium'):
         
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.
-        download = request.GET.get('download', 'false')\
-            .lower().startswith('t') 
+        download = request.GET.get('download', 'false').lower().startswith('t') 
         download = download or derivative == 'full'
         if download: # generate appropriate filename and set disposition
             response['Content-Disposition'] = 'attachment; filename=%s' % filename

@@ -18,16 +18,13 @@ class SpecimenIndex(SearchIndex):
     subspecies_facet = FacetCharField(model_attr='subspecies', null=True)
     sex = FacetCharField(null=True)
 
-    def prepare_sex(self, object):
-        if object.sex:
-            return object.get_sex_display()
-        else:
-            return 'Unspecified/Unknown'
+    def prepare_sex(self, obj):
+        return obj.get_sex_display() if obj.sex else 'Unspcified/Unknown'
 
-    def prepare_images(self, object):
-        return object.images.all().values_list('id', flat=True)
+    def prepare_images(self, obj):
+        return obj.images.values_list('id', flat=True)
     
-    def get_queryset(self):
-        return Specimen.objects.select_related().all()
+    def index_queryset(self):
+        return Specimen.objects.select_related()
 
 site.register(Specimen, SpecimenIndex)

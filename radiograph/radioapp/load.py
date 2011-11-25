@@ -48,6 +48,8 @@ def load_django_models(image_dir_path, csv_path):
         image.image_full = image_info['file']
         image.save()
 
+        image.generate_derivatives()
+
     for key, vals in record_mismatches.items():
         print 'ID: %s' % key
         print 'Files: %s\n' % [x['file'].name for x in vals]

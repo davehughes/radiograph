@@ -1,6 +1,6 @@
 import os
 
-SITE_ROOT_DIR = '/home/dave/.virtualenvs/radiograph/src/radiograph/radiograph'
+SITE_ROOT_DIR = '/projects/radiograph/radiograph'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -47,7 +47,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = SITE_ROOT_DIR + '/media'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -57,7 +57,10 @@ MEDIA_URL = ''
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
+STATIC_ROOT = SITE_ROOT_DIR + '/static'
+STATIC_URL = '/static'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '!y7gt4_i_xmm)8s_ir8qa_83s)hhl!8!%u0%-9gbd67(gl%c-l'
@@ -92,12 +95,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admin',
+    'django.contrib.admindocs',
+    'django.contrib.staticfiles',
     'radiograph.radioapp',
-    'haystack'
+    'haystack',
+    'south'
 )
 
 HAYSTACK_SITECONF = 'radiograph.search_sites'

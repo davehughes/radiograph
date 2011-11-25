@@ -4,20 +4,40 @@ import tempfile
 
 from django.core.files import File as DjangoFile
 from django.db import models
+from django.template.defaultfilters import slugify
+
+def slugify_uniquely(value, model, slugfield):
+    suffix = 0
+    potential = base = slugify(value)
+    while True:
+        if suffix:
+            potential = "-".join([base, str(suffix)])
+        if not model.objects.filter(**{slugfield: potential}).count():
+            return potential
+        suffix += 1
 
 # Create your models here.
 class Specimen(models.Model):
-    SEX_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female')
-        )
+    SEX_CHOICES = (('M', 'Male'), ('F', 'Female'))
 
+    slug = models.SlugField(editable=False, null=True)
     specimen_id = models.CharField(max_length=255, null=True)
     species = models.CharField(max_length=255)
     subspecies = models.CharField(max_length=255, null=True)
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, null=True)
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
+
+    def __unicode__(self):
+        return '%s %s - %s' % (self.species, self.subspecies or '', self.specimen_id)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            slugbase = '%s %s %s' % (self.species, 
+                                     self.subspecies or '', 
+                                     self.specimen_id)
+            self.slug = slugify_uniquely(slugbase, self.__class__, 'slug')
+        return super(Specimen, self).save(*args, **kwargs)
 
 class ImageManager(models.Manager):
 
