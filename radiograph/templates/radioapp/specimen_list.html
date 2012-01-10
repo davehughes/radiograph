@@ -1,17 +1,28 @@
 {% extends "radioapp/base.html" %}
 
-{% block title %}Specimen List{%endblock%}
+{% block title %}{% endblock %}
+
 {% block content %}
 
-{% for label, values in facets.fields.items %}
-  <h2>Facet: {{ label }}</h2>
-  {% for value, count in values %}
-  <span>{{ value }} ({{ count }})</span></br>
-  {% endfor %}
-{% endfor %}
+<div class="row">
+    <div class="span5">
+        {% for label, values in facets.fields.items %}
+          <h2>Facet: {{ label }}</h2>
+          {% for value, count in values %}
+          <span>{{ value }} ({{ count }})</span></br>
+          {% endfor %}
+        {% endfor %}
+    </div>
 
-{% for specimen in results %}
-{% include 'radioapp/specimen_result.html' %}
-{% endfor %}
+    <div class="span11">
+        {% for specimen in results %}
+        {% include 'radioapp/specimen_result.html' %}
+        {% endfor %}
+    </div>
+</div>
 
+{% endblock %}
+
+{% block header_resources %}
+<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
 {% endblock %}
