@@ -1,5 +1,6 @@
+import logging
 import os
-from PIL import Image as PILImage
+#from PIL import Image as PILImage
 import tempfile
 
 from django.core.files import File as DjangoFile
@@ -24,7 +25,7 @@ class Specimen(models.Model):
     specimen_id = models.CharField(max_length=255, null=True)
     species = models.CharField(max_length=255)
     subspecies = models.CharField(max_length=255, null=True)
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES, null=True)
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True)
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
 
@@ -67,26 +68,29 @@ class Image(models.Model):
     image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True)
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
-        source_image = PILImage.open(self.image_full) 
+        #source_image = PILImage.open(self.image_full) 
         tmpdir = tmpdir or tempfile.mkdtemp()
         
         derivatives = [
-            ('image_thumbnail', (80, 80)),
-            ('image_medium', (800, 600))
+            ('image_thumbnail', 
+             ['-define', 'jpeg:size=300x300', 
+              '-thumbnail', '90x90>']),
+            ('image_medium', ['-resize', '1024x1024>'])
             ]
 
-        for attr, size in derivatives:
-            derivative_attr = getattr(self, attr)
-            if (not derivative_attr) or regenerate:
+        for attr, args in derivatives:
+            derivative = getattr(self, attr)
+            if (not derivative) or regenerate:
                 # write updated image to temp file
-                resized = source_image.resize(size, PILImage.ANTIALIAS)
-                _, resized_tmp = tempfile.mkstemp(suffix='.png', dir=tmpdir)
-                resized.save(open(resized_tmp, 'wb'))
+                fd, resized_tmp = tempfile.mkstemp(suffix='.png', dir=tmpdir)
+                os.close(fd)
+
+                _imagemagick_convert(self.image_full, resized_tmp, args)
 
                 # clean up existing image
-                if derivative_attr:
-                    path = derivative_attr.path
-                    derivative_attr.delete()
+                if derivative:
+                    path = derivative.path
+                    derivative.delete()
                     if os.path.isfile(path):
                         os.remove(path)
 
@@ -98,3 +102,26 @@ class Image(models.Model):
                 # finally, clean up the temporary image
                 if os.path.isfile(resized_tmp):
                     os.remove(resized_tmp)
+
+def _imagemagick_convert(inpath, outpath, args=None):
+    
+    if not os.path.isfile(inpath):
+        LOG.warn('%s is not a file.', inpath)
+        return False
+    
+    command = ['convert', inpath]
+    command.extend(args)
+    command.append(outpath)
+    
+    LOG.debug('Calling imagemagick: %s.', command)
+
+    proc = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    
+    if err:
+        LOG.error('Error calling imagemagick: %s', err)
+
+    return proc.returncode == 0

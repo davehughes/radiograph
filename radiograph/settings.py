@@ -13,11 +13,11 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', 
-        'NAME': os.path.join(SITE_ROOT_DIR, 'app.db'),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'NAME': 'radiograph',
+        'USER': 'radiograph',
+        'PASSWORD': 'radiograph',
+        'HOST': 'localhost',
         'PORT': ''
     }
 }
