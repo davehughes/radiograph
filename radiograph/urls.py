@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import *
 
 from django.contrib import admin
+from haystack.views import search_view_factory
+from radioapp.views import SearchView
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -16,5 +18,5 @@ urlpatterns = patterns('',
         'radioapp.views.image',
         name='image'),
 
-    url(r'^$', 'radioapp.views.index', name='index'),
+    url(r'^$', search_view_factory(SearchView), name='index'),
 )

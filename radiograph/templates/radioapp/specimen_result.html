@@ -1,14 +1,6 @@
 <div class="specimen-result"
      style="clear: both;">
 
-<ul class="specimen-result-images media-grid">
-  {% for image_id in specimen.images %}
-  <a href="{% url image image_id 'medium' %}"
-     style="text-decoration: none">
-    <img class="thumbnail" src="{% url image image_id 'thumbnail' %}"
-  </a>
-  {% endfor %}
-</ul>
 <div class="specimen-result-details"
      style="display: inline-block">
   <h2>
@@ -34,5 +26,15 @@
     {% endif %}
   </table
 </div>
+
+<ul class="specimen-result-images media-grid">
+  {% for image_id in specimen.images %}
+  <a href="{% url image image_id 'medium' %}"
+     style="text-decoration: none">
+     <img class="thumbnail" src="{% url image image_id 'thumbnail' %}"/>
+    {{ image.get_aspect_display }}
+  </a>
+  {% endfor %}
+</ul>
 
 </div>

@@ -4,11 +4,19 @@
 
 {% block content %}
 
+
+{% for obj in page.object_list %}
+<h3>{{ obj.species }}</h3>
+{% for image in obj.images %}
+<a href="#">{{ image }}</a>
+{% endfor %}
+{% endfor %}
+
 <div class="row">
     <div class="span5">
-        {% for label, values in facets.fields.items %}
-          <h2>Facet: {{ label }}</h2>
-          {% for value, count in values %}
+        {% for facet in facets %}
+          <h3>{{ facet.label }}</h3>
+          {% for value, count in facet.values %}
           <span>{{ value }} ({{ count }})</span></br>
           {% endfor %}
         {% endfor %}
