@@ -1,44 +1,68 @@
 import logging
 import os
-#from PIL import Image as PILImage
 import tempfile
 
 from django.core.files import File as DjangoFile
 from django.db import models
-from django.template.defaultfilters import slugify
 
-def slugify_uniquely(value, model, slugfield):
-    suffix = 0
-    potential = base = slugify(value)
-    while True:
-        if suffix:
-            potential = "-".join([base, str(suffix)])
-        if not model.objects.filter(**{slugfield: potential}).count():
-            return potential
-        suffix += 1
+# The current project scope is almost too narrow to store these details, but
+# I'll include them for completeness and to enable meaningful semantic data
+# sharing.
+# 
+# The radiographs that we're interested in are in
+# Animalia -> Chordata -> Mammalia -> Primates
+
+TAXONOMY_LEVELS = (
+    (0, 'Kingdom'),
+    (1, 'Phylum'),
+    (2, 'Class'),
+    (3, 'Order'),
+    (4, 'Family'),
+    (5, 'Genus'),
+    (6, 'Species'),
+    (7, 'Subspecies')
+)
+
+class Taxon(models.Model):
+    parent = models.ForeignKey('self', null=True)
+    level = models.IntegerField(choices=TAXONOMY_LEVELS)
+    name = models.CharField(max_length=255)
+    common_name = models.CharField(max_length=255, null=True)
+    description = models.TextField(null=True)
+
+    def __unicode__(self):
+        return self.name
+
+    @property
+    def hierarchy(self):
+        return (self.parent.hierarchy if self.parent else []) + [self]
+
+    def create_child_taxon(self, *args, **kwargs):
+        kwargs['parent'] = self
+        kwargs['level'] = self.level + 1
+        return Taxon.objects.create(*args, **kwargs)
+
+class Institution(models.Model):
+    name = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, null=True)
+    logo = models.FileField(upload_to='institutions', null=True)
 
 # Create your models here.
 class Specimen(models.Model):
-    SEX_CHOICES = (('M', 'Male'), ('F', 'Female'))
+    SEX_CHOICES = (('M', 'Male'), ('F', 'Female'), ('U', 'Unknown'))
 
-    slug = models.SlugField(editable=False, null=True)
     specimen_id = models.CharField(max_length=255, null=True)
-    species = models.CharField(max_length=255)
-    subspecies = models.CharField(max_length=255, null=True)
+    taxon = models.ForeignKey('Taxon', related_name='specimens')
+    institution = models.ForeignKey('Institution', related_name='specimens')
     sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True)
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
 
-    def __unicode__(self):
-        return '%s %s - %s' % (self.species, self.subspecies or '', self.specimen_id)
+    created = models.DateField(auto_now_add=True)
+    last_modified = models.DateField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            slugbase = '%s %s %s' % (self.species, 
-                                     self.subspecies or '', 
-                                     self.specimen_id)
-            self.slug = slugify_uniquely(slugbase, self.__class__, 'slug')
-        return super(Specimen, self).save(*args, **kwargs)
+    def __unicode__(self):
+        return '%s - %s' % (taxonomy_node, self.specimen_id)
 
 class ImageManager(models.Manager):
 

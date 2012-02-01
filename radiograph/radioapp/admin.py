@@ -9,8 +9,8 @@ class ImageInline(admin.TabularInline):
 
 class SpecimenAdmin(admin.ModelAdmin):
     inlines = [ ImageInline ]
-    list_display = ('specimen_id', 'species', 'subspecies', 'sex')
-    list_editable = ('species', 'subspecies', 'sex')
-    list_filter = ('species', 'sex')
+    list_display = ('specimen_id', 'sex')
+    list_editable = ('sex',)
+    list_filter = ('sex',)
 
 admin.site.register(models.Specimen, SpecimenAdmin)

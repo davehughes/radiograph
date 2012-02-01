@@ -18,5 +18,9 @@ urlpatterns = patterns('',
         'radioapp.views.image',
         name='image'),
 
-    url(r'^$', search_view_factory(SearchView), name='index'),
+    url(r'^autocomplete/taxa$', 
+        'radioapp.views.taxa_autocomplete',
+        name='taxa-autocomplete'),
+
+    url(r'^$', search_view_factory(SearchView), name='index')
 )

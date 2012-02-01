@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.conf import settings
@@ -11,7 +12,7 @@ from haystack.query import SearchQuerySet
 import haystack
 import magic
 
-from radioapp.models import Specimen, Image
+from radioapp.models import Specimen, Image, Taxon
 
 MIME = magic.Magic(mime=True)
 
@@ -25,7 +26,6 @@ class SearchView(haystack.views.FacetedSearchView):
         super(SearchView, self).__init__(*args, **kwargs)
 
     def create_response(self, *args, **kwargs):
-        import ipdb; ipdb.set_trace();
         return super(SearchView, self).create_response(*args, **kwargs)
 
 #    def build_form(self, form_kwargs=None):
@@ -133,5 +133,14 @@ def image(request, image_id, derivative='medium'):
         if download: # generate appropriate filename and set disposition
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
+
+def taxa_autocomplete(request):
+    term = request.GET.get('term')
+    
+    sqs = SearchQuerySet().models(Taxon).filter(label=term)[:8]
+    response = [{'id': r.pk, 'label': r.label, 'value': r.label}
+                for r in sqs]
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
 
 

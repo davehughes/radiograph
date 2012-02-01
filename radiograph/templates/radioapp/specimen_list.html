@@ -4,6 +4,7 @@
 
 {% block content %}
 
+<input id="taxon-autocomplete" type="text"/>
 
 {% for obj in page.object_list %}
 <h3>{{ obj.species }}</h3>
@@ -33,4 +34,22 @@
 
 {% block header_resources %}
 <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+{% endblock %}
+
+
+{% block scripts %}
+
+{{ block.super }}
+
+<script type="text/javascript">
+
+    $('#taxon-autocomplete').autocomplete({
+        source: '/autocomplete/taxa',
+        minLength: 2,
+        select: function(e, ui) {
+            alert('selection happened');
+        }
+    });
+</script>
+
 {% endblock %}
