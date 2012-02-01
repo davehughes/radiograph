@@ -1,5 +1,6 @@
 *.egg-info
 *.pyc
 *~
+*.sw[a-z]
 radiograph/solr/radiograph/data/
 radiograph/apache.conf
