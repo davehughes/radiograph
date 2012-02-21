@@ -104,8 +104,6 @@
     <dynamicField name="*_dt" type="date"    indexed="true"  stored="true"/>
     
 
-    <field name="subspecies_facet" type="string" indexed="true" stored="true" multiValued="false" />
-
     <field name="settings" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="taxa" type="string" indexed="true" stored="true" multiValued="true" />
@@ -114,15 +112,15 @@
 
     <field name="comments" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
+    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
 
-    <field name="species_facet" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="label_sort" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="specimen_id" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="images" type="text" indexed="true" stored="true" multiValued="true" />
 
-    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
 
   </fields>
 

@@ -1,17 +1,58 @@
 {% extends "radioapp/base.html" %}
 
-{% block title %}{% endblock %}
-
 {% block content %}
 
-<input id="taxon-autocomplete" type="text"/>
+<a href="#" class="btn">
+    <i class="icon-download"></i>
+</a>
 
-{% for obj in page.object_list %}
-<h3>{{ obj.species }}</h3>
-{% for image in obj.images %}
-<a href="#">{{ image }}</a>
-{% endfor %}
-{% endfor %}
+<div class="btn-group">
+    <a class="btn" href="#">
+        <i class="icon-download"></i>
+        Download
+    </a>
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li><a href="#">Option 1</a></li>
+        <li><a href="#">Option 2</a></li>
+        <li><a href="#">Option 3</a></li>
+    </ul>
+</div>
+
+<table class="table table-condensed table-striped table-bordered">
+    <tr>
+        <th>
+            <a href="#" class="btn">
+                <i class="icon-cog"></i>
+            </a>
+        </th>
+        <th>Taxon</th>
+        <th>Sex</th>
+        <th>Images</th>
+    </tr>
+    {% for specimen in page.object_list %}
+    <tr>
+        <td>
+            <input type="checkbox" value="{{ specimen.object.id }}"/>
+        </td>
+        <td>
+            {% for tnode in specimen.object.taxon.hierarchy %}
+            {% if tnode.level > 6 %}
+            <span class="taxon-{{ tnode.get_level_display|lower }}">{{ tnode.name }} </span>
+            {% endif %}
+            {% endfor %}
+        </td>
+        <td>{{ specimen.sex }}</td>
+        <td>
+            <a href="#">Lateral</a>
+            <a href="#">Superior</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
 
 <div class="row">
     <div class="span5">
@@ -32,24 +73,3 @@
 
 {% endblock %}
 
-{% block header_resources %}
-<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
-{% endblock %}
-
-
-{% block scripts %}
-
-{{ block.super }}
-
-<script type="text/javascript">
-
-    $('#taxon-autocomplete').autocomplete({
-        source: '/autocomplete/taxa',
-        minLength: 2,
-        select: function(e, ui) {
-            alert('selection happened');
-        }
-    });
-</script>
-
-{% endblock %}

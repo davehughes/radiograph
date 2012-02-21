@@ -12,8 +12,6 @@ class SpecimenIndex(SearchIndex):
     images = MultiValueField()
 
     # facet fields
-    species_facet = FacetCharField(model_attr='species')
-    subspecies_facet = FacetCharField(model_attr='subspecies', null=True)
     sex = FacetCharField(null=True)
     taxa = FacetMultiValueField()
 
@@ -21,7 +19,7 @@ class SpecimenIndex(SearchIndex):
         return obj.get_sex_display() if obj.sex else 'Unspecified/Unknown'
 
     def prepare_taxa(self, obj):
-        return [t.id for t in obj.taxon.heirarchy]
+        return [t.id for t in obj.taxon.hierarchy]
 
     def prepare_images(self, obj):
         return ['%s:%s' % (i.id, i.get_aspect_display())
@@ -32,13 +30,17 @@ class SpecimenIndex(SearchIndex):
 
 class TaxonomicIndex(SearchIndex):
     label = EdgeNgramField() 
+    label_sort = FacetCharField()
     text = CharField(document=True)
     
     def prepare_label(self, obj):
-        return ' '.join([t.name for t in obj.hierarchy if t.level >= 5])
+        return ' '.join([t.name for t in obj.hierarchy if t.level >= 7])
+
+    def prepare_label_sort(self, obj):
+        return ' '.join([t.name for t in obj.hierarchy if t.level >= 7])
 
     def index_queryset(self):
-        return Taxon.objects.filter(level__gt=5)
+        return Taxon.objects.filter(level__gt=7)
 
 site.register(Specimen, SpecimenIndex)
 site.register(Taxon, TaxonomicIndex)

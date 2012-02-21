@@ -1,0 +1,114 @@
+{% extends "radioapp/base.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<form class="well form-horizontal">
+
+    {# Image files #}
+    <div class="control-group">
+        <label class="control-label">Images</label>
+        <div class="controls form-inline">
+            <select id="aspect-01">
+                <option selected="selected">Superior</option>
+                <option>Lateral</option>
+            </select>
+            <input type="file" name="file-1"/>
+            <a href="#" class="btn"><i class="icon-remove"></i></a>
+            <br/>
+
+            <select id="aspect-01">
+                <option>Superior</option>
+                <option selected="selected">Lateral</option>
+            </select>
+            <input type="file" name="file-1"/>
+            <a href="#" class="btn"><i class="icon-remove"></i></a>
+            <br/>
+
+            <a href="#" class="btn">
+                <i class="icon-plus"></i>
+                Add Image
+            </a>
+        </div>
+    </div>
+
+    {# Institution choice #}
+    <div class="control-group">
+        <label class="control-label" for="institution-choice">Institution</label>
+        <div class="controls">
+            <select id="institution-choice">
+                <option>foo</option>
+                <option>bar</option>
+            </select>
+        </div>
+    </div>
+
+    {# Taxon choice #}
+    <div class="control-group">
+        <label class="control-label" for="taxon-choice">Taxon</label>
+        <div class="controls">
+            <select class="taxon-autocomplete" 
+                    data-placeholder="Choose genus/species">
+                {% for taxon in taxa_query %}
+                <option value="{{ taxon.id }}">{{ taxon.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    {# Sex choice #}
+    <div class="control-group">
+        <label class="control-label" for="sex-choice">Sex</label>
+        <div class="controls">
+            <select id="sex-choice">
+                <option>Male</option>
+                <option>Female</option>
+                <option>Unknown/Unspecified</option>
+            </select>
+        </div>
+    </div>
+
+    {# Machine settings textbox #}
+    <div class="control-group">
+        <label class="control-label" for="settings">Settings</label>
+        <div class="controls">
+            <input type="text" id="settings" class="input-xlarge"></input>
+        </div>
+    </div>
+
+    {# Comments text area #}
+    <div class="control-group">
+        <label class="control-label" for="comments">Comments</label>
+        <div class="controls">
+            <textarea id="comments"></textarea>
+        </div>
+    </div>
+
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button class="btn btn-primary">Save and Enter Another</button>
+        <button class="btn">Discard</button>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block header_resources %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/chosen/chosen/chosen.css">
+{% endblock %}
+
+{% block scripts %}
+
+{{ block.super }}
+
+<script type="text/javascript" src="/static/chosen/chosen/chosen.jquery.min.js">
+</script>
+
+<script type="text/javascript">
+    $('.taxon-autocomplete').chosen();
+</script>
+
+{% endblock %}

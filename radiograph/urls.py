@@ -14,6 +14,10 @@ urlpatterns = patterns('',
         'radioapp.views.specimen',
         name='specimen'),
 
+    url(r'^specimens/(?P<specimen_id>[^/]+)/edit$',
+        'radioapp.views.edit_specimen',
+        name='specimen-edit'),
+
     url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
         'radioapp.views.image',
         name='image'),

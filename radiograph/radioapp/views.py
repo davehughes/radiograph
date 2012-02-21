@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -31,38 +32,55 @@ class SearchView(haystack.views.FacetedSearchView):
 #    def build_form(self, form_kwargs=None):
 #        super(SearchView, self).build_form(form_kwargs)
 
+    def extra_context(self):
+        extra = super(SearchView, self).extra_context()
 
-class SearchForm(haystack.forms.SearchForm):
+        facets = copy.deepcopy(self.form.facets)
+        facet_map = self.results.facet_counts().get('fields', {})
+        for f in facets:
+            f['values'] = facet_map.get(f['field'], [])
+        extra['facets'] = facets
+
+        return extra
+
+
+class SearchForm(haystack.forms.FacetedModelSearchForm):
     facets = [{
         'field': 'sex', 
         'label': 'Sex',
         'multi': False
         }, {
-        'field': 'species_facet', 
-        'label': 'Species/subspecies',
+        'field': 'taxa', 
+        'label': 'Taxon',
         'multi': True
     }]
 
     def __init__(self, *args, **kwargs):
         self.selected_facets = kwargs.pop("selected_facets", [])
         super(SearchForm, self).__init__(*args, **kwargs)
+
+    def get_models(self):
+        return [Specimen]
     
     def search(self):
         sqs = super(SearchForm, self).search()
+        for facet in self.facets:
+            sqs = sqs.facet(facet['field'])
 
         multifacets = {}
+        facet_map = {f['field']: f for f in self.facets}
         for facet in self.selected_facets:
             if ':' not in facet:
                 continue
                 
             field, value = facet.split(':', 1)
-            facet = facet_map[field]
+            facet = facet_map.get(field, {})
             if facet.get('multi', False):
                 multifacets.setdefault(field, []).append(value)
             else:
                 sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
                 
-        for field, vals in multifacets:
+        for field, vals in multifacets.iteritems():
             clauses = [u'%s:"%s"' % (field, sqs.query.clean(v)) for v in vals]
             sqs = sqs.narrow(' OR '.join(clauses))
 
@@ -142,5 +160,10 @@ def taxa_autocomplete(request):
                 for r in sqs]
     return HttpResponse(json.dumps(response), content_type='application/json')
 
+def edit_specimen(request, specimen_id):
+    ctx = RequestContext(request, {
+        'taxa_query': SearchQuerySet().models(Taxon).order_by('label_sort')
+        })
+    return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
 
 

@@ -1,9 +1,12 @@
 import logging
 import os
+import subprocess
 import tempfile
 
 from django.core.files import File as DjangoFile
 from django.db import models
+
+LOG = logging.getLogger(__name__)
 
 # The current project scope is almost too narrow to store these details, but
 # I'll include them for completeness and to enable meaningful semantic data
@@ -12,21 +15,34 @@ from django.db import models
 # The radiographs that we're interested in are in
 # Animalia -> Chordata -> Mammalia -> Primates
 
+KINGDOM = 0
+PHYLUM = 1
+CLASS = 2
+ORDER = 3
+SUBORDER = 4
+FAMILY = 5
+SUBFAMILY = 6
+GENUS = 7
+SPECIES = 8
+SUBSPECIES = 9
+
 TAXONOMY_LEVELS = (
-    (0, 'Kingdom'),
-    (1, 'Phylum'),
-    (2, 'Class'),
-    (3, 'Order'),
-    (4, 'Family'),
-    (5, 'Genus'),
-    (6, 'Species'),
-    (7, 'Subspecies')
+    (KINGDOM, 'Kingdom'),
+    (PHYLUM, 'Phylum'),
+    (CLASS, 'Class'),
+    (ORDER, 'Order'),
+    (SUBORDER, 'Suborder'),
+    (FAMILY, 'Family'),
+    (SUBFAMILY, 'Subfamily'),
+    (GENUS, 'Genus'),
+    (SPECIES, 'Species'),
+    (SUBSPECIES, 'Subspecies')
 )
 
 class Taxon(models.Model):
     parent = models.ForeignKey('self', null=True)
     level = models.IntegerField(choices=TAXONOMY_LEVELS)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True)
     common_name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
 
@@ -41,6 +57,19 @@ class Taxon(models.Model):
         kwargs['parent'] = self
         kwargs['level'] = self.level + 1
         return Taxon.objects.create(*args, **kwargs)
+
+    def children(self):
+        return Taxon.objects.filter(parent=self)
+
+    def get_json_subtree(self):
+        '''Create a JSON-compatible subtree rooted with this Taxon.'''
+        return {'level': self.level,
+                'level_name': self.get_level_display(),
+                'name': self.name,
+                'common_name': self.common_name,
+                'description': self.description,
+                'children': [child.get_json_subtree() 
+                             for child in self.children()]}
 
 class Institution(models.Model):
     name = models.CharField(max_length=255)
@@ -62,7 +91,7 @@ class Specimen(models.Model):
     last_modified = models.DateField(auto_now=True)
 
     def __unicode__(self):
-        return '%s - %s' % (taxonomy_node, self.specimen_id)
+        return '%s - %s' % (self.taxon, self.specimen_id)
 
 class ImageManager(models.Manager):
 
@@ -109,7 +138,7 @@ class Image(models.Model):
                 fd, resized_tmp = tempfile.mkstemp(suffix='.png', dir=tmpdir)
                 os.close(fd)
 
-                _imagemagick_convert(self.image_full, resized_tmp, args)
+                _imagemagick_convert(self.image_full.path, resized_tmp, args)
 
                 # clean up existing image
                 if derivative:

@@ -11,15 +11,38 @@ import magic
 
 MIME = magic.Magic(mime=True)
 
-def load_django_models(image_dir_path, csv_path):
+def load_django_models(image_dir_path, csv_path, institution):
 
+    # assumes that taxa are already loaded
     for record in load_image_records(csv_path):
-        models.Specimen.objects.create(species = record['species'],
-                                       subspecies = record.get('subspecies'),
+        taxon_labels = record['species'].split(' ')
+        if record.get('subspecies'):
+            taxon_labels.append(record['subspecies'])
+
+        comments = [record.get('comments')]
+
+        parent = None
+        level = models.GENUS # start here
+        for level_offset, taxon_label in enumerate(taxon_labels):
+            taxa = models.Taxon.objects.filter(level=(level + level_offset))
+            if parent:
+                taxa = taxa.filter(parent=parent)
+            try:
+                parent = taxon = taxa.get(name__iexact=taxon_label)
+            except models.Taxon.DoesNotExist:
+                if level_offset == 2:
+                    comments.append('Original classification: %s' %
+                                     ' '.join(taxon_labels))
+                else:
+                    import ipdb; ipdb.set_trace();
+        
+        comments = '\n\n'.join(c.strip() for c in comments if len(c.strip()) > 0)
+        models.Specimen.objects.create(taxon=taxon,
+                                       institution=institution,
                                        specimen_id = record.get('specimen_id'),
                                        sex = record.get('sex'),
                                        settings = record.get('settings'),
-                                       comments = record.get('comments'))
+                                       comments = comments)
     
     record_mismatches = {}
     duplicate_ids = {}
@@ -48,15 +71,14 @@ def load_django_models(image_dir_path, csv_path):
         image.image_full = image_info['file']
         image.save()
 
-        image.generate_derivatives()
+        #image.generate_derivatives()
 
     for key, vals in record_mismatches.items():
         print 'ID: %s' % key
         print 'Files: %s\n' % [x['file'].name for x in vals]
 
     for key, vals in duplicate_ids.items():
-        print 'ID: %s'
-        
+        print 'ID: %s' % key
 
 def load_image_info(path='.', levels=10):
     # glob for .tifs up to @levels directories deep from @path
