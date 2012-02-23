@@ -1,75 +1,128 @@
 {% extends "radioapp/base.html" %}
+{% load url from future %}
 
 {% block content %}
 
-<a href="#" class="btn">
-    <i class="icon-download"></i>
-</a>
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <a class="btn btn-small" href="#">Filter</a>
+    </div>
 
-<div class="btn-group">
-    <a class="btn" href="#">
-        <i class="icon-download"></i>
-        Download
-    </a>
-    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-        <span class="caret"></span>
-    </a>
-    <ul class="dropdown-menu">
-        <li><a href="#">Option 1</a></li>
-        <li><a href="#">Option 2</a></li>
-        <li><a href="#">Option 3</a></li>
-    </ul>
+    <div class="btn-group">
+        <a class="btn btn-small" href="#">
+            <i class="icon-download"></i>
+            Download
+        </a>
+    </div>
 </div>
 
-<table class="table table-condensed table-striped table-bordered">
-    <tr>
-        <th>
-            <a href="#" class="btn">
-                <i class="icon-cog"></i>
-            </a>
-        </th>
-        <th>Taxon</th>
-        <th>Sex</th>
-        <th>Images</th>
-    </tr>
-    {% for specimen in page.object_list %}
-    <tr>
-        <td>
-            <input type="checkbox" value="{{ specimen.object.id }}"/>
-        </td>
-        <td>
-            {% for tnode in specimen.object.taxon.hierarchy %}
-            {% if tnode.level > 6 %}
-            <span class="taxon-{{ tnode.get_level_display|lower }}">{{ tnode.name }} </span>
-            {% endif %}
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2">
+            {% for facet in facets %}
+              <h3>{{ facet.label }}</h3>
+              {% for value, count in facet.values %}
+              <span>{{ value }} ({{ count }})</span></br>
+              {% endfor %}
             {% endfor %}
-        </td>
-        <td>{{ specimen.sex }}</td>
-        <td>
-            <a href="#">Lateral</a>
-            <a href="#">Superior</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        </div>
+        <div class="span10">
+            <div class="pagination">
+                <ul>
+                    <li><a href="#">«</a></li>
+                    <li><a href="#">1</a></li>
+                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a href="#">15</a></li>
+                    <li class="active"><a href="#">16</a></li>
+                    <li><a href="#">17</a></li>
+                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a href="#">30</a></li>
+                    <li><a href="#">»</a></li>
+                </ul>
+            </div>
+            <table class="table table-condensed table-striped">
+                <col width="10%"/>
+                <col/>
+                <col width="10%"/>
+                <col width="20%"/>
+                <col width="25"/>
+                <tr>
+                    <th>
+                        <div class="btn-group">
+                            <a href="#" class="btn btn-small"><input type="checkbox"/></a>
+                            <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>Select All</li>
+                                <li>Select None</li>
+                                <li>Invert Selection</li>
+                            </ul>
+                        </div>
+                    </th>
+                    <th>Taxon</th>
+                    <th>Sex</th>
+                    <th>Images</th>
+                    <th/>
+                </tr>
+                {% for specimen in page.object_list %}
+                <tr>
+                    <td>
+                        <input type="checkbox" value="{{ specimen.object.id }}"/>
+                    </td>
+                    <td>
+                        {% for tnode in specimen.object.taxon.hierarchy %}
+                        {% if tnode.level > 6 %}
+                        <span class="taxon-{{ tnode.get_level_display|lower }}">{{ tnode.name }} </span>
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ specimen.sex }}</td>
+                    <td>
+                        <a href="#">Lateral</a>
+                        <a href="#">Superior</a>
+                    </td>
+                    <td>
 
-
-<div class="row">
-    <div class="span5">
-        {% for facet in facets %}
-          <h3>{{ facet.label }}</h3>
-          {% for value, count in facet.values %}
-          <span>{{ value }} ({{ count }})</span></br>
-          {% endfor %}
-        {% endfor %}
-    </div>
-
-    <div class="span11">
-        {% for specimen in results %}
-        {% include 'radioapp/specimen_result.html' %}
-        {% endfor %}
+                        <a class="btn" title="Edit Specimen"
+                           href="{% url 'specimen-edit' specimen.object.id %}">
+                            <i class="icon-edit"></i> 
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
 </div>
 
+<div id="tree"></div>
+
+{% endblock %}
+
+{% comment %}
+{% block header_resources %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet"
+      href="/static/yui/build/treeview/assets/skins/sam/treeview.css"/>
+{% endblock %]
+{% endcomment %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript" 
+    src="/static/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+</script>
+
+<script type="text/javascript"
+        src="/static/yui/build/treeview/treeview-min.js"></script>
+
+<script type="text/javascript">
+    var tv = new YAHOO.widget.TreeView("tree");
+    var root = tv.getRoot();
+    var child1 = new YAHOO.widget.TextNode("Node 1", root, false);
+    var child2 = new YAHOO.widget.TextNode("Node 2", root, false);
+    tv.draw();
+</script>
 {% endblock %}
 

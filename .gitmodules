@@ -1,3 +1,6 @@
 [submodule "radiograph/radioapp/static/chosen"]
 	path = radiograph/radioapp/static/chosen
 	url = git://github.com/harvesthq/chosen.git
+[submodule "radiograph/radioapp/static/bootstrap"]
+	path = radiograph/radioapp/static/bootstrap
+	url = git://github.com/twitter/bootstrap.git

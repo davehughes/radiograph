@@ -6,9 +6,11 @@ from radioapp.views import SearchView
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login',
+        {'template_name': 'radioapp/login.html'},
+        name='login'),
 
     url(r'^specimens/(?P<specimen_id>[^/]+)$',
         'radioapp.views.specimen',

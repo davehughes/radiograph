@@ -3,7 +3,7 @@ import json
 import os
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -160,10 +160,14 @@ def taxa_autocomplete(request):
                 for r in sqs]
     return HttpResponse(json.dumps(response), content_type='application/json')
 
+@user_passes_test(lambda u: u.is_staff)
 def edit_specimen(request, specimen_id):
     ctx = RequestContext(request, {
         'taxa_query': SearchQuerySet().models(Taxon).order_by('label_sort')
         })
     return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
 
+def build_taxa_tree():
+    taxa = (Taxon.objects.order_by('level')
+            .values_list('id', 'parent_id', 'level'))
 

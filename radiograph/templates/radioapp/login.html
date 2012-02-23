@@ -1,0 +1,58 @@
+{% extends "radioapp/base.html" %}
+{% load i18n %}
+
+{% block title %}Radiograph Database - Sign In{% endblock %}
+
+{% block header_resources %}
+{{ block.super }}
+<style type="text/css">
+    .form-container {
+        float: left;
+        height: 50%;
+        margin-bottom: -120px;
+    }
+    .form-container form { 
+        border: 1px solid #dadada; 
+        border-radius: 4px;
+        clear: both;
+        height: 240px;
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container row">
+    <form action="{{ app_path }}" method="post" id="login-form" class="span6 offset3">
+        {% csrf_token %}
+        <input type="hidden" name="this_is_the_login_form" value="1" />
+        <input type="hidden" name="next" value="{{ next }}" />
+
+        <div class="modal-header">
+            <h3>Radiograph Database - Sign In</h3>
+        </div>
+
+        <div class="modal-body form form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="id_username">Username:</label>
+                <div class="controls">
+                {% if not form.this_is_the_login_form.errors %}{{ form.username.errors }}{% endif %}
+                {{ form.username }}
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="id_password">Password:</label>
+                <div class="controls">
+                {% if not form.this_is_the_login_form.errors %}{{ form.password.errors }}{% endif %}
+                {{ form.password }}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Sign In</button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
