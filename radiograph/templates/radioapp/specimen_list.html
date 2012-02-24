@@ -27,19 +27,7 @@
             {% endfor %}
         </div>
         <div class="span10">
-            <div class="pagination">
-                <ul>
-                    <li><a href="#">«</a></li>
-                    <li><a href="#">1</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
-                    <li><a href="#">15</a></li>
-                    <li class="active"><a href="#">16</a></li>
-                    <li><a href="#">17</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
-                    <li><a href="#">30</a></li>
-                    <li><a href="#">»</a></li>
-                </ul>
-            </div>
+            {% include "radioapp/partials/pagination.html" %}
             <table class="table table-condensed table-striped">
                 <col width="10%"/>
                 <col/>
@@ -92,6 +80,7 @@
                 </tr>
                 {% endfor %}
             </table>
+            {% include "radioapp/partials/pagination.html" %}
         </div>
     </div>
 </div>

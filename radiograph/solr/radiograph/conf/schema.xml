@@ -112,7 +112,7 @@
 
     <field name="comments" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
 
     <field name="label_sort" type="string" indexed="true" stored="true" multiValued="false" />
 
@@ -120,7 +120,7 @@
 
     <field name="images" type="text" indexed="true" stored="true" multiValued="true" />
 
-    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
+    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
 
   </fields>
 

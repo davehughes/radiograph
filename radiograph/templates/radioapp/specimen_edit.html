@@ -1,9 +1,13 @@
 {% extends "radioapp/base.html" %}
+{% load url from future %}
 
-{% block title %}{% endblock %}
+{% block title %}Edit Specimen{% endblock %}
 
 {% block content %}
-<form class="well form-horizontal">
+<form class="well form-horizontal"
+    method="post"
+    action="{% url 'specimen' specimen.id %}">
+    {% csrf_token %}
 
     {# Image files #}
     <div class="control-group">
@@ -37,8 +41,9 @@
         <label class="control-label" for="institution-choice">Institution</label>
         <div class="controls">
             <select id="institution-choice">
-                <option>foo</option>
-                <option>bar</option>
+                {% for institution in institutions %}
+                <option value="{{ institution.id }}">{{ institution.name }}</option>
+                {% endfor %}
             </select>
         </div>
     </div>
@@ -97,14 +102,14 @@
 
 {% block header_resources %}
     {{ block.super }}
-    <link rel="stylesheet" href="/static/chosen/chosen/chosen.css">
+    <link rel="stylesheet" href="/static/chosen/chosen.css">
 {% endblock %}
 
 {% block scripts %}
 
 {{ block.super }}
 
-<script type="text/javascript" src="/static/chosen/chosen/chosen.jquery.min.js">
+<script type="text/javascript" src="/static/chosen/chosen.jquery.min.js">
 </script>
 
 <script type="text/javascript">

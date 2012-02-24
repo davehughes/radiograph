@@ -98,7 +98,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.staticfiles',
-    'radiograph.radioapp',
+    'radioapp',
     'haystack',
     'south'
 )

@@ -11,12 +11,7 @@ from django.views.decorators.http import require_http_methods
 import haystack
 from haystack.query import SearchQuerySet
 import haystack
-import magic
-
-from radioapp.models import Specimen, Image, Taxon
-
-MIME = magic.Magic(mime=True)
-
+from radioapp.models import Specimen, Image, Taxon, Institution
 
 class SearchView(haystack.views.FacetedSearchView):
     template = 'radioapp/specimen_list.html'
@@ -121,6 +116,7 @@ def specimen(request, specimen_id):
                                   context_instance=ctx)
     elif request.method == 'POST':
         # TODO: implement update handling
+        
         pass
 
 def image(request, image_id, derivative='medium'):
@@ -142,7 +138,7 @@ def image(request, image_id, derivative='medium'):
         response = HttpResponse()
         response['X-Sendfile'] = filepath
         response['Content-Length'] = imgfile.size
-        response['Content-Type'] = MIME.from_file(filepath)
+        response['Content-Type'] = '%s; %s' % mimetypes.guess_mime(filepath)
         
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.
@@ -162,7 +158,10 @@ def taxa_autocomplete(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_specimen(request, specimen_id):
+    specimen = get_object_or_404(Specimen, id=specimen_id)
     ctx = RequestContext(request, {
+        'specimen': specimen,
+        'institutions': Institution.objects.all(),
         'taxa_query': SearchQuerySet().models(Taxon).order_by('label_sort')
         })
     return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
@@ -170,4 +169,5 @@ def edit_specimen(request, specimen_id):
 def build_taxa_tree():
     taxa = (Taxon.objects.order_by('level')
             .values_list('id', 'parent_id', 'level'))
+
 

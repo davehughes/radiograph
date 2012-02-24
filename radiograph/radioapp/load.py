@@ -1,15 +1,12 @@
 import csv
 import glob
 import itertools
+import mimetypes
 import os
 import re
 
 from django.core.files.uploadedfile import UploadedFile
 from radioapp import models
-
-import magic
-
-MIME = magic.Magic(mime=True)
 
 def load_django_models(image_dir_path, csv_path, institution):
 
@@ -102,9 +99,10 @@ def _load_image_info(image_path):
         return {'filename': filename, 'path': filepath, 'error': error}
     
     aspect = 'superior' if m.group('aspect').lower() == 's' else 'lateral'
+    mime, encoding = mimetypes.guess_type(filepath)
     file_ = UploadedFile(file=open(filepath, 'rb'),
                          name=filename,
-                         content_type=MIME.from_file(filepath),
+                         content_type=mime,
                          size=os.path.getsize(filepath))
     return {
         'species_code': m.group('species_code'),
