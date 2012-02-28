@@ -1,9 +1,9 @@
 {% load paginate from radiograph %}
 
-<div class="pagination">
-    <ul>
+<ul>
     {% for pnav in page|paginate %}
-    <li><a href="?page={{ pnav.page_number }}">{{ pnav.display }}</a></li>
+    <li {% if pnav.is_current %}class="active"{% endif %}>
+        <a href="?page={{ pnav.page_number }}">{{ pnav.display }}</a>
+    </li>
     {% endfor %}
-    </ul>
-</div>
+</ul>

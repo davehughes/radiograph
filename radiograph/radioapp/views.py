@@ -4,6 +4,9 @@ import os
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator, InvalidPage
+from django.core.urlresolvers import reverse
+from django.forms import fields as formfields
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -11,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 import haystack
 from haystack.query import SearchQuerySet
 import haystack
-from radioapp.models import Specimen, Image, Taxon, Institution
+from radioapp import forms, models
 
 class SearchView(haystack.views.FacetedSearchView):
     template = 'radioapp/specimen_list.html'
@@ -23,9 +26,18 @@ class SearchView(haystack.views.FacetedSearchView):
 
     def create_response(self, *args, **kwargs):
         return super(SearchView, self).create_response(*args, **kwargs)
-
-#    def build_form(self, form_kwargs=None):
-#        super(SearchView, self).build_form(form_kwargs)
+    
+    def build_page(self):
+        form_data = getattr(self.form, 'cleaned_data', {})
+        per_page = form_data.get('results_per_page') or self.results_per_page
+        paginator = Paginator(self.results, per_page)
+        
+        try:
+            page = paginator.page(self.request.GET.get('page', 1))
+        except InvalidPage:
+            raise Http404
+        
+        return (paginator, page)
 
     def extra_context(self):
         extra = super(SearchView, self).extra_context()
@@ -40,6 +52,7 @@ class SearchView(haystack.views.FacetedSearchView):
 
 
 class SearchForm(haystack.forms.FacetedModelSearchForm):
+    results_per_page = formfields.IntegerField(initial=20, required=False)
     facets = [{
         'field': 'sex', 
         'label': 'Sex',
@@ -54,8 +67,11 @@ class SearchForm(haystack.forms.FacetedModelSearchForm):
         self.selected_facets = kwargs.pop("selected_facets", [])
         super(SearchForm, self).__init__(*args, **kwargs)
 
+    def no_query_found(self):
+        return self.searchqueryset.all()
+
     def get_models(self):
-        return [Specimen]
+        return [models.Specimen]
     
     def search(self):
         sqs = super(SearchForm, self).search()
@@ -105,23 +121,10 @@ def index(request):
         return render_to_response('radioapp/specimen_list.html',
                                   context_instance=ctx)
 
-def specimen(request, specimen_id):
-    if request.method == 'GET':
-        specimen = get_object_or_404(Specimen, id=specimen_id)
-        ctx = RequestContext(request, {
-            'specimen': specimen,
-            'images': specimen.images.all()
-            })
-        return render_to_response('radioapp/specimen_detail.html',
-                                  context_instance=ctx)
-    elif request.method == 'POST':
-        # TODO: implement update handling
-        
-        pass
 
 def image(request, image_id, derivative='medium'):
     if request.method == 'GET':
-        image = get_object_or_404(Image, id=image_id)
+        image = get_object_or_404(models.Image, id=image_id)
         imgfile = getattr(image, 'image_%s' % derivative)
         if not imgfile:
             raise Http404()        
@@ -151,23 +154,56 @@ def image(request, image_id, derivative='medium'):
 def taxa_autocomplete(request):
     term = request.GET.get('term')
     
-    sqs = SearchQuerySet().models(Taxon).filter(label=term)[:8]
+    sqs = SearchQuerySet().models(models.Taxon).filter(label=term)[:8]
     response = [{'id': r.pk, 'label': r.label, 'value': r.label}
                 for r in sqs]
     return HttpResponse(json.dumps(response), content_type='application/json')
 
+def specimen(request, specimen_id):
+    if request.method == 'GET':
+        specimen = get_object_or_404(models.Specimen, id=specimen_id)
+        ctx = RequestContext(request, {'specimen': specimen})
+        return render_to_response('radioapp/specimen_detail.html',
+                                  context_instance=ctx)
+    elif request.method == 'POST':
+        specimen_form = forms.SpecimenForm(request.POST)
+        if specimen_form.is_valid():
+            #specimen_form.save()
+            return HttpResponseRedirect(reverse('specimen-edit', args=[specimen_id]))
+        else:
+            import ipdb; ipdb.set_trace();
+            raise Exception("Error was encountered")
+    else:
+        return HttpResponseNotAllowed(['GET'])
+
+def specimens(request):
+    if request.method == 'POST':
+        # create new specimen from values
+        specimen_form = forms.SpecimenForm(request.POST)
+        if specimen_form.is_valid():
+            #new_specimen = specimen_form.save()
+            return HttpResponseRedirect(reverse('specimen-edit', args=[new_specimen.id]))
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+@user_passes_test(lambda u: u.is_staff)
+def new_specimen(request):
+    if request.method == 'GET':
+        specimen_form = forms.SpecimenForm()
+        ctx = RequestContext(request, {'form': specimen_form})
+        return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
+    else:
+        return HttpResponseNotAllowed(['GET'])
+
 @user_passes_test(lambda u: u.is_staff)
 def edit_specimen(request, specimen_id):
-    specimen = get_object_or_404(Specimen, id=specimen_id)
-    ctx = RequestContext(request, {
-        'specimen': specimen,
-        'institutions': Institution.objects.all(),
-        'taxa_query': SearchQuerySet().models(Taxon).order_by('label_sort')
-        })
+    specimen = get_object_or_404(models.Specimen, id=specimen_id)
+    specimen_form = forms.SpecimenForm(instance=specimen)
+    ctx = RequestContext(request, {'form': specimen_form})
     return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
 
 def build_taxa_tree():
-    taxa = (Taxon.objects.order_by('level')
+    taxa = (models.Taxon.objects.order_by('level')
             .values_list('id', 'parent_id', 'level'))
 
 

@@ -80,7 +80,7 @@ class Institution(models.Model):
 class Specimen(models.Model):
     SEX_CHOICES = (('M', 'Male'), ('F', 'Female'), ('U', 'Unknown'))
 
-    specimen_id = models.CharField(max_length=255, null=True)
+    specimen_id = models.CharField(max_length=255, null=True, verbose_name='Specimen ID')
     taxon = models.ForeignKey('Taxon', related_name='specimens')
     institution = models.ForeignKey('Institution', related_name='specimens')
     sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True)

@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe as safe
 
 register = template.Library()
 
@@ -9,7 +10,7 @@ class PaginationNav(object):
         self.display = display or page_number or '' 
 
 @register.filter
-def paginate(page, adjacent=3):
+def paginate(page, adjacent=2):
     numpages = page.paginator.num_pages
     # Don't paginate if there is only one page
     if numpages <= 1:
@@ -54,11 +55,11 @@ def paginate(page, adjacent=3):
 
     # determine whether we need a 'previous' link and build it
     if page.has_previous():
-        pages.insert(0, PaginationNav(page.previous_page_number(), 'previous'))
+        pages.insert(0, PaginationNav(page.previous_page_number(), safe('&#xab;')))
 
     # determine whether we need a 'next' link and build it 
     if page.has_next(): 
-        pages.append(PaginationNav(page.next_page_number(), 'next')) 
+        pages.append(PaginationNav(page.next_page_number(), safe('&#xbb;'))) 
 
     return pages 
                         
