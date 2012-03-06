@@ -4,32 +4,13 @@
 {% block title %}Edit Specimen{% endblock %}
 
 {% block content %}
-<form class="well form-horizontal"
-    method="post"
+<form class="form-horizontal" method="post"
     {% if form.instance %}
-    action="{% url "specimen" form.instance.id %}">
+    action="{% url "specimen" form.instance.id %}"
     {% else %}
-    action="{% url "specimen-list" %}
-    {% endif %}
+    action="{% url "specimen-list" %}"
+    {% endif %}>
     {% csrf_token %}
-
-    {# Image files #}
-    <div class="control-group">
-        <label class="control-label">Images</label>
-        <div class="controls form-inline">
-            {% for image in form.images %}
-                {{ image.aspect }}
-                {{ image.image_full }}
-                <a href="#" class="btn"><i class="icon-remove"></i></a>
-            <br/>
-            {% endfor %}
-
-            <a href="#" class="btn">
-                <i class="icon-plus"></i>
-                Add Image
-            </a>
-        </div>
-    </div>
 
     {# Institution choice #}
     <div class="control-group">
@@ -91,6 +72,23 @@
         </div>
     </div>
 
+
+    {# Image files #}
+    <div class="control-group">
+        <label class="control-label">Images</label>
+        <div class="controls form-inline image-controls">
+            <div id="image-controls">
+                {% for image in images_form %}
+                    <div class="image-control">
+                        {{ image.id }}
+                        {{ image.aspect }}
+                        {{ image.image_full }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
     </fieldset>
 
     <div class="form-actions">
@@ -105,17 +103,54 @@
 {% block header_resources %}
     {{ block.super }}
     <link rel="stylesheet" href="/static/chosen/chosen.css">
+    <style type="text/css">
+        input { box-sizing: content-box; }
+        .image-action {
+            font-weight: bold;
+        }
+        .chzn-container .chzn-single { background-image: none; }
+        a.fileinput-button { display: inline-block; }
+        .fileinput-button {
+            position: relative;
+            overflow: hidden;
+            /*float: left;*/
+            margin-right: 4px;
+        }
+        .fileinput-button input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            border: solid transparent;
+            border-width: 0 0 100px 200px;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            -moz-transform: translate(-300px, 0) scale(4);
+            direction: ltr;
+            cursor: pointer;
+        }
+        ul.dropdown-menu { overflow: hidden; }
+        ul.dropdown-menu a { width: 100%; }
+    </style>
 {% endblock %}
 
 {% block scripts %}
 
 {{ block.super }}
 
-<script type="text/javascript" src="/static/chosen/chosen.jquery.min.js">
-</script>
+<script type="text/javascript" src="/static/js/underscore-min.js"></script>
+<script type="text/javascript" src="/static/js/backbone.js"></script>
+<script type="text/javascript" src="/static/chosen/chosen.jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/image-control.js"></script>
+<script type="text/javascript" src="/static/js/radiograph.js"></script>
 
 <script type="text/javascript">
-    $('.taxon-autocomplete').chosen();
+    $(function() {
+        $('.taxon-autocomplete').chosen();
+        var imagesView = new ImagesView({el: '#image-controls'});
+        //var imageView = new ImageView({model: {}, el: '#image-controls'}, {parse: true});
+        //imageView.render();
+    });
 </script>
 
 {% endblock %}

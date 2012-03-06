@@ -1,5 +1,6 @@
 import copy
 import json
+import mimetypes
 import os
 
 from django.conf import settings
@@ -13,7 +14,6 @@ from django.template import RequestContext
 from django.views.decorators.http import require_http_methods
 import haystack
 from haystack.query import SearchQuerySet
-import haystack
 from radioapp import forms, models
 
 class SearchView(haystack.views.FacetedSearchView):
@@ -128,20 +128,20 @@ def image(request, image_id, derivative='medium'):
         imgfile = getattr(image, 'image_%s' % derivative)
         if not imgfile:
             raise Http404()        
-
-        species = "%s %s" % (image.specimen.species, 
-                             image.specimen.subspecies) \
-            if image.specimen.subspecies \
-            else image.specimen.species
-        filename = '%s - %s - %s' % (species, 
-                                     image.get_aspect_display(),
-                                     derivative)
+        
+        taxon = ' '.join([t.name for t in image.specimen.taxon.hierarchy if t.level >= 7])
+        _, ext = os.path.splitext(imgfile.path)
+        filename = '%s-%s-%s-%s%s' % (taxon,
+                                      image.specimen.id,
+                                      image.get_aspect_display(),
+                                      derivative,
+                                      ext)
         filepath = os.path.join(settings.MEDIA_ROOT, imgfile.path)
                                   
         response = HttpResponse()
         response['X-Sendfile'] = filepath
         response['Content-Length'] = imgfile.size
-        response['Content-Type'] = '%s; %s' % mimetypes.guess_mime(filepath)
+        response['Content-Type'] = '%s; %s' % mimetypes.guess_type(filepath)
         
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.
@@ -151,14 +151,6 @@ def image(request, image_id, derivative='medium'):
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
-def taxa_autocomplete(request):
-    term = request.GET.get('term')
-    
-    sqs = SearchQuerySet().models(models.Taxon).filter(label=term)[:8]
-    response = [{'id': r.pk, 'label': r.label, 'value': r.label}
-                for r in sqs]
-    return HttpResponse(json.dumps(response), content_type='application/json')
-
 def specimen(request, specimen_id):
     if request.method == 'GET':
         specimen = get_object_or_404(models.Specimen, id=specimen_id)
@@ -166,9 +158,12 @@ def specimen(request, specimen_id):
         return render_to_response('radioapp/specimen_detail.html',
                                   context_instance=ctx)
     elif request.method == 'POST':
-        specimen_form = forms.SpecimenForm(request.POST)
+        specimen = get_object_or_404(models.Specimen, id=specimen_id)
+        specimen_form = forms.SpecimenForm(request.POST, instance=specimen)
         if specimen_form.is_valid():
             #specimen_form.save()
+
+            # save images
             return HttpResponseRedirect(reverse('specimen-edit', args=[specimen_id]))
         else:
             import ipdb; ipdb.set_trace();
@@ -181,7 +176,7 @@ def specimens(request):
         # create new specimen from values
         specimen_form = forms.SpecimenForm(request.POST)
         if specimen_form.is_valid():
-            #new_specimen = specimen_form.save()
+            new_specimen = specimen_form.save()
             return HttpResponseRedirect(reverse('specimen-edit', args=[new_specimen.id]))
     else:
         return HttpResponseNotAllowed(['POST'])
@@ -189,8 +184,11 @@ def specimens(request):
 @user_passes_test(lambda u: u.is_staff)
 def new_specimen(request):
     if request.method == 'GET':
-        specimen_form = forms.SpecimenForm()
-        ctx = RequestContext(request, {'form': specimen_form})
+        images_form = forms.ImageFormSet(prefix='IMAGES_new')
+        ctx = RequestContext(request, {
+            'form': forms.SpecimenForm(),
+            'images_form': images_form
+            })
         return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
     else:
         return HttpResponseNotAllowed(['GET'])
@@ -198,8 +196,11 @@ def new_specimen(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_specimen(request, specimen_id):
     specimen = get_object_or_404(models.Specimen, id=specimen_id)
-    specimen_form = forms.SpecimenForm(instance=specimen)
-    ctx = RequestContext(request, {'form': specimen_form})
+    ctx = RequestContext(request, {
+        'form': forms.SpecimenForm(instance=specimen),
+        'images_form': forms.ImageFormSet(instance=specimen,
+                                          prefix='IMAGES_%s' % specimen.id)
+        })
     return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
 
 def build_taxa_tree():

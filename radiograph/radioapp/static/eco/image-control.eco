@@ -1,0 +1,109 @@
+<div>
+    <% if @image.id: %>
+        <input type='hidden' value='<%= @image.id %>' <%= @tagAs 'id' %>/>
+    <% end %>
+    <select class='span2' <%= @tagAs 'aspect' %>>
+        <% for option in @aspectOptions(): %>
+            <option value='<%= option.value %>' <% if option.selected: %>selected='selected'<% end %>>
+                <%= option.label %>
+            </option>
+        <% end %>
+    </select>
+
+    <% if @image.currentFile: %>
+        <% if not @image.replacementFile: %>
+            <span class="dropdown">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    Existing file: 
+                    <a href='<%= @image.currentFile.url %>' class="download-file">
+                        <%= @image.currentFile.name %>
+                    </a>
+                    <span class="caret">&nbsp;</span>
+                </span>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href='<%= @image.currentFile.url %>' class="download-file">
+                            <i class="icon-download"></i>
+                            Download Existing File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" class="replace-file fileinput-button">
+                            <i class="icon-random"></i>
+                            Replace File
+                            <input type='file' <%= @tagAs 'image_full' %>/>
+                        </a>
+                    </li>
+                </ul>
+            </span>
+        <% else: %>
+            <span class="dropdown">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    Replace
+                    <a href='<%= @image.currentFile.url %>' class="download-file">
+                        <%= @image.currentFile.name %>
+                    </a>
+                    with
+                    <a class='fileinput-button' style="display:inline-block">
+                        <%= @image.replacementFile.name %>
+                        <input type='file' <%= @tagAs 'image_full' %>/>
+                    </a>
+                    <span class="caret">&nbsp;</span>
+                </span>
+                <ul class="dropdown-menu"> 
+                    <li>
+                        <a href='<%= @image.currentFile.url %>' class="download-file">
+                            <i class="icon-download"></i>
+                            Download Existing File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" class="replace-file fileinput-button">
+                            <i class="icon-random"></i>
+                            Replace File
+                            <input type='file' <%= @tagAs 'image_full' %>/>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" class="cancel-replace">
+                            <i class="icon-remove"></i>
+                            Cancel Replacement
+                        </a>
+                    </li>
+                </ul>
+            </span>
+        <% end %>
+    <% else: %>
+        <% if @image.replacementFile: %>
+            <span class="dropdown">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    Upload file:
+                    <a class='fileinput-button' style="display:inline-block">
+                        <%= @image.replacementFile.name %>
+                        <input type='file' <%= @tagAs 'image_full' %>/>
+                    </a>
+                    <span class="caret">&nbsp;</span>
+                </span>
+                <ul class="dropdown-menu"> 
+                    <li>
+                        <a href="javascript:void(0)" class="replace-file fileinput-button">
+                            <i class="icon-random"></i>
+                            Replace File
+                            <input type='file' <%= @tagAs 'image_full' %>/>
+                        </a>
+                    </li>
+                </ul>
+            </span>
+        <% else: %>
+            <a class='fileinput-button'>
+                Upload an Image
+                <i class='icon-upload'></i>
+                <input type='file'>
+            </a>
+        <% end %>
+    <% end %>
+
+    <a href="javascript:void(0)" class="btn btn-small remove-image">
+        <i class="icon-remove"></i>
+    </a>
+</div>

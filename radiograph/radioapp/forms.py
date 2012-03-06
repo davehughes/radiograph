@@ -1,5 +1,7 @@
 from django import forms
-from django.forms import fields, models as form_models
+from django.forms import fields, models as form_models, widgets
+from django.core.urlresolvers import reverse
+from peak.util.proxies import ObjectWrapper
 from radioapp import models
 
 class InstitutionForm(forms.ModelForm):
@@ -12,22 +14,19 @@ class TaxonChoiceField(forms.ModelChoiceField):
     @property
     def label_cache(self):
         if self._label_cache is None:
-            cache = {}
-            taxa = (models.Taxon.objects
+            self._label_cache = {
+                tid: ' '.join((ppname, pname, name)[models.SUBSPECIES - tlevel:])
+                for ppname, pname, name, tid, tlevel
+                in (models.Taxon.objects
                     .filter(level__gte=models.GENUS)
-                    .values_list('parent__parent__name', 'parent__name', 'name',
-                                 'id', 'level'))
-            for ppname, pname, name, tid, tlevel in taxa:
-                cache[tid] = ' '.join((ppname, pname, name)[models.SUBSPECIES - tlevel:])
-
-            self._label_cache = cache
+                    .values_list('parent__parent__name', 'parent__name', 'name', 'id', 'level'))
+                }
         return self._label_cache
 
-    def label_from_instance(self, taxon_id):
-        lc = self.label_cache
-        label = self.label_cache.get(taxon_id)
+    def label_from_instance(self, taxon):
+        label = self.label_cache.get(taxon.id)
         if not label:
-            taxon = models.Taxon.objects.get(id=taxon_id)
+            taxon = models.Taxon.objects.get(id=taxon.id)
             label = ' '.join([t.name for t in taxon.hierarchy 
                               if t.level >= models.GENUS])
         return label
@@ -42,8 +41,7 @@ class SpecimenForm(forms.ModelForm):
         'data-placeholder': 'Choose genus/species'
         }
     taxon = TaxonChoiceField(label='Taxon', 
-                             queryset=(models.Taxon.objects.filter(level__gt=7)
-                                       .values_list('id', flat=True)),
+                             queryset=models.Taxon.objects.filter(level__gt=7),
                              widget=forms.Select(attrs=_taxon_attrs))
     institution = InstitutionChoiceField(label="Institution",
                                          queryset=models.Institution.objects.all())
@@ -51,18 +49,32 @@ class SpecimenForm(forms.ModelForm):
     class Meta:
         model = models.Specimen
         widgets = {
-            'settings': forms.TextInput(attrs={'class': 'input-xlarge'})
-        }
+            'settings': forms.Textarea(attrs={'rows': '', 'cols': '', 'class': 'span8'}),
+            'comments': forms.Textarea(attrs={'rows': '', 'cols': '', 'class': 'span8'})
+            }
 
+
+class CustomFileInput(widgets.ClearableFileInput):
+    template_with_initial = u'%(initial_text)s: %(initial)s %(clear_template)s | %(input_text)s: %(input)s'
+
+    def render(self, name, value, attrs=None):
+        url = getattr(value, 'url', None)
+        if url:
+            value = ImageFileFieldWrapper(value)
+        return super(CustomFileInput, self).render(name, value, attrs=attrs)
+
+class ImageFileFieldWrapper(ObjectWrapper):
     @property
-    def images(self):
-        if self.instance:
-            return ImageFormSet(instance=self.instance,
-                                prefix='IMAGES_%s' % self.instance.id)
+    def url(self):
+        return reverse('image', args=[self.__subject__.instance.id, 'full'])
 
 class ImageForm(forms.ModelForm):
     class Meta: 
         model = models.Image
+        widgets = {
+            'aspect': forms.Select(attrs={'class': 'span2'}),
+            'image_full': CustomFileInput()
+            }
 
 class SpecimenFormSet(form_models.BaseInlineFormSet):
     def add_fields(self, form, index):
@@ -78,6 +90,8 @@ class SpecimenFormSet(form_models.BaseInlineFormSet):
                          instance=instance,
                          prefix='IMAGES_%s' % pk_value)
 
+
 ImageFormSet = form_models.inlineformset_factory(models.Specimen,
                                                  models.Image,
-                                                 extra=1)
+                                                 form=ImageForm,
+                                                 extra=0)

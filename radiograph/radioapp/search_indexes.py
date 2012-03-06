@@ -37,7 +37,7 @@ class TaxonomicIndex(SearchIndex):
         return ' '.join([t.name for t in obj.hierarchy if t.level >= 7])
 
     def prepare_label_sort(self, obj):
-        return ' '.join([t.name for t in obj.hierarchy if t.level >= 7])
+        return self.prepare_label(obj)
 
     def index_queryset(self):
         return Taxon.objects.filter(level__gt=7)
