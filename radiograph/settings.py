@@ -47,7 +47,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = SITE_ROOT_DIR + '/media'
+MEDIA_ROOT = '/mnt/storage/radiograph/media'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -63,7 +63,7 @@ STATIC_ROOT = SITE_ROOT_DIR + '/static'
 STATIC_URL = '/static'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '!y7gt4_i_xmm)8s_ir8qa_83s)hhl!8!%u0%-9gbd67(gl%c-l'
+SECRET_KEY = '429hkGZkIdZHfI1vdck9ZNvSXdM6pqKhmdhBUjX9XoUDdXUCXu'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

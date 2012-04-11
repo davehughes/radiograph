@@ -2,17 +2,19 @@ from django.conf.urls.defaults import *
 
 from django.contrib import admin
 from haystack.views import search_view_factory
-from radioapp.views import SearchView
+#from radioapp.views import SearchView
 admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),
 
-    url(r'^login/$', 'django.contrib.auth.views.login',
+    url(r'^accounts/login/$', 
+        'radioapp.views.login',
         {'template_name': 'radioapp/login.html'},
         name='login'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout',
+    url(r'^accounts/logout/$', 
+        'radioapp.views.logout',
         {'next_page': '/'},
         name='logout'),
 
@@ -36,5 +38,5 @@ urlpatterns = patterns('',
         'radioapp.views.image',
         name='image'),
 
-    url(r'^$', search_view_factory(SearchView), name='index')
+    url(r'^$', 'radioapp.views.index', name='index'),
 )

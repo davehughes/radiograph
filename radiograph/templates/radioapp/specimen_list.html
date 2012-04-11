@@ -3,11 +3,16 @@
 
 {% block content %}
 
+<div id="results-target"></div>
+
 <div class="btn-toolbar">
     <div class="btn-group">
         <a class="btn btn-small" href="#">
             <i class="icon-download"></i>
             Download
+        </a>
+        <a class="btn btn-small show-modal" href="#">
+            Show Modal
         </a>
     </div>
     <div class="btn-group">
@@ -199,16 +204,18 @@
 {% block header_resources %}
 {{ block.super }}
 {# <link type="text/css" rel="stylesheet" href="/static/yui/build/treeview/assets/skins/sam/treeview.css"/> #}
+<link type="text/css" rel="styleshee" href="static/css/radiograph.css"/>
 <style type="text/css">
-    span.taxon { font-style: italic; }
-    .pagination ul { display: inline; }
 </style>
 {% endblock %}
 
-
-
 {% block scripts %}
 {{ block.super }}
+
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap-button.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap-dropdown.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/chosen/chosen.jquery.min.js"></script>
 
 <script type="text/javascript">
     $(function() {
@@ -246,6 +253,9 @@
         $('.item-selection-invert').click(function(e) { 
             invertSelection();
             });
+
+        var results = new SpecimenResults({model: App}).render().$el;
+        $('#results-target').replaceWith(results);
     });
 </script>
 

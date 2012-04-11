@@ -117,8 +117,8 @@ class Image(models.Model):
 
     # image and derivative files
     image_full = models.FileField(upload_to='images/full')
-    image_medium = models.FileField(upload_to='images/medium', null=True)
-    image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True)
+    image_medium = models.FileField(upload_to='images/medium', null=True, blank=True)
+    image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True, blank=True)
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
         #source_image = PILImage.open(self.image_full) 

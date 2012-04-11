@@ -58,15 +58,17 @@ class CustomFileInput(widgets.ClearableFileInput):
     template_with_initial = u'%(initial_text)s: %(initial)s %(clear_template)s | %(input_text)s: %(input)s'
 
     def render(self, name, value, attrs=None):
+        '''
+        Wraps value to override the default URL with our custom mod_xsendfile
+        handler.
+        '''
         url = getattr(value, 'url', None)
         if url:
-            value = ImageFileFieldWrapper(value)
+            class Wrap(ObjectWrapper):
+                url = reverse('image', args=[value.instance.id, 'full'])
+            value = Wrap(value)
         return super(CustomFileInput, self).render(name, value, attrs=attrs)
 
-class ImageFileFieldWrapper(ObjectWrapper):
-    @property
-    def url(self):
-        return reverse('image', args=[self.__subject__.instance.id, 'full'])
 
 class ImageForm(forms.ModelForm):
     class Meta: 

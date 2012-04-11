@@ -104,11 +104,17 @@
     <dynamicField name="*_dt" type="date"    indexed="true"  stored="true"/>
     
 
+    <field name="institution_label" type="string" indexed="true" stored="true" multiValued="false" />
+
     <field name="settings" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="taxa" type="string" indexed="true" stored="true" multiValued="true" />
 
     <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
+
+    <field name="sex_label" type="string" indexed="true" stored="true" multiValued="false" />
+
+    <field name="taxon" type="slong" indexed="true" stored="true" multiValued="false" />
 
     <field name="comments" type="text" indexed="true" stored="true" multiValued="false" />
 
@@ -116,11 +122,15 @@
 
     <field name="label_sort" type="string" indexed="true" stored="true" multiValued="false" />
 
+    <field name="taxon_label" type="text" indexed="true" stored="true" multiValued="false" />
+
     <field name="specimen_id" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="images" type="text" indexed="true" stored="true" multiValued="true" />
 
     <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
+
+    <field name="institution" type="string" indexed="true" stored="true" multiValued="false" />
 
   </fields>
 

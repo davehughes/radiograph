@@ -6,8 +6,8 @@ SITE_ROOT = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(SITE_ROOT)
 
 # If using a virtualenv add the site-packages dir to the path
-#vepath = 'path/to/virtualenv/lib/python2.7/site-packages'
-#site.addsitedir(vepath)
+vepath = '/projects/radiograph/env/lib/python2.7/site-packages'
+site.addsitedir(vepath)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'radiograph.settings'
 

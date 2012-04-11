@@ -10,21 +10,32 @@ class SpecimenIndex(SearchIndex):
     comments = CharField(model_attr='comments', null=True)
     settings = CharField(model_attr='settings', null=True)
     images = MultiValueField()
+    taxon = IntegerField()
+    taxon_label = CharField()
 
     # facet fields
-    sex = FacetCharField(null=True)
+    institution = FacetCharField()
+    institution_label = FacetCharField()
+    sex = FacetCharField(model_attr='sex', null=True)
+    sex_label = FacetCharField(null=True)
     taxa = FacetMultiValueField()
 
-    def prepare_sex(self, obj):
-        return obj.get_sex_display() if obj.sex else 'Unspecified/Unknown'
+    def prepare(self, obj):
+        doc = super(SpecimenIndex, self).prepare(obj)
+        doc.update({
+            'institution': obj.institution.id,
+            'institution_label': obj.institution.name,
+            'sex_label': obj.get_sex_display() if obj.sex else 'Unspecified/Unknown',
+            'taxon': obj.taxon.id,
+            'taxon_label': ' '.join([t.name for t in 
+                                     obj.taxon.hierarchy 
+                                     if t.level >= 7]),
+            'taxa': [t.id for t in obj.taxon.hierarchy],
+            'images': ['%s:%s' % (i.id, i.get_aspect_display())
+                       for i in obj.images.all()]
+            })
+        return doc
 
-    def prepare_taxa(self, obj):
-        return [t.id for t in obj.taxon.hierarchy]
-
-    def prepare_images(self, obj):
-        return ['%s:%s' % (i.id, i.get_aspect_display())
-                for i in obj.images.all()]
-    
     def index_queryset(self):
         return Specimen.objects.select_related()
 

@@ -1,0 +1,37 @@
+<h1><span class="taxon"><%= @taxon.label %></span></h1>
+<table>
+  <tr>
+    <th>Specimen ID</th>
+    <td><%= @specimenId %></td>
+  </tr>
+  <tr>
+    <th>Sex</th>
+    <td><%= @sex %></td>
+  </tr>
+  <% if @settings: %>
+  <tr>
+    <th>Settings</th><td><%= @settings.value %></td>
+  </tr>
+  <% end %>
+  <% if @comments: %>
+  <tr>
+    <th>Comments</th>
+    <td><%= @comments %></td>
+  </tr>
+  <% end %>
+  <tr>
+    <th>Images</th>
+    <td>
+      <% if @images and @images.length > 0: %>
+        <% for image in @images: %>
+        <a href="<%= image.files.medium %>">
+            <img src="<%= image.files.thumbnail %>"/>
+        </a>
+        <% end %>
+    </td>
+    <% else: %>
+      <span class="empty">No images attached.</span>
+    <% end %>
+  </tr>
+</table>
+{% endblock %#}
