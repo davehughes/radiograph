@@ -1,9 +1,9 @@
-{exec}  = require 'child_process'
 fs      = require 'fs'
 path    = require 'path'
 stitch  = require 'stitch'
 util    = require 'util'
 _       = require('underscore')._
+{exec, spawn} = require 'child_process'
 
 ###############################################################################
 #
@@ -52,22 +52,20 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
   watch(lessFiles, compileLess)
 
 build = (callback) ->
-  compileLess()
+  compileLess RADIOAPP_LESS, (code, output) -> writeJS(output, RADIOAPP_CSS)
   compileCoffee(paths=[COFFEE_SRC, JS_SRC], 
                 callback= (output) -> writeJS(output, RADIOAPP_JS))
   callback?()
 
-compileLess = (callback) ->
-  exec "lessc --yui-compress #{RADIOAPP_LESS} > #{RADIOAPP_CSS}", (err, stdout, stderr) ->
-    if err
-      util.log err
-    else
-      util.log "Compiled less to #{RADIOAPP_CSS}."
-      callback?()
+compileLess = (input, callback) ->
+  less = spawn 'lessc', ['--yui-compress', input]
+  output = ''
+  less.stdout.on 'data', (data) -> output += data
+  less.on 'exit', (code) -> callback(code, output)
 
 compileCoffee = (paths, uglify=OPTIONS.uglify, callback) ->
-  package = stitch.createPackage paths: paths
-  package.compile (err, output) ->
+  pkg = stitch.createPackage paths: paths
+  pkg.compile (err, output) ->
     if err
       util.log err
     else

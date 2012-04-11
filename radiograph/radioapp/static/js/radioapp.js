@@ -1913,7 +1913,7 @@ I think you should use an
 
 }, "radioapp": function(exports, require, module) {(function() {
   var App, AppModel, Backbone, File, FormPaginationView, Image, ImageCollection, ImageView, ImagesView, LoginFormView, PaginationView, Search, Specimen, SpecimenForm, SpecimenModal, SpecimenResults, User, View,
-    __hasProp = Object.prototype.hasOwnProperty,
+    __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1925,15 +1925,17 @@ I think you should use an
 
     __extends(View, _super);
 
+    View.name = 'View';
+
     function View() {
-      View.__super__.constructor.apply(this, arguments);
+      return View.__super__.constructor.apply(this, arguments);
     }
 
     View.prototype.templateId = null;
 
     View.prototype.viewContext = function() {
-      var _ref, _ref2;
-      return (_ref = (_ref2 = this.model) != null ? _ref2.toJSON() : void 0) != null ? _ref : {};
+      var _ref, _ref1;
+      return (_ref = (_ref1 = this.model) != null ? _ref1.toJSON() : void 0) != null ? _ref : {};
     };
 
     View.prototype.render = function() {
@@ -1953,8 +1955,10 @@ I think you should use an
 
     __extends(SpecimenForm, _super);
 
+    SpecimenForm.name = 'SpecimenForm';
+
     function SpecimenForm() {
-      SpecimenForm.__super__.constructor.apply(this, arguments);
+      return SpecimenForm.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenForm.prototype.templateId = 'specimen-edit';
@@ -1989,8 +1993,10 @@ I think you should use an
 
     __extends(SpecimenModal, _super);
 
+    SpecimenModal.name = 'SpecimenModal';
+
     function SpecimenModal() {
-      SpecimenModal.__super__.constructor.apply(this, arguments);
+      return SpecimenModal.__super__.constructor.apply(this, arguments);
     }
 
     className = 'modal specimen-modal';
@@ -2016,8 +2022,10 @@ I think you should use an
 
     __extends(Specimen, _super);
 
+    Specimen.name = 'Specimen';
+
     function Specimen() {
-      Specimen.__super__.constructor.apply(this, arguments);
+      return Specimen.__super__.constructor.apply(this, arguments);
     }
 
     Specimen.prototype.defaults = function() {
@@ -2040,8 +2048,10 @@ I think you should use an
 
     __extends(User, _super);
 
+    User.name = 'User';
+
     function User() {
-      User.__super__.constructor.apply(this, arguments);
+      return User.__super__.constructor.apply(this, arguments);
     }
 
     User.prototype.defaults = function() {
@@ -2065,8 +2075,10 @@ I think you should use an
 
     __extends(Search, _super);
 
+    Search.name = 'Search';
+
     function Search() {
-      Search.__super__.constructor.apply(this, arguments);
+      return Search.__super__.constructor.apply(this, arguments);
     }
 
     Search.prototype.defaults = function() {
@@ -2104,9 +2116,11 @@ I think you should use an
 
     __extends(AppModel, _super);
 
+    AppModel.name = 'AppModel';
+
     function AppModel() {
       this.alert = __bind(this.alert, this);
-      AppModel.__super__.constructor.apply(this, arguments);
+      return AppModel.__super__.constructor.apply(this, arguments);
     }
 
     AppModel.prototype.defaults = function() {
@@ -2126,7 +2140,9 @@ I think you should use an
     };
 
     AppModel.prototype.alert = function(type, body) {
-      if (type == null) type = 'info';
+      if (type == null) {
+        type = 'info';
+      }
       return this.alerts.add({
         type: type,
         body: body
@@ -2151,11 +2167,15 @@ I think you should use an
 
     __extends(SpecimenResults, _super);
 
+    SpecimenResults.name = 'SpecimenResults';
+
     function SpecimenResults() {
       this.logout = __bind(this.logout, this);
+
       this.showEditItemForm = __bind(this.showEditItemForm, this);
+
       this.showCreateItemForm = __bind(this.showCreateItemForm, this);
-      SpecimenResults.__super__.constructor.apply(this, arguments);
+      return SpecimenResults.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenResults.prototype.templateId = 'specimen-list';
@@ -2244,11 +2264,15 @@ I think you should use an
 
     __extends(LoginFormView, _super);
 
+    LoginFormView.name = 'LoginFormView';
+
     function LoginFormView() {
       this.displayError = __bind(this.displayError, this);
+
       this.clearError = __bind(this.clearError, this);
+
       this.submit = __bind(this.submit, this);
-      LoginFormView.__super__.constructor.apply(this, arguments);
+      return LoginFormView.__super__.constructor.apply(this, arguments);
     }
 
     LoginFormView.prototype.templateId = 'login';
@@ -2328,8 +2352,10 @@ I think you should use an
 
     __extends(File, _super);
 
+    File.name = 'File';
+
     function File() {
-      File.__super__.constructor.apply(this, arguments);
+      return File.__super__.constructor.apply(this, arguments);
     }
 
     File.prototype.defaults = {
@@ -2345,8 +2371,10 @@ I think you should use an
 
     __extends(Image, _super);
 
+    Image.name = 'Image';
+
     function Image() {
-      Image.__super__.constructor.apply(this, arguments);
+      return Image.__super__.constructor.apply(this, arguments);
     }
 
     Image.prototype.defaults = {
@@ -2357,10 +2385,10 @@ I think you should use an
     };
 
     Image.prototype.toJSON = function() {
-      var _ref, _ref2;
+      var _ref, _ref1;
       return _.extend(Image.__super__.toJSON.apply(this, arguments), {
         currentFile: (_ref = this.get('currentFile')) != null ? _ref.toJSON() : void 0,
-        replacementFile: (_ref2 = this.get('replacementFile')) != null ? _ref2.toJSON() : void 0
+        replacementFile: (_ref1 = this.get('replacementFile')) != null ? _ref1.toJSON() : void 0
       });
     };
 
@@ -2372,8 +2400,10 @@ I think you should use an
 
     __extends(ImageCollection, _super);
 
+    ImageCollection.name = 'ImageCollection';
+
     function ImageCollection() {
-      ImageCollection.__super__.constructor.apply(this, arguments);
+      return ImageCollection.__super__.constructor.apply(this, arguments);
     }
 
     ImageCollection.prototype.model = Image;
@@ -2390,8 +2420,10 @@ I think you should use an
 
     __extends(ImagesView, _super);
 
+    ImagesView.name = 'ImagesView';
+
     function ImagesView() {
-      ImagesView.__super__.constructor.apply(this, arguments);
+      return ImagesView.__super__.constructor.apply(this, arguments);
     }
 
     ImagesView.prototype.initialize = function() {
@@ -2448,8 +2480,10 @@ I think you should use an
 
     __extends(ImageView, _super);
 
+    ImageView.name = 'ImageView';
+
     function ImageView() {
-      ImageView.__super__.constructor.apply(this, arguments);
+      return ImageView.__super__.constructor.apply(this, arguments);
     }
 
     ImageView.prototype.initialize = function() {
@@ -2526,10 +2560,13 @@ I think you should use an
 
     __extends(PaginationView, _super);
 
+    PaginationView.name = 'PaginationView';
+
     function PaginationView() {
       this.buildPageElement = __bind(this.buildPageElement, this);
+
       this.buildPageUrl = __bind(this.buildPageUrl, this);
-      PaginationView.__super__.constructor.apply(this, arguments);
+      return PaginationView.__super__.constructor.apply(this, arguments);
     }
 
     PaginationView.prototype.templateId = 'pagination';
@@ -2559,9 +2596,15 @@ I think you should use an
 
     PaginationView.prototype.paginate = function(currentPage, totalPages, adjacent) {
       var chunkend, chunkstart, createPageNav, createPaginationStruct, ellipsisPost, ellipsisPre, pages;
-      if (adjacent == null) adjacent = 2;
-      if (adjacent == null) adjacent = 2;
-      if (totalPages <= 1) return [];
+      if (adjacent == null) {
+        adjacent = 2;
+      }
+      if (adjacent == null) {
+        adjacent = 2;
+      }
+      if (totalPages <= 1) {
+        return [];
+      }
       createPaginationStruct = function(pageNumber, display, isCurrent) {
         return {
           pageNumber: pageNumber,
@@ -2617,9 +2660,11 @@ I think you should use an
 
     __extends(FormPaginationView, _super);
 
+    FormPaginationView.name = 'FormPaginationView';
+
     function FormPaginationView() {
       this.buildPageElement = __bind(this.buildPageElement, this);
-      FormPaginationView.__super__.constructor.apply(this, arguments);
+      return FormPaginationView.__super__.constructor.apply(this, arguments);
     }
 
     FormPaginationView.prototype.buildPageElement = function(page) {
@@ -2686,7 +2731,7 @@ I think you should use an
     (function() {
       var option, _i, _len, _ref;
     
-      __out.push('(function() {\n  this.ecoTemplates || (this.ecoTemplates = {});\n  this.ecoTemplates["image-control"] = function(__obj) {\n    if (!__obj) __obj = {};\n    var __out = [], __capture = function(callback) {\n      var out = __out, result;\n      __out = [];\n      callback.call(this);\n      result = __out.join(\'\');\n      __out = out;\n      return __safe(result);\n    }, __sanitize = function(value) {\n      if (value && value.ecoSafe) {\n        return value;\n      } else if (typeof value !== \'undefined\' && value != null) {\n        return __escape(value);\n      } else {\n        return \'\';\n      }\n    }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;\n    __safe = __obj.safe = function(value) {\n      if (value && value.ecoSafe) {\n        return value;\n      } else {\n        if (!(typeof value !== \'undefined\' && value != null)) value = \'\';\n        var result = new String(value);\n        result.ecoSafe = true;\n        return result;\n      }\n    };\n    if (!__escape) {\n      __escape = __obj.escape = function(value) {\n        return (\'\' + value)\n          .replace(/&/g, \'&amp;\')\n          .replace(/</g, \'&lt;\')\n          .replace(/>/g, \'&gt;\')\n          .replace(/"/g, \'&quot;\');\n      };\n    }\n    (function() {\n      (function() {\n        var option, _i, _len, _ref;\n      \n\n<div>\n  <input type="hidden" value="');
+      __out.push('<div>\n  <input type="hidden" value="');
     
       __out.push(__sanitize(this.image.id));
     
@@ -2707,13 +2752,28 @@ I think you should use an
       if (this.image.currentFile) {
         __out.push('\n    ');
         if (!this.image.replacementFile) {
-          __out.push('\n        <span class="dropdown">\n          <span class="dropdown-toggle" data-toggle="dropdown">\n          Existing file:\n          <a href="');
+          __out.push('\n        <span class="dropdown">\n          <span class="dropdown-toggle" data-toggle="dropdown">\n            Existing file:\n            <a href="');
           __out.push(__sanitize(this.image.currentFile.url));
-          __out.push('" class="download-file">\n            ');
+          __out.push('" class="download-file">\n              ');
           __out.push(__sanitize(this.image.currentFile.name));
-          __out.push('\n          </a>\n          <span class="caret">&nbsp;</span>\n        </span>\n        <ul class="dropdown-menu">\n          <li>\n            <a href="');
+          __out.push('\n            </a>\n            <span class="caret">&nbsp;</span>\n          </span>\n          <ul class="dropdown-menu">\n            <li>\n              <a href="');
           __out.push(__sanitize(this.image.currentFile.url));
-          __out.push('" class="download-file">\n              <i class="icon-download"></i>\n              Download Existing File\n            </a>\n          </li>\n          <li>\n            <a href="javascript:void(0)" class="replace-file fileinput-button">\n              <i class="icon-random"></i>\n              Replace File\n              <input type="file" name="replacement"/>\n            </a>\n          </li>\n        </ul>\\n            </span>\\n        \');\n          } else {\n            __out.push(\'\\n            <span class="dropdown">\\n                <span class="dropdown-toggle" data-toggle="dropdown">\\n                    Replace\\n                    <a href=\\\'\');\n            __out.push(__sanitize(this.image.currentFile.url));\n            __out.push(\'\\\' class="download-file">\\n                        \');\n            __out.push(__sanitize(this.image.currentFile.name));\n            __out.push(\'\\n                    </a>\\n                    with\\n                    <a class=\\\'fileinput-button\\\' style="display:inline-block">\\n                        \');\n            __out.push(__sanitize(this.image.replacementFile.name));\n            __out.push(\'\\n                        <input type=\\\'file\\\' \');\n            __out.push(__sanitize(this.tagAs(\'image_full\')));\n            __out.push(\'/>\\n                    </a>\\n                    <span class="caret">&nbsp;</span>\\n                </span>\\n                <ul class="dropdown-menu"> \\n                    <li>\\n                        <a href=\\\'\');\n            __out.push(__sanitize(this.image.currentFile.url));\n            __out.push(\'\\\' class="download-file">\\n                            <i class="icon-download"></i>\\n                            Download Existing File\\n                        </a>\\n                    </li>\\n                    <li>\\n                        <a href="javascript:void(0)" class="replace-file fileinput-button">\\n                            <i class="icon-random"></i>\\n                            Replace File\\n                            <input type=\\\'file\\\' \');\n            __out.push(__sanitize(this.tagAs(\'image_full\')));\n            __out.push(\'/>\\n                        </a>\\n                    </li>\\n                    <li>\\n                        <a href="javascript:void(0)" class="cancel-replace">\\n                            <i class="icon-remove"></i>\\n                            Cancel Replacement\\n                        </a>\\n                    </li>\\n                </ul>\\n            </span>\\n        \');\n          }\n          __out.push(\'\\n    \');\n        } else {\n          __out.push(\'\\n        \');\n          if (this.image.replacementFile) {\n            __out.push(\'\\n            <span class="dropdown">\\n                <span class="dropdown-toggle" data-toggle="dropdown">\\n                    Upload file:\\n                    <a class=\\\'fileinput-button\\\' style="display:inline-block">\\n                        \');\n            __out.push(__sanitize(this.image.replacementFile.name));\n            __out.push(\'\\n                        <input type=\\\'file\\\' \');\n            __out.push(__sanitize(this.tagAs(\'image_full\')));\n            __out.push(\'/>\\n                    </a>\\n                    <span class="caret">&nbsp;</span>\\n                </span>\\n                <ul class="dropdown-menu"> \\n                    <li>\\n                        <a href="javascript:void(0)" class="replace-file fileinput-button">\\n                            <i class="icon-random"></i>\\n                            Replace File\\n                            <input type=\\\'file\\\' \');\n            __out.push(__sanitize(this.tagAs(\'image_full\')));\n            __out.push(\'/>\\n                        </a>\\n                    </li>\\n                </ul>\\n            </span>\\n        \');\n          } else {\n            __out.push(\'\\n            <a class=\\\'fileinput-button\\\'>\\n                Upload an Image\\n                <i class=\\\'icon-upload\\\'></i>\\n                <input type=\\\'file\\\' \');\n            __out.push(__sanitize(this.tagAs(\'image_full\')));\n            __out.push(\'/>\\n            </a>\\n        \');\n          }\n          __out.push(\'\\n    \');\n        }\n      \n        __out.push(\'\\n\\n    <a href="javascript:void(0)" class="btn btn-small remove-image">\\n        <i class="icon-remove"></i>\\n    </a>\\n</div>\\n\');\n      \n      }).call(this);\n      \n    }).call(__obj);\n    __obj.safe = __objSafe, __obj.escape = __escape;\n    return __out.join(\'\');\n  };\n}).call(this);\n');
+          __out.push('" class="download-file">\n                <i class="icon-download"></i>\n                Download Existing File\n              </a>\n            </li>\n            <li>\n              <a href="javascript:void(0)" class="replace-file fileinput-button">\n                <i class="icon-random"></i>\n                Replace File\n                <input type="file" name="replacement"/>\n              </a>\n            </li>\n          </ul>\n       </span>\n    ');
+        } else {
+          __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Replace\n        <a href="');
+          __out.push(__sanitize(this.image.currentFile.url));
+          __out.push('" class="download-file">\n          ');
+          __out.push(__sanitize(this.image.currentFile.name));
+          __out.push('\n        </a>  \n        with\n        <a class="fileinput-button" style="display:inline-block">\n          ');
+          __out.push(__sanitize(this.image.replacementFile.name));
+          __out.push('\n          <input type="file" name="replacement-file"/>\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu">\n        <li>\n          <a href="');
+          __out.push(__sanitize(this.image.currentFile.url));
+          __out.push('" class="download-file">\n            <i class="icon-download"></i>\n            Download Existing File\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file" name="replacement-file"/>\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="cancel-replace">\n            <i class="icon-remove"></i>\n            Cancel Replacement\n          </a>\n        </li>\n      </ul>\n    </span>\n  ');
+          if (this.image.replacementFile) {
+            __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Upload file:\n        <a class=\\\'fileinput-button\\\' style="display:inline-block">\n          ');
+            __out.push(__sanitize(this.image.replacementFile.name));
+            __out.push('\n          <input type="file" name="replacement-file"/>\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu"> \n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file" name="replacement-file"/>\n          </a>\n        </li>\n      </ul>\n    </span>\n    <a class="fileinput-button">\n      Upload an Image\n      <i class="icon-upload"></i>\n      <input type="file" name="replacement-file"/>\n    </a>\n    <a href="javascript:void(0)" class="btn btn-small remove-image">\n      <i class="icon-remove"></i>\n    </a>\n</div>\n');
+          }
         }
       }
     
@@ -2878,7 +2938,7 @@ I think you should use an
   }
   (function() {
     (function() {
-      var alert, choice, specimen, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
+      var alert, choice, specimen, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     
       __out.push('<div class="btn-toolbar">\n    <div class="btn-group">\n        <a class="btn btn-small" href="#">\n            <i class="icon-download"></i>\n            Download\n        </a>\n    </div>\n    <div class="btn-group">\n        ');
     
@@ -2916,9 +2976,9 @@ I think you should use an
     
       __out.push('\n            </span>\n            <span class="caret"></span>\n        </a>\n        \n        <ul class="dropdown-menu">\n            <li><a href="#">10</a></li>\n            <li><a href="#">20</a></li>\n            <li><a href="#">50</a></li>\n            <li><a href="#">100</a></li>\n            <li><a href="#">&#x221e;</a></li>\n        </ul>\n    </span> results per page\n</div>\n\n<table class="table table-condensed table-striped">\n    <col width="10%"/>\n    <col/>\n    <col width="10%"/>\n    <col width="20%"/>\n    <col width="25"/>\n    <tr>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    <input type="checkbox" class="item-selector"/>\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    <li>\n                        <a href="#" class="item-selection-all">\n                            <i class="icon-ok"></i>\n                            Select All\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-none">\n                            <i class="icon-remove"></i>\n                            Select None\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-invert">\n                            <i class="icon-resize-full"></i>\n                            Invert Selection\n                        </a>\n                    </li>\n                </ul>\n            </span>\n        </th>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Taxon\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    <h1>Surprise!!!</h1>\n                </div>\n                <!--ul class="dropdown-menu">\n                    <li>Sort</li>\n                    <li>Filter</li>\n                </ul-->\n            </span>\n        </th>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Sex\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    ');
     
-      _ref2 = this.institutionChoices;
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        choice = _ref2[_j];
+      _ref1 = this.institutionChoices;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        choice = _ref1[_j];
         __out.push('\n                        <li>\n                        <input type="checkbox" name="filter-sex-');
         __out.push(__sanitize(choice.value));
         __out.push('"/>\n                        <label for="filter-sex-');
@@ -2934,9 +2994,9 @@ I think you should use an
     
       __out.push('"\n               title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n\n    ');
     
-      _ref3 = this.search.results;
-      for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-        specimen = _ref3[_k];
+      _ref2 = this.search.results;
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        specimen = _ref2[_k];
         __out.push('\n    <tr>\n        <td class="selection">\n            <input type="checkbox" class="item-selection"\n                value="');
         specimen.id;
         __out.push('"/>\n        </td>\n        <td class="taxon">');
