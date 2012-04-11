@@ -106,7 +106,7 @@ App = new AppModel()
 
 
 class SpecimenResults extends View
-  templateId: 'specimen-list'
+  templateId: 'templates/specimen-list'
 
   events: ->
     'click [rel=login]': 'showLogin',

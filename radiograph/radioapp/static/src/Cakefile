@@ -44,35 +44,45 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
   coffeeFiles   = collectFiles(COFFEE_SRC, '.coffee')
   lessFiles     = collectFiles(LESS_SRC, '.less')
   vendorFiles   = collectFiles(JS_SRC, '.js')
+  jsFiles       = []
+  jsFiles.concat(coffeeFiles, vendorFiles)
 
-  watch([].concat(coffeeFiles, vendorFiles), ->
-    compileCoffee(paths=[COFFEE_SRC, JS_SRC],
-                  callback= (output) -> writeJS(output, RADIOAPP_JS))
-    )
-  watch(lessFiles, compileLess)
+  watch jsFiles, ->
+    compileCoffee
+      paths: [COFFEE_SRC, JS_SRC]
+      callback: (output) -> writeJS(output, RADIOAPP_JS)
+
+  watch lessFiles, ->
+    compileLess
+      input: RADIOAPP_LESS
+      callback: (code, output) -> writeJS(output, RADIOAPP_CSS)
 
 build = (callback) ->
-  compileLess RADIOAPP_LESS, (code, output) -> writeJS(output, RADIOAPP_CSS)
-  compileCoffee(paths=[COFFEE_SRC, JS_SRC], 
-                callback= (output) -> writeJS(output, RADIOAPP_JS))
+  compileLess 
+    input: RADIOAPP_LESS
+    callback: (code, output) -> writeJS(output, RADIOAPP_CSS)
+  compileCoffee
+    paths: [COFFEE_SRC, JS_SRC]
+    callback: (err, output) -> writeJS(output, RADIOAPP_JS)
   callback?()
 
-compileLess = (input, callback) ->
-  less = spawn 'lessc', ['--yui-compress', input]
+compileLess = (opts) ->
+  less = spawn 'lessc', ['--yui-compress', opts.input]
   output = ''
   less.stdout.on 'data', (data) -> output += data
-  less.on 'exit', (code) -> callback(code, output)
+  less.on 'exit', (code) -> opts.callback(code, output)
 
-compileCoffee = (paths, uglify=OPTIONS.uglify, callback) ->
-  pkg = stitch.createPackage paths: paths
+compileCoffee = (opts) ->
+  pkg = stitch.createPackage paths: opts.paths
   pkg.compile (err, output) ->
     if err
       util.log err
+      opts.callback?(err)
     else
-      if uglify then output = uglify(output)
-      callback?(output)
+      if opts.uglify then output = uglify(output)
+      opts.callback?(err, output)
 
-# Minify using uglify-js
+# Minify using uglify-j
 uglify = (source, callback) ->
   parser = require('uglify-js').parser
   uglify = require('uglify-js').uglify
