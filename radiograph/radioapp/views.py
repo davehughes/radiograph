@@ -178,8 +178,22 @@ def logout(request, *args, **kwargs):
         return response
 
 def index(request):
-    view = SearchView()
+    ctx = {
+        'search': SearchView().create_context(),
+        'user': create_user_struct(request.user)
+    }
     return view(request)
+
+def create_user_struct(user):
+    if user and user.is_authenticated():
+        return {
+            'firstName': user.first_name,
+            'lastName': user.last_name,
+            'isStaff': user.is_staff,
+            'loggedIn': True
+        }
+    else:
+        return {'loggedIn': False}
 
 def image(request, image_id, derivative='medium'):
     if request.method == 'GET':
