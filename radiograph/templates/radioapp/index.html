@@ -1,0 +1,17 @@
+{% extends "radioapp/base.html" %}
+
+{% block title %}Radiograph Database{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        var app = require('radioapp');
+
+        $(function() {
+            var resultsView = app.SpecimenResults({model: window.appState});
+            $(document).find('body').append(resultsView.render().$el);
+        });
+    </script>
+{% endblock %}
+

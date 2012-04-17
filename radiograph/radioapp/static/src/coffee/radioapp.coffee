@@ -1,3 +1,4 @@
+_ = require('underscore')._
 Backbone = require('backbone')
 require('jquery.chosen')
 
@@ -36,15 +37,67 @@ class SpecimenModal extends SpecimenForm
     @$el.modal({keyboard: false})
     @
 
+class Specimens extends Backbone.Model
+  defaults: ->
+    items: []
+    queries: [{
+      rel: 'search'
+      href: '...'
+      prompt: 'Search specimens'
+      data: [
+        {name: 'results_per_page', value: 20, prompt: 'Results per page'}
+        {name: 'sex_filter', value: [], prompt: 'Sex filter'}
+        {name: 'taxa_filter', value: [], prompt: 'Taxa filter'}
+        {name: 'query', value: '*:*', prompt: 'Search string'}
+      ]
+    }]
+    links:
+      profile: null
+      template: null
+
+
 class Specimen extends Backbone.Model
   defaults: ->
+    href: null,
     institution: null,
     sex: null,
     taxon: null,
     specimen_id: null,
     settings: null,
     comments: null,
+
+    skull_length: null,
+    cranial_width: null,
+    neurocranial_height: null,
+    facial_height: null,
+    palate_length: null,
+    palate_width: null,
+
     images: new ImageCollection([])
+
+    links:
+      profile: null,
+      edit: null,
+      delete: null
+
+class Image extends Backbone.Model
+  defaults: ->
+    uri: null,
+    file: null,
+    replacementFile: null
+    aspect: null
+    links:
+      profile: null,
+      thumb: null,
+      medium: null,
+      large: null,
+
+  toJSON: -> _.extend super,
+    currentFile: @get('file')?.toJSON()
+    replacementFile: @get('replacementFile')?.toJSON()
+
+class ImageCollection extends Backbone.Collection
+  model: Image
 
 class User extends Backbone.Model
   defaults: ->
@@ -53,31 +106,52 @@ class User extends Backbone.Model
     lastName: '',
     isStaff: false,
     links:
-      login: 'login',
-      logout: 'logout'
+      profile: null,
+      login: null,
+      logout: null
 
-class Search extends Backbone.Model
+class File extends Backbone.Model
   defaults: ->
-    url: window.location.pathname,
-    args: {},
+    name: null
+    url: null
+
+class CollectionModel extends Backbone.Model
+  itemModel: -> CollectionItemModel
+  defaults: ->
+    version: null
+    href: null
+    items: []
+    links: []
+    template: [
+        {name: null, value: null, choices: '<URL or list>'}
+    ]
+    queries: []
+    error: null
+    pagination:
+      currentPage: 1
+      totalPages: 1
+
+  initialize: (args, opts) ->
+    ItemModel = @itemModel()
+    itemModels = _.map args.items, (i) =>
+      item = new ItemModel(i)
+      item.collection = @
+      return item
+    @set('items', itemModels)
+
+class CollectionItemModel extends Backbone.Model
+  defaults: ->
+    href: null
+    data: []
+    links: []
+
+class SearchTemplate extends Backbone.Model
+  defaults: ->
     resultsPerPage: 20,
     currentPage: 1,
     totalPages: 10,
     facets: [],
-    query: '*:*',
-    results: [
-      {
-        sex: 'Male',
-        taxon_label: '<Taxon>',
-        links:
-          edit: ''
-      }, {
-        sex: 'Female',
-        taxon_label: '<Taxon>',
-        links:
-          edit: ''
-      }
-    ]
+    query: '*:*'
 
 class AppModel extends Backbone.Model
   defaults: ->
@@ -103,7 +177,6 @@ class AppModel extends Backbone.Model
     alerts: @alerts.toJSON()
 
 App = new AppModel()
-
 
 class SpecimenResults extends View
   templateId: 'templates/specimen-list'
@@ -202,28 +275,6 @@ class LoginFormView extends View
       @$('.alert-error').html(msg).show()
     else
       @$('.alert-error').html('').hide()
-
-class File extends Backbone.Model
-  defaults:
-    name: null
-    url: null
-
-class Image extends Backbone.Model
-  
-  defaults:
-    id: null,
-    aspect: null,
-    currentFile: null,
-    replacementFile: null
-
-  toJSON: -> _.extend super,
-    currentFile: @get('currentFile')?.toJSON()
-    replacementFile: @get('replacementFile')?.toJSON()
-
-class ImageCollection extends Backbone.Collection
-  model: Image
-  initialize: ->
-    @cid = _.uniqueID('IMAGES_')
 
 class ImagesView extends Backbone.View
   initialize: ->

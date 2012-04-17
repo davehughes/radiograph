@@ -18,15 +18,10 @@
     <script type="text/javascript">
       _ = require('underscore')._
       Backbone = require('backbone')
-      //require('jquery.csrf');
-      
-      /*Modernizr.load({
-              test: Modernizr.placeholder,
-              nope: '/static/js/jquery.placeholder.js',
-              complete: function() { $('input, textarea').placeholder(); }
-          });*/
-    </script>
+      require('jquery.csrf');
 
+      _.extend(window, {{ exports|safe }});
+    </script>
     
     {% endblock %}
   </body>

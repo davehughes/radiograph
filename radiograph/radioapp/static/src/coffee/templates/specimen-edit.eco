@@ -1,0 +1,91 @@
+<form class="form-horizontal specimen-form" method="post"
+    action="<%= @links.submit.url %>" enctype='multipart/form-data">
+    
+    <% # Institution choice %>
+    <div class="control-group">
+        <label class="control-label" for="institution-choice">
+            {{ form.institution.label }}
+        </label>
+        <div class="controls">
+            {{ form.institution }}
+        </div>
+    </div>
+
+    {# Specimen id textbox #}
+    <div class="control-group">
+        <label class="control-label" for="specimen-id">
+            {{ form.specimen_id.label }}
+        </label>
+        <div class="controls">
+            {{ form.specimen_id }}
+        </div>
+    </div>
+
+    {# Taxon choice #}
+    <div class="control-group">
+        <label class="control-label" for="taxon-choice">
+            {{ form.taxon.label }}
+        </label>
+        <div class="controls">
+            {{ form.taxon }}
+        </div>
+    </div>
+
+    {# Sex choice #}
+    <div class="control-group">
+        <label class="control-label" for="sex-choice">
+            {{ form.sex.label }}
+        </label>
+        <div class="controls">
+            {{ form.sex }}
+        </div>
+    </div>
+
+    {# Machine settings textbox #}
+    <div class="control-group">
+        <label class="control-label" for="settings">
+            {{ form.settings.label }}
+        </label>
+        <div class="controls">
+            {{ form.settings }}
+        </div>
+    </div>
+
+    {# Comments text area #}
+    <div class="control-group">
+        <label class="control-label" for="comments">
+            {{ form.comments.label }}
+        </label>
+        <div class="controls">
+            {{ form.comments }}
+        </div>
+    </div>
+
+
+    {# Image files #}
+    <div class="control-group">
+        <label class="control-label">Images</label>
+        <div class="controls form-inline image-controls">
+            <input type="hidden" name="prefix" value="{{ images_form.prefix }}"/>
+            {{ images_form.management_form }}
+            <div id="image-controls">
+                {% for image in images_form %}
+                    <div class="image-control">
+                        {{ image.id }}
+                        {{ image.aspect }}
+                        {{ image.image_full }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button class="btn btn-primary">Save and Enter Another</button>
+        <a class="btn" href="/">Discard</a>
+    </div>
+
+</form>

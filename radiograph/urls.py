@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 
 from django.contrib import admin
 from haystack.views import search_view_factory
-#from radioapp.views import SearchView
+from radioapp.views import SearchView
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -13,6 +13,7 @@ urlpatterns = patterns('',
         'radioapp.views.login',
         {'template_name': 'radioapp/login.html'},
         name='login'),
+
     url(r'^accounts/logout/$', 
         'radioapp.views.logout',
         {'next_page': '/'},
@@ -20,7 +21,11 @@ urlpatterns = patterns('',
 
     url(r'^specimens/$',
         'radioapp.views.specimens',
-        name='specimen-list'),
+        name='specimen-collection'),
+
+    url(r'^specimens/search$',
+        search_view_factory(SearchView),
+        name='specimen-search'),
 
     url(r'^specimens/new$',
         'radioapp.views.new_specimen',
@@ -34,9 +39,29 @@ urlpatterns = patterns('',
         'radioapp.views.edit_specimen',
         name='specimen-edit'),
 
-    url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
+    url(r'^specimens/(?P<specimen_id>[^/]+)/delete$',
+        'radioapp.views.delete_specimen',
+        name='specimen-delete'),
+
+    url(r'^images/(?P<image_id>[^/]+)$',
         'radioapp.views.image',
         name='image'),
+
+    url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
+        'radioapp.views.image_file',
+        name='image-file'),
+
+    url(r'^app/state',
+        'radioapp.views.app_state',
+        name='app-state'),
+
+    # Endpoints exposing choices for various fields
+    url(r'^choices/(?P<field>[^/])$', 
+        'radioapp.views.field_choices',
+        name='field-choices'),
+
+    url(r'^templates/image', 'radioapp.views.image_template', name='image-template'),
+    url(r'^templates/specimen', 'radioapp.views.specimen_template', name='specimen-template'),
 
     url(r'^$', 'radioapp.views.index', name='index'),
 )

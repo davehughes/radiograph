@@ -115,10 +115,11 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <% for choice in @institutionChoices: %>
+                    <% for value, label in @choices.institutions: %>
                         <li>
-                        <input type="checkbox" name="filter-sex-<%= choice.value %>"/>
-                        <label for="filter-sex-<%= choice.value %>"><%= choice.label %></label>
+                            <input type="checkbox" id="filter-sex-<%= value %>"
+                                   name="filter-sex" value="<%= value %>"/>
+                            <label for="filter-sex-<%= value %>"><%= label %></label>
                         </li>
                     <% end %>
                 </ul>
@@ -135,20 +136,19 @@
         </th>
     </tr>
 
-    <% for specimen in @search.results: %>
+    <% for specimen in @items: %>
     <tr>
         <td class="selection">
             <input type="checkbox" class="item-selection"
                 value="<% specimen.id %>"/>
         </td>
-        <td class="taxon"><%= specimen.taxon_label %></td>
-        <td class="sex"><%= specimen.sex %></td>
+        <td class="taxon"><%= @choices.taxon[specimen.taxon] %></td>
+        <td class="sex"><%= @choices.sex[specimen.sex] %></td>
         <td class="images">
             <a href="#">Lateral</a>
             <a href="#">Superior</a>
         </td>
         <td class="actions">
-
             <a class="btn" title="Edit Specimen" rel="edit"
                href="<%= specimen.links.edit %>">
                 <i class="icon-edit"></i> 
