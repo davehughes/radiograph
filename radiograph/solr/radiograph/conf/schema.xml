@@ -110,25 +110,27 @@
 
     <field name="taxa" type="string" indexed="true" stored="true" multiValued="true" />
 
-    <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
+    <field name="specimen_id" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="sex_label" type="string" indexed="true" stored="true" multiValued="false" />
+
+    <field name="json_doc" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="taxon" type="slong" indexed="true" stored="true" multiValued="false" />
 
     <field name="comments" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
+    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="label_sort" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="taxon_label" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="specimen_id" type="text" indexed="true" stored="true" multiValued="false" />
+    <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="images" type="text" indexed="true" stored="true" multiValued="true" />
 
-    <field name="sex" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="label" type="edge_ngram" indexed="true" stored="true" multiValued="false" />
 
     <field name="institution" type="string" indexed="true" stored="true" multiValued="false" />
 

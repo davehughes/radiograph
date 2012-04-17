@@ -1,3 +1,5 @@
+import json
+
 from django.core.urlresolvers import reverse
 from haystack.indexes import *
 from haystack import site
@@ -19,6 +21,7 @@ class SpecimenIndex(SearchIndex):
     sex = FacetCharField(model_attr='sex', null=True)
     sex_label = FacetCharField(null=True)
     taxa = FacetMultiValueField()
+    json_doc = FacetCharField()
 
     def prepare(self, obj):
         doc = super(SpecimenIndex, self).prepare(obj)
@@ -30,9 +33,23 @@ class SpecimenIndex(SearchIndex):
             'taxon_label': ' '.join([t.name for t in 
                                      obj.taxon.hierarchy 
                                      if t.level >= 7]),
-            'taxa': [t.id for t in obj.taxon.hierarchy],
-            'images': ['%s:%s' % (i.id, i.get_aspect_display())
-                       for i in obj.images.all()]
+            'taxa': [t.id for t in obj.taxon.hierarchy]
+            })
+
+        doc['json_doc'] = json.dumps({
+            'institution': obj.institution.id,
+            'sex': obj.sex,
+            'taxon': obj.taxon.id,
+            'skull_length': obj.skull_length,
+            'cranial_width': obj.cranial_width,
+            'neurocranial_height': obj.neurocranial_height,
+            'facial_height': obj.facial_height,
+            'palate_length': obj.palate_length,
+            'palate_width': obj.palate_width,
+            'images': [{'href': reverse('image', args=[img.id]),
+                        'aspect': img.aspect,
+                        'file': reverse('image-file', args=[img.id, 'full'])}
+                       for img in obj.images.all()]
             })
         return doc
 

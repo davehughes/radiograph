@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 
+from django.contrib.auth.models import User
 from django.core.files import File as DjangoFile
 from django.db import models
 
@@ -87,8 +88,18 @@ class Specimen(models.Model):
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
 
+    # cranial measurements
+    skull_length = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    cranial_width = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    neurocranial_height = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    facial_height = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    palate_length = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    palate_width = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+
     created = models.DateField(auto_now_add=True)
+    created_by = models.ForeignKey(User, related_name='specimens_created', null=True)
     last_modified = models.DateField(auto_now=True)
+    last_modified_by = models.ForeignKey(User, related_name='specimens_last_modified', null=True)
 
     def __unicode__(self):
         return '%s - %s' % (self.taxon, self.specimen_id)
