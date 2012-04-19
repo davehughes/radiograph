@@ -54,13 +54,8 @@ MEDIA_ROOT = '/mnt/storage/radiograph/media'
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
-
 STATIC_ROOT = SITE_ROOT_DIR + '/static'
-STATIC_URL = '/static'
+STATIC_URL = '/static/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '429hkGZkIdZHfI1vdck9ZNvSXdM6pqKhmdhBUjX9XoUDdXUCXu'
