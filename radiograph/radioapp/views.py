@@ -137,13 +137,11 @@ def create_user_struct(request):
             'lastName': request.user.last_name,
             'isStaff': request.user.is_staff,
             'loggedIn': True,
-            'links': {'logout': reverse('logout')}
             }
     else:
         return {
             'isStaff': False,
             'loggedIn': False,
-            'links': {'login': reverse('login')}
             }
 
 def login(request, *args, **kwargs):
@@ -177,10 +175,12 @@ def logout(request, *args, **kwargs):
 
 def index(request):
     ctx = {
-        'exports': json.dumps({
-            'appState': _app_state(request),
-            'specimens': _specimens(request)
-            })
+        'user': create_user_struct(request),
+        'specimens': _specimens(request),
+        'links': {
+            'login': reverse('login'),
+            'logout': reverse('logout')
+            }
     }
     return render(request, 'radioapp/index.html', ctx)
 
@@ -276,6 +276,15 @@ def save_specimen_changes(request, specimen_id):
         import ipdb; ipdb.set_trace();
         raise Exception("Error was encountered")
 
+def template(request, mediatype):
+    if mediatype == 'image':
+        result = IMAGE_TEMPLATE()
+    elif mediatype == 'specimen':
+        result = SPECIMEN_TEMPLATE()
+    else:
+        return Http404()
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
 def IMAGE_TEMPLATE():
     return {
         'data': [
@@ -290,20 +299,20 @@ def SPECIMEN_TEMPLATE():
     return {
         'data': [
             {'name': 'taxon', 'value': '', 'prompt': 'Taxon',
-             'choices': reverse('field-choices', args='taxon')},
+             'choices': reverse('field-choices', args=['taxon'])},
             {'name': 'institution', 'value': '', 'prompt': 'Institution',
-             'choices': reverse('field-choices', args='institution')},
+             'choices': reverse('field-choices', args=['institution'])},
             {'name': 'specimenId', 'value': '', 'prompt': 'Specimen ID'},
             {'name': 'sex', 'value': '', 'prompt': 'Sex',
              'choices': models.Specimen.SEX_CHOICES},
             {'name': 'comments', 'value': '', 'prompt': 'Comments'},
             {'name': 'settings', 'value': '', 'prompt': 'Settings'},
-            {'name': 'skull_length', 'value': '', 'prompt': 'Skull Length'},
-            {'name': 'cranial_width', 'value': '', 'prompt': 'Cranial Width'},
-            {'name': 'neurocranial_height', 'value': '', 'prompt': 'Neurocranial Height'},
-            {'name': 'facial_height', 'value': '', 'prompt': 'Facial Height'},
-            {'name': 'palate_length', 'value': '', 'prompt': 'Palate Length'},
-            {'name': 'palate_width', 'value': '', 'prompt': 'Palate Width'},
+            {'name': 'skullLength', 'value': '', 'prompt': 'Skull Length'},
+            {'name': 'cranialWidth', 'value': '', 'prompt': 'Cranial Width'},
+            {'name': 'neurocranialHeight', 'value': '', 'prompt': 'Neurocranial Height'},
+            {'name': 'facialHeight', 'value': '', 'prompt': 'Facial Height'},
+            {'name': 'palateLength', 'value': '', 'prompt': 'Palate Length'},
+            {'name': 'palateWidth', 'value': '', 'prompt': 'Palate Width'},
             {'name': 'images', 'value': [], 'prompt': 'Images',
              'template': IMAGE_TEMPLATE()}
             ]
@@ -315,16 +324,14 @@ def SPECIMEN_SEARCH_TEMPLATE():
         'prompt': 'Search Specimens',
         'href': reverse('specimen-collection'),
         'data': [
-            {'name': 'q', 'value': '', 'prompt': 'Query'},
+            {'name': 'q', 'value': '*:*', 'prompt': 'Query'},
             {'name': 'page', 'value': 1, 'prompt': 'Page'},
             {'name': 'results_per_page', 'value': 20, 'prompt': 'Results Per Page'},
-            {'name': 'taxa', 'value': '', 'prompt': 'Taxa'},
-            {'name': 'sex', 'value': '', 'prompt': 'Sex'},
+            {'name': 'taxa_filter', 'value': [], 'prompt': 'Taxa filter'},
+            {'name': 'sex', 'value': [], 'prompt': 'Sex filter'},
             {'name': 'order', 'value': '', 'prompt': 'Order By'}
         ]
     }
-
-
 
 def image_template(request):
     return HttpResponse(json.dumps(IMAGE_TEMPLATE()), content_type='application/json')
@@ -352,12 +359,13 @@ def _specimens(request):
         'last_modified': datetime.datetime.now(),
         'last_modified_by': None,
         'images': [{
-            'uri': reverse('image', args=['{id}', 'medium']),
+            'uri': reverse('image', args=['{id}']),
             'aspect': 'Lateral',
             'files': {
-                'medium': reverse('image', args=['{id}', 'medium']),
-                'large': reverse('image', args=['{id}', 'large']),
-                'full': reverse('image', args=['{id}', 'full'])
+                'thumbnail': reverse('image-file', args=['{id}', 'thumb']),
+                'medium': reverse('image-file', args=['{id}', 'medium']),
+                'large': reverse('image-file', args=['{id}', 'large']),
+                'full': reverse('image-file', args=['{id}', 'full'])
                 }
             }]
         }]
@@ -380,7 +388,14 @@ def _specimens(request):
             'href': request.build_absolute_uri(),
             'items': [create_specimen_item(v) for v in values],
             'queries': [SPECIMEN_SEARCH_TEMPLATE()],
-            'template': SPECIMEN_TEMPLATE()
+            'links': [
+                {'rel': 'template', 'href': reverse('template', args=['specimen'])}
+                # {'rel': 'profile', ...}
+                ],
+            'pagination': {
+                'currentPage': 5,
+                'totalPages': 15
+                }
             }
         }
             

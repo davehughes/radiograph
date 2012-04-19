@@ -1,7 +1,19 @@
 from django.contrib import admin
 
-from radioapp import models 
+from radioapp import models, views
 
+
+class TaxonListFilter(admin.SimpleListFilter):
+    title = 'Taxon'
+    parameter_name = 'taxon'
+
+    def lookups(self, request, model_admin):
+        return views._taxon_choices()
+    
+    def queryset(self, request, queryset):
+        if self.value():
+            queryset = queryset.filter(taxon=self.value())
+        return queryset
 
 class ImageInline(admin.TabularInline):
     model = models.Image
@@ -11,6 +23,18 @@ class SpecimenAdmin(admin.ModelAdmin):
     inlines = [ ImageInline ]
     list_display = ('specimen_id', 'sex')
     list_editable = ('sex',)
-    list_filter = ('sex',)
+    list_filter = ('sex', TaxonListFilter)
+    search_fields = ('specimen_id',)
+    exclude = ('created_by', 'last_modified_by')
+    fields = (
+         'institution', 
+         'specimen_id',
+         'taxon',
+         'sex',
+         ('skull_length', 'cranial_width'),
+         'settings',
+         'comments'
+    ) 
+         
 
 admin.site.register(models.Specimen, SpecimenAdmin)

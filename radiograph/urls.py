@@ -56,12 +56,12 @@ urlpatterns = patterns('',
         name='app-state'),
 
     # Endpoints exposing choices for various fields
-    url(r'^choices/(?P<field>[^/])$', 
+    url(r'^choices/(?P<field>[^/]+)$', 
         'radioapp.views.field_choices',
         name='field-choices'),
 
-    url(r'^templates/image', 'radioapp.views.image_template', name='image-template'),
-    url(r'^templates/specimen', 'radioapp.views.specimen_template', name='specimen-template'),
+    # Endpoints exposing templates for media types
+    url(r'^templates/(?P<mediatype>[^/]+)$', 'radioapp.views.template', name='template'),
 
     url(r'^$', 'radioapp.views.index', name='index'),
 )
