@@ -12,7 +12,7 @@ _       = require('underscore')._
 ###############################################################################
 
 COFFEE_SRC    = path.join(__dirname, 'coffee')
-JS_SRC    = path.join(__dirname, 'js')
+JS_SRC        = path.join(__dirname, 'js')
 LESS_SRC      = path.join(__dirname, 'less')
 JS_OUT        = path.join(__dirname, '../js')
 CSS_OUT       = path.join(__dirname, '../css')
@@ -44,13 +44,12 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
   coffeeFiles   = collectFiles(COFFEE_SRC, '.coffee')
   lessFiles     = collectFiles(LESS_SRC, '.less')
   vendorFiles   = collectFiles(JS_SRC, '.js')
-  jsFiles       = []
-  jsFiles.concat(coffeeFiles, vendorFiles)
+  jsFiles = [].concat(coffeeFiles, vendorFiles)
 
   watch jsFiles, ->
     compileCoffee
       paths: [COFFEE_SRC, JS_SRC]
-      callback: (output) -> writeJS(output, RADIOAPP_JS)
+      callback: (err, output) -> writeJS(output, RADIOAPP_JS)
 
   watch lessFiles, ->
     compileLess
@@ -82,7 +81,7 @@ compileCoffee = (opts) ->
       if opts.uglify then output = uglify(output)
       opts.callback?(err, output)
 
-# Minify using uglify-j
+# Minify using uglify-js
 uglify = (source, callback) ->
   parser = require('uglify-js').parser
   uglify = require('uglify-js').uglify
