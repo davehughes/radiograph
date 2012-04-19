@@ -1,7 +1,0 @@
-<div class="pagination">
-    <ul>
-        <% for page in @pages: %>
-            <li><%- @buildPageElement(page) %></li>
-        <% end %>
-    </ul>
-</div>

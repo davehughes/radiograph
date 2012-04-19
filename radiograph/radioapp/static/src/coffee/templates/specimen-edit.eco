@@ -1,91 +1,115 @@
 <form class="form-horizontal specimen-form" method="post"
-    action="<%= @links.submit.url %>" enctype='multipart/form-data">
+    action="<%#= @links.submit.url %>" enctype="multipart/form-data">
+
+    <div class="controls">
+        <% if @existing: %>
+        <h2>Edit Specimen</h2>
+        <% else: %>
+        <h2>Enter New Specimen</h2>
+        <% end %>
+    </div>
     
-    <% # Institution choice %>
-    <div class="control-group">
-        <label class="control-label" for="institution-choice">
-            {{ form.institution.label }}
-        </label>
+    <%# Institution choice %>
+    <div class="control-group institution">
+        <label class="control-label" for="institution">Institution</label>
         <div class="controls">
-            {{ form.institution }}
+            <select name="institution">
+                <% for value, label in @choices.institution: %>
+                <option value="<%= value %>"><%= label %></option>
+                <% end %>
+            </select>
         </div>
     </div>
 
-    {# Specimen id textbox #}
-    <div class="control-group">
-        <label class="control-label" for="specimen-id">
-            {{ form.specimen_id.label }}
-        </label>
+    <%# Specimen id textbox %>
+    <div class="control-group specimen-id">
+        <label class="control-label" for="specimenId">Specimen ID</label>
         <div class="controls">
-            {{ form.specimen_id }}
+            <input type="text" name="specimenId" value="<%= @values.specimenId %>"/>
         </div>
     </div>
 
-    {# Taxon choice #}
-    <div class="control-group">
-        <label class="control-label" for="taxon-choice">
-            {{ form.taxon.label }}
-        </label>
+    <%# Taxon choice %>
+    <div class="control-group taxon">
+        <label class="control-label" for="taxon">Taxon</label>
         <div class="controls">
-            {{ form.taxon }}
+            <select name="taxon">
+                <% for value, label in @choices.taxon: %>
+                <option value="<%= value %>"><%= label %></option>
+                <% end %>
+            </select>
         </div>
     </div>
 
-    {# Sex choice #}
-    <div class="control-group">
-        <label class="control-label" for="sex-choice">
-            {{ form.sex.label }}
-        </label>
+    <%# Sex choice %>
+    <div class="control-group sex">
+        <label class="control-label" for="sex">Sex</label>
         <div class="controls">
-            {{ form.sex }}
+            <select name="sex">
+                <% for value, label in @choices.sex: %>
+                <option value="<%= value %>"><%= label %></option>
+                <% end %>
+            </select>
         </div>
     </div>
 
-    {# Machine settings textbox #}
-    <div class="control-group">
-        <label class="control-label" for="settings">
-            {{ form.settings.label }}
-        </label>
+    <%# Skull measurements %>
+    <div class="control-group measurements">
+        <label class="control-label">Measurements</label>
         <div class="controls">
-            {{ form.settings }}
+            <table class="specimen-measurements">
+                <tr>
+                    <th>Skull Length</th>
+                    <th>Cranial Width</th>
+                    <th>Neurocranial Height</th>
+                    <th>Facial Height</th>
+                    <th>Palate Length</th>
+                    <th>Palate Width</th>
+                </tr>
+                <tr>
+                    <td><input type="text" value="<%= @values.skullLength %>" name="skullLength"/></td>
+                    <td><input type="text" value="<%= @values.cranialWidth %>" name="cranial-width"/></td>
+                    <td><input type="text" value="<%= @values.neurocranialHeight %>" name="neurocranial-height"/></td>
+                    <td><input type="text" value="<%= @values.facialHeight %>" name="facial-height"/></td>
+                    <td><input type="text" value="<%= @values.palateLength %>" name="palate-length"/></td>
+                    <td><input type="text" value="<%= @values.palateWidth %>" name="palate-width"/></td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    {# Comments text area #}
-    <div class="control-group">
-        <label class="control-label" for="comments">
-            {{ form.comments.label }}
-        </label>
+
+    <%# Comments text area %>
+    <div class="control-group comments">
+        <label class="control-label" for="comments">Comments</label>
         <div class="controls">
-            {{ form.comments }}
+            <textarea name="comments"><%= @values.comments %></textarea>
         </div>
     </div>
 
+    <%# Machine settings textbox %>
+    <div class="control-group settings">
+        <label class="control-label" for="settings">Settings</label>
+        <div class="controls">
+            <textarea name="settings"><%= @values.settings %></textarea>
+        </div>
+    </div>
 
-    {# Image files #}
-    <div class="control-group">
+    <%# Image files %>
+    <div class="control-group images">
         <label class="control-label">Images</label>
         <div class="controls form-inline image-controls">
-            <input type="hidden" name="prefix" value="{{ images_form.prefix }}"/>
-            {{ images_form.management_form }}
             <div id="image-controls">
-                {% for image in images_form %}
-                    <div class="image-control">
-                        {{ image.id }}
-                        {{ image.aspect }}
-                        {{ image.image_full }}
-                    </div>
-                {% endfor %}
+                <div class="image-control">
+                </div>
             </div>
         </div>
     </div>
 
-    </fieldset>
-
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button class="btn btn-primary">Save and Enter Another</button>
-        <a class="btn" href="/">Discard</a>
+        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>
+        <a rel="save-and-create" class="btn btn-primary" href="javascript:void(0)">Save and Enter Another</a>
+        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>
     </div>
 
 </form>

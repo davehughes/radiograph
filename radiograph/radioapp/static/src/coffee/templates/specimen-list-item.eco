@@ -1,0 +1,20 @@
+<td class="selection">
+    <input type="checkbox" class="item-selection"
+        value="<%# specimen.id %>"/>
+</td>
+<td class="taxon">
+    <a rel="detail" href="#">
+        <%= @choices.taxon[@taxon] %>
+        Taxon goes here
+    </a>
+</td>
+<td class="sex"><%= @choices.sex[@sex] %></td>
+<td class="images">
+    <a href="#">Lateral</a>
+    <a href="#">Superior</a>
+</td>
+<td class="actions">
+    <a class="btn" title="Edit Specimen" rel="edit">
+        <i class="icon-edit"></i>
+    </a>
+</td>

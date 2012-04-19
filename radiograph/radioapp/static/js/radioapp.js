@@ -48,8 +48,387 @@
     };
   }
   return this.require.define;
-}).call(this)({"radioapp": function(exports, require, module) {(function() {
-  var App, AppModel, Backbone, File, FormPaginationView, Image, ImageCollection, ImageView, ImagesView, LoginFormView, PaginationView, Search, Specimen, SpecimenForm, SpecimenModal, SpecimenResults, User, View, _,
+}).call(this)({"radioapp/api": function(exports, require, module) {(function() {
+  var Backbone, CollectionItemModel, CollectionModel, _,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  _ = require('underscore')._;
+
+  Backbone = require('backbone');
+
+  CollectionModel = (function(_super) {
+
+    __extends(CollectionModel, _super);
+
+    function CollectionModel() {
+      CollectionModel.__super__.constructor.apply(this, arguments);
+    }
+
+    CollectionModel.prototype.itemModel = function() {
+      return CollectionItemModel;
+    };
+
+    CollectionModel.prototype.defaults = function() {
+      return {
+        version: null,
+        href: null,
+        items: [],
+        links: [],
+        template: null,
+        queries: [],
+        error: null,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1
+        }
+      };
+    };
+
+    CollectionModel.prototype.parse = function(input) {
+      var ItemModel, collection,
+        _this = this;
+      collection = input.collection;
+      ItemModel = this.itemModel();
+      collection.items = _.map(collection.items, function(i) {
+        var item;
+        item = new ItemModel(i, {
+          parse: true
+        });
+        item.collection = _this;
+        return item;
+      });
+      return collection;
+    };
+
+    CollectionModel.prototype.getLink = function(rel) {
+      return _.find(this.links, function(l) {
+        return l.rel === rel;
+      });
+    };
+
+    CollectionModel.prototype.fetchTemplate = function(callback) {
+      if (this.get('template')) callback(this.get('template'));
+      if (this.getLink('template')) {
+        if (!this._templateXHR) {
+          this._templateXHR = $.ajax({
+            url: this.getLink('template'),
+            dataType: 'json'
+          });
+        }
+        this._templateXHR.done(callback);
+      }
+      return null;
+    };
+
+    return CollectionModel;
+
+  })(Backbone.Model);
+
+  CollectionItemModel = (function(_super) {
+
+    __extends(CollectionItemModel, _super);
+
+    function CollectionItemModel() {
+      CollectionItemModel.__super__.constructor.apply(this, arguments);
+    }
+
+    CollectionItemModel.prototype.defaults = function() {
+      return {
+        href: null,
+        links: []
+      };
+    };
+
+    /*
+      Map from collection+json style data fields (e.g. [{name: 'foo', value: 'bar'}, ...])
+      to a dictionary (e.g. {'foo': 'bar', ...}), optionally using a parse function.
+    
+      Parse functions should be named by concatenating the string 'parse' and the 
+      capitalized name of the field to be transformed (e.g., to specify a function to
+      transform the field 'foo', the class should provide a 'parseFoo' method).
+    */
+
+    CollectionItemModel.prototype.parse = function(input) {
+      var fieldValues, mapField,
+        _this = this;
+      mapField = function(memo, field) {
+        var parseFunc;
+        parseFunc = _this["parse" + (field.name.charAt(0).toUpperCase()) + (field.name.slice(1))];
+        memo[field.name] = parseFunc ? parseFunc(field.value) : field.value;
+        return memo;
+      };
+      fieldValues = _.reduce(input.data, mapField, {});
+      return _.extend(fieldValues, {
+        href: input.href,
+        links: input.links
+      });
+    };
+
+    return CollectionItemModel;
+
+  })(Backbone.Model);
+
+  _.extend(exports, {
+    'CollectionModel': CollectionModel,
+    'CollectionItemModel': CollectionItemModel
+  });
+
+}).call(this);
+}, "radioapp/models": function(exports, require, module) {(function() {
+  var Backbone, File, Image, ImageCollection, Specimen, SpecimenCollection, User, api, util, _,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  _ = require('underscore')._;
+
+  Backbone = require('backbone');
+
+  api = require('radioapp/api');
+
+  util = require('radioapp/util');
+
+  SpecimenCollection = (function(_super) {
+
+    __extends(SpecimenCollection, _super);
+
+    function SpecimenCollection() {
+      SpecimenCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    SpecimenCollection.prototype.itemModel = function() {
+      return Specimen;
+    };
+
+    SpecimenCollection.prototype.defaults = function() {
+      return {
+        items: [],
+        queries: [
+          {
+            rel: 'search',
+            href: '...',
+            prompt: 'Search specimens',
+            data: [
+              {
+                name: 'results_per_page',
+                value: 20,
+                prompt: 'Results per page'
+              }, {
+                name: 'sex_filter',
+                value: [],
+                prompt: 'Sex filter'
+              }, {
+                name: 'taxa_filter',
+                value: [],
+                prompt: 'Taxa filter'
+              }, {
+                name: 'query',
+                value: '*:*',
+                prompt: 'Search string'
+              }
+            ]
+          }
+        ],
+        links: {
+          profile: null,
+          template: null
+        }
+      };
+    };
+
+    SpecimenCollection.prototype.toJSON = function() {
+      return _.extend(SpecimenCollection.__super__.toJSON.apply(this, arguments), {
+        items: _.map(this.get('items'), function(i) {
+          return i.toJSON();
+        })
+      });
+    };
+
+    return SpecimenCollection;
+
+  })(api.CollectionModel);
+
+  Specimen = (function(_super) {
+
+    __extends(Specimen, _super);
+
+    function Specimen() {
+      Specimen.__super__.constructor.apply(this, arguments);
+    }
+
+    Specimen.prototype.defaults = function() {
+      return {
+        institution: null,
+        sex: null,
+        taxon: null,
+        specimen_id: null,
+        settings: null,
+        comments: null,
+        skull_length: null,
+        cranial_width: null,
+        neurocranial_height: null,
+        facial_height: null,
+        palate_length: null,
+        palate_width: null,
+        images: new ImageCollection([])
+      };
+    };
+
+    Specimen.prototype.parseImages = function(value) {
+      console.log('parsing images');
+      return value;
+    };
+
+    return Specimen;
+
+  })(api.CollectionItemModel);
+
+  Image = (function(_super) {
+
+    __extends(Image, _super);
+
+    function Image() {
+      Image.__super__.constructor.apply(this, arguments);
+    }
+
+    Image.prototype.defaults = function() {
+      return {
+        uri: null,
+        file: null,
+        replacementFile: null,
+        aspect: null,
+        links: {
+          profile: null,
+          thumb: null,
+          medium: null,
+          large: null
+        }
+      };
+    };
+
+    Image.prototype.toJSON = function() {
+      var _ref, _ref2;
+      return _.extend(Image.__super__.toJSON.apply(this, arguments), {
+        currentFile: (_ref = this.get('file')) != null ? _ref.toJSON() : void 0,
+        replacementFile: (_ref2 = this.get('replacementFile')) != null ? _ref2.toJSON() : void 0
+      });
+    };
+
+    return Image;
+
+  })(Backbone.Model);
+
+  ImageCollection = (function(_super) {
+
+    __extends(ImageCollection, _super);
+
+    function ImageCollection() {
+      ImageCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    ImageCollection.prototype.model = Image;
+
+    return ImageCollection;
+
+  })(Backbone.Collection);
+
+  User = (function(_super) {
+
+    __extends(User, _super);
+
+    function User() {
+      User.__super__.constructor.apply(this, arguments);
+    }
+
+    User.prototype.defaults = function() {
+      return {
+        loggedIn: false,
+        firstName: 'Anonymous',
+        lastName: '',
+        isStaff: false,
+        links: {
+          profile: null,
+          login: null,
+          logout: null
+        }
+      };
+    };
+
+    return User;
+
+  })(Backbone.Model);
+
+  File = (function(_super) {
+
+    __extends(File, _super);
+
+    function File() {
+      File.__super__.constructor.apply(this, arguments);
+    }
+
+    File.prototype.defaults = function() {
+      return {
+        name: null,
+        url: null
+      };
+    };
+
+    return File;
+
+  })(Backbone.Model);
+
+  _.extend(exports, {
+    'User': User,
+    'Specimen': Specimen,
+    'SpecimenCollection': SpecimenCollection,
+    'Image': Image,
+    'ImageCollection': ImageCollection
+  });
+
+}).call(this);
+}, "radioapp/util": function(exports, require, module) {(function() {
+  var Alerts, Backbone, _,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  _ = require('underscore')._;
+
+  Backbone = require('backbone');
+
+  Alerts = (function(_super) {
+
+    __extends(Alerts, _super);
+
+    function Alerts() {
+      Alerts.__super__.constructor.apply(this, arguments);
+    }
+
+    Alerts.prototype.Types = {
+      SUCCESS: 'success',
+      INFO: 'info',
+      WARNING: 'warning',
+      ERROR: 'error'
+    };
+
+    Alerts.prototype.publish = function(type, body) {
+      if (type == null) type = Alerts.Types.INFO;
+      return this.trigger('published', {
+        type: type,
+        body: body
+      });
+    };
+
+    return Alerts;
+
+  })(Backbone.Model);
+
+  _.extend(exports, {
+    'Alerts': Alerts
+  });
+
+}).call(this);
+}, "radioapp/views": function(exports, require, module) {(function() {
+  var AlertsView, AppToolbar, AppView, Backbone, FormPaginationView, ImageView, ImagesView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -57,6 +436,10 @@
   _ = require('underscore')._;
 
   Backbone = require('backbone');
+
+  models = require('radioapp/models');
+
+  require('bootstrap');
 
   require('jquery.chosen');
 
@@ -78,11 +461,19 @@
     View.prototype.render = function() {
       var template, templateEl;
       View.__super__.render.apply(this, arguments);
-      template = require(templateId);
+      template = require(this.templateId);
       templateEl = template(this.viewContext());
       this.$el.html(templateEl);
+      this.updateAuthz(App.user);
       return this;
     };
+
+    View.prototype.initialize = function() {
+      View.__super__.initialize.apply(this, arguments);
+      return App.on('change:user', this.updateAuthz, this);
+    };
+
+    View.prototype.updateAuthz = function(user) {};
 
     return View;
 
@@ -96,13 +487,23 @@
       SpecimenForm.__super__.constructor.apply(this, arguments);
     }
 
-    SpecimenForm.prototype.templateId = 'specimen-edit';
+    SpecimenForm.prototype.templateId = 'templates/specimen-edit';
+
+    SpecimenForm.prototype.events = function() {
+      return {
+        'click [rel=discard]': 'discard'
+      };
+    };
 
     SpecimenForm.prototype.viewContext = function() {
       return _.extend(SpecimenForm.__super__.viewContext.apply(this, arguments), {
-        institutionChoices: ['Harvard', 'Smithsonian'],
-        sexChoices: ['M', 'F', '?'],
-        taxonChoices: ['', 'Foo', 'Bar', 'Baz'],
+        existing: this.model ? true : false,
+        values: {},
+        choices: {
+          institution: [],
+          sex: [],
+          taxon: []
+        },
         links: {}
       });
     };
@@ -113,10 +514,11 @@
       _.defer(function() {
         return _this.$('select[name=taxon]').chosen();
       });
-      new ImagesView({
-        el: this.$('.image-controls')
-      });
       return this;
+    };
+
+    SpecimenForm.prototype.discard = function() {
+      return App.view.popPane();
     };
 
     return SpecimenForm;
@@ -151,231 +553,150 @@
 
   })(SpecimenForm);
 
-  Specimen = (function(_super) {
+  SpecimenSearchPane = (function(_super) {
 
-    __extends(Specimen, _super);
+    __extends(SpecimenSearchPane, _super);
 
-    function Specimen() {
-      Specimen.__super__.constructor.apply(this, arguments);
+    function SpecimenSearchPane() {
+      this.showCreateItemPane = __bind(this.showCreateItemPane, this);
+      this.navigateToPage = __bind(this.navigateToPage, this);
+      SpecimenSearchPane.__super__.constructor.apply(this, arguments);
     }
 
-    Specimen.prototype.defaults = function() {
+    SpecimenSearchPane.prototype.templateId = 'templates/specimen-search-form';
+
+    SpecimenSearchPane.prototype.events = function() {
       return {
-        institution: null,
-        sex: null,
-        taxon: null,
-        specimen_id: null,
-        settings: null,
-        comments: null,
-        images: new ImageCollection([])
+        'click [rel=create]': 'showCreateItemPane'
       };
     };
 
-    return Specimen;
-
-  })(Backbone.Model);
-
-  User = (function(_super) {
-
-    __extends(User, _super);
-
-    function User() {
-      User.__super__.constructor.apply(this, arguments);
-    }
-
-    User.prototype.defaults = function() {
-      return {
-        loggedIn: false,
-        firstName: 'Anonymous',
-        lastName: '',
-        isStaff: false,
-        links: {
-          login: 'login',
-          logout: 'logout'
-        }
-      };
-    };
-
-    return User;
-
-  })(Backbone.Model);
-
-  Search = (function(_super) {
-
-    __extends(Search, _super);
-
-    function Search() {
-      Search.__super__.constructor.apply(this, arguments);
-    }
-
-    Search.prototype.defaults = function() {
-      return {
-        url: window.location.pathname,
-        args: {},
-        resultsPerPage: 20,
-        currentPage: 1,
-        totalPages: 10,
-        facets: [],
-        query: '*:*',
-        results: [
-          {
-            sex: 'Male',
-            taxon_label: '<Taxon>',
-            links: {
-              edit: ''
-            }
-          }, {
-            sex: 'Female',
-            taxon_label: '<Taxon>',
-            links: {
-              edit: ''
-            }
-          }
-        ]
-      };
-    };
-
-    return Search;
-
-  })(Backbone.Model);
-
-  AppModel = (function(_super) {
-
-    __extends(AppModel, _super);
-
-    function AppModel() {
-      this.alert = __bind(this.alert, this);
-      AppModel.__super__.constructor.apply(this, arguments);
-    }
-
-    AppModel.prototype.defaults = function() {
-      return {
-        user: new User(),
-        search: new Search(),
-        institutionChoices: [],
-        links: {
-          createSpecimen: ''
-        }
-      };
-    };
-
-    AppModel.prototype.initialize = function() {
-      AppModel.__super__.initialize.apply(this, arguments);
-      return this.alerts = new Backbone.Collection();
-    };
-
-    AppModel.prototype.alert = function(type, body) {
-      if (type == null) type = 'info';
-      return this.alerts.add({
-        type: type,
-        body: body
-      });
-    };
-
-    AppModel.prototype.toJSON = function() {
-      return _.extend(AppModel.__super__.toJSON.apply(this, arguments), {
-        user: this.get('user').toJSON(),
-        search: this.get('search').toJSON(),
-        alerts: this.alerts.toJSON()
-      });
-    };
-
-    return AppModel;
-
-  })(Backbone.Model);
-
-  App = new AppModel();
-
-  SpecimenResults = (function(_super) {
-
-    __extends(SpecimenResults, _super);
-
-    function SpecimenResults() {
-      this.logout = __bind(this.logout, this);
-      this.showEditItemForm = __bind(this.showEditItemForm, this);
-      this.showCreateItemForm = __bind(this.showCreateItemForm, this);
-      SpecimenResults.__super__.constructor.apply(this, arguments);
-    }
-
-    SpecimenResults.prototype.templateId = 'templates/specimen-list';
-
-    SpecimenResults.prototype.events = function() {
-      return {
-        'click [rel=login]': 'showLogin',
-        'click [rel=logout]': 'logout',
-        'click [rel=create]': 'showCreateItemForm',
-        'click [rel=edit]': 'showEditItemForm'
-      };
-    };
-
-    SpecimenResults.prototype.initialize = function() {
-      SpecimenResults.__super__.initialize.apply(this, arguments);
-      return this.model.on('change:user', this.render, this);
-    };
-
-    SpecimenResults.prototype.render = function() {
-      SpecimenResults.__super__.render.apply(this, arguments);
-      if (this.model.get('user').get('isStaff')) {
-        this.$('[rel=edit],[rel=create]').show();
-      } else {
-        this.$('[rel=edit],[rel=create]').hide();
+    SpecimenSearchPane.prototype.render = function() {
+      var _this = this;
+      SpecimenSearchPane.__super__.render.apply(this, arguments);
+      if (this.model.get('pagination')) {
+        _.each(this.$('.pagination'), function(placeholder) {
+          var paginationView;
+          paginationView = new PaginationView(_this.model.get('pagination'));
+          $(placeholder).replaceWith(paginationView.render().$el);
+          return paginationView.on('navigate', _this.navigateToPage);
+        });
       }
+      _.each(this.model.get('items'), function(s) {
+        var view;
+        view = new SpecimenResult({
+          model: s
+        });
+        return _this.$('table tbody').append(view.render().$el);
+      });
       return this;
     };
 
-    SpecimenResults.prototype.viewContext = function() {
-      var pagination, search;
-      search = this.model.get('search');
-      pagination = new FormPaginationView({
-        model: search
-      }).render().$el.html();
-      return _.extend(SpecimenResults.__super__.viewContext.apply(this, arguments), {
-        pagination: pagination
-      });
+    SpecimenSearchPane.prototype.updateAuthz = function(user) {
+      if (user == null) user = App.user;
+      if (user.get('isStaff')) {
+        return this.$('[rel=edit],[rel=create]').show();
+      } else {
+        return this.$('[rel=edit],[rel=create]').hide();
+      }
     };
 
-    SpecimenResults.prototype.showLogin = function(e) {
-      var loginForm,
-        _this = this;
-      e.preventDefault();
-      e.stopPropagation();
-      loginForm = new LoginFormView();
-      loginForm.show();
-      loginForm.$('input:visible,select:visible,textarea:visible').first().focus();
-      return loginForm.on('loginsuccess', function(data) {
-        return _this.model.set('user', new User(data.user, {
-          parse: true
-        }));
-      });
+    SpecimenSearchPane.prototype.navigateToPage = function(page) {
+      return console.log("navigate to page " + page);
     };
 
-    SpecimenResults.prototype.showCreateItemForm = function(e) {
+    SpecimenSearchPane.prototype.showCreateItemPane = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      return new SpecimenModal().render().$('input:visible,select:visible,textarea:visible').first().focus();
+      return App.view.pushPane(new SpecimenForm());
     };
 
-    SpecimenResults.prototype.showEditItemForm = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      return new SpecimenModal().render().$('input:visible,select:visible,textarea:visible').first().focus();
+    return SpecimenSearchPane;
+
+  })(View);
+
+  SpecimenResult = (function(_super) {
+
+    __extends(SpecimenResult, _super);
+
+    function SpecimenResult() {
+      this.showDetailPane = __bind(this.showDetailPane, this);
+      this.showEditPane = __bind(this.showEditPane, this);
+      SpecimenResult.__super__.constructor.apply(this, arguments);
+    }
+
+    SpecimenResult.prototype.templateId = 'templates/specimen-list-item';
+
+    SpecimenResult.prototype.tagName = 'tr';
+
+    SpecimenResult.prototype.events = function() {
+      return {
+        'click [rel=edit]': 'showEditPane',
+        'click [rel=detail]': 'showDetailPane'
+      };
     };
 
-    SpecimenResults.prototype.logout = function(e) {
-      var _this = this;
-      e.preventDefault();
-      e.stopPropagation();
-      return $.ajax({
-        url: $(e.currentTarget).attr('href'),
-        dataType: 'json',
-        success: function() {
-          _this.model.alert('success', 'You have been logged out successfully.');
-          return _this.model.set('user', new User());
+    SpecimenResult.prototype.viewContext = function() {
+      return _.extend(SpecimenResult.__super__.viewContext.apply(this, arguments), {
+        choices: {
+          taxon: {},
+          sex: {},
+          institution: {}
         }
       });
     };
 
-    return SpecimenResults;
+    SpecimenResult.prototype.showEditPane = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return App.view.pushPane(new SpecimenForm({
+        model: this.model
+      }));
+    };
+
+    SpecimenResult.prototype.showDetailPane = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return App.view.pushPane(new SpecimenDetailPane());
+    };
+
+    return SpecimenResult;
+
+  })(View);
+
+  SpecimenDetailPane = (function(_super) {
+
+    __extends(SpecimenDetailPane, _super);
+
+    function SpecimenDetailPane() {
+      SpecimenDetailPane.__super__.constructor.apply(this, arguments);
+    }
+
+    SpecimenDetailPane.prototype.templateId = 'templates/specimen-detail';
+
+    SpecimenDetailPane.prototype.events = function() {
+      return {
+        'click [rel=back]': 'back'
+      };
+    };
+
+    SpecimenDetailPane.prototype.viewContext = function() {
+      return _.extend(SpecimenDetailPane.__super__.viewContext.apply(this, arguments), {
+        choices: {
+          taxon: {},
+          sex: {},
+          institution: {}
+        }
+      });
+    };
+
+    SpecimenDetailPane.prototype.back = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return App.view.popPane();
+    };
+
+    return SpecimenDetailPane;
 
   })(View);
 
@@ -390,7 +711,7 @@
       LoginFormView.__super__.constructor.apply(this, arguments);
     }
 
-    LoginFormView.prototype.templateId = 'login';
+    LoginFormView.prototype.templateId = 'templates/login';
 
     LoginFormView.prototype.events = function() {
       return {
@@ -400,10 +721,7 @@
 
     LoginFormView.prototype.viewContext = function() {
       return {
-        errors: [],
-        links: {
-          login: '/accounts/login/'
-        }
+        errors: []
       };
     };
 
@@ -424,8 +742,8 @@
       e.preventDefault();
       form = $(e.currentTarget);
       return $.ajax({
-        type: form.attr('method'),
-        url: form.attr('action'),
+        type: 'POST',
+        url: App.links.login,
         data: form.serialize(),
         dataType: 'json',
         success: function(data) {
@@ -463,67 +781,169 @@
 
   })(View);
 
-  File = (function(_super) {
+  AlertsView = (function(_super) {
 
-    __extends(File, _super);
+    __extends(AlertsView, _super);
 
-    function File() {
-      File.__super__.constructor.apply(this, arguments);
+    function AlertsView() {
+      this.displayAlert = __bind(this.displayAlert, this);
+      AlertsView.__super__.constructor.apply(this, arguments);
     }
 
-    File.prototype.defaults = {
-      name: null,
-      url: null
+    AlertsView.prototype.className = 'alerts';
+
+    AlertsView.prototype.alertTemplate = _.template('<div class="alert alert-<%= type %>">\n    <a class="close" data-dismiss="alert">×</a>\n    <%= body %>\n</div>');
+
+    AlertsView.prototype.initialize = function() {
+      return this.model.on('published', this.displayAlert);
     };
 
-    return File;
+    AlertsView.prototype.displayAlert = function(alert) {
+      return this.$el.append(this.alertTemplate(alert));
+    };
 
-  })(Backbone.Model);
+    return AlertsView;
 
-  Image = (function(_super) {
+  })(Backbone.View);
 
-    __extends(Image, _super);
+  AppToolbar = (function(_super) {
 
-    function Image() {
-      Image.__super__.constructor.apply(this, arguments);
+    __extends(AppToolbar, _super);
+
+    function AppToolbar() {
+      this.logout = __bind(this.logout, this);
+      AppToolbar.__super__.constructor.apply(this, arguments);
     }
 
-    Image.prototype.defaults = {
-      id: null,
-      aspect: null,
-      currentFile: null,
-      replacementFile: null
+    AppToolbar.prototype.templateId = 'templates/app-toolbar';
+
+    AppToolbar.prototype.className = 'app-toolbar';
+
+    AppToolbar.prototype.events = function() {
+      return {
+        'click [rel=login]': 'showLogin',
+        'click [rel=logout]': 'logout'
+      };
     };
 
-    Image.prototype.toJSON = function() {
-      var _ref, _ref2;
-      return _.extend(Image.__super__.toJSON.apply(this, arguments), {
-        currentFile: (_ref = this.get('currentFile')) != null ? _ref.toJSON() : void 0,
-        replacementFile: (_ref2 = this.get('replacementFile')) != null ? _ref2.toJSON() : void 0
+    AppToolbar.prototype.initialize = function() {
+      return App.on('change:user', this.render, this);
+    };
+
+    AppToolbar.prototype.viewContext = function() {
+      return _.extend(AppToolbar.__super__.viewContext.apply(this, arguments), {
+        user: App.user.toJSON()
       });
     };
 
-    return Image;
-
-  })(Backbone.Model);
-
-  ImageCollection = (function(_super) {
-
-    __extends(ImageCollection, _super);
-
-    function ImageCollection() {
-      ImageCollection.__super__.constructor.apply(this, arguments);
-    }
-
-    ImageCollection.prototype.model = Image;
-
-    ImageCollection.prototype.initialize = function() {
-      return this.cid = _.uniqueID('IMAGES_');
+    AppToolbar.prototype.showLogin = function(e) {
+      var loginForm,
+        _this = this;
+      e.preventDefault();
+      e.stopPropagation();
+      loginForm = new LoginFormView();
+      loginForm.show();
+      loginForm.$('input:visible,select:visible,textarea:visible').first().focus();
+      return loginForm.on('loginsuccess', function(data) {
+        App.user = new models.User(data.user, {
+          parse: true
+        });
+        return App.trigger('change:user');
+      });
     };
 
-    return ImageCollection;
+    AppToolbar.prototype.logout = function(e) {
+      var _this = this;
+      e.preventDefault();
+      e.stopPropagation();
+      return $.ajax({
+        url: App.links.logout,
+        dataType: 'json',
+        success: function() {
+          App.user = new models.User();
+          App.alerts.publish('success', 'You have been logged out successfully');
+          return App.trigger('change:user');
+        }
+      });
+    };
 
-  })(Backbone.Collection);
+    return AppToolbar;
+
+  })(View);
+
+  AppView = (function(_super) {
+
+    __extends(AppView, _super);
+
+    function AppView() {
+      AppView.__super__.constructor.apply(this, arguments);
+    }
+
+    AppView.prototype.templateId = 'templates/appview';
+
+    AppView.prototype.className = 'appview';
+
+    AppView.prototype.template = _.template('<div class="app-toolbar"></div>\n<div class="alerts"></div>\n<div class="app-content"></div>');
+
+    AppView.prototype.initialize = function() {
+      this.panes = [];
+      this.toolbar = new AppToolbar(self);
+      return this.alertsView = new AlertsView({
+        model: App.alerts
+      });
+    };
+
+    AppView.prototype.render = function() {
+      this.$el.html(this.template());
+      this.$('.app-toolbar').replaceWith(this.toolbar.render().$el);
+      this.$('.alerts').replaceWith(this.alertsView.render().$el);
+      if (this.pane) this.$('.app-content').append(this.pane.render().$el);
+      return this;
+    };
+
+    AppView.prototype.pushPane = function(paneView) {
+      var lastPane;
+      lastPane = this.pane;
+      this.panes.push(paneView);
+      this.pane = paneView;
+      this.$('.app-content').children().detach();
+      this.$('.app-content').append(this.pane.render().$el);
+      return this.trigger('change:pane', {
+        "new": this.pane,
+        old: lastPane
+      });
+    };
+
+    AppView.prototype.popPane = function() {
+      var lastPane;
+      lastPane = this.panes.pop();
+      this.$('.app-content').children().detach();
+      this.pane = _.last(this.panes);
+      if (this.pane) this.$('.app-content').append(this.pane.render().$el);
+      this.trigger('change:pane', {
+        "new": this.pane,
+        old: lastPane
+      });
+      return lastPane;
+    };
+
+    return AppView;
+
+  })(Backbone.View);
+
+  SpecimenEditPane = (function(_super) {
+
+    __extends(SpecimenEditPane, _super);
+
+    function SpecimenEditPane() {
+      SpecimenEditPane.__super__.constructor.apply(this, arguments);
+    }
+
+    SpecimenEditPane.prototype.templateId = 'templates/specimen-edit';
+
+    return SpecimenEditPane;
+
+  })(View);
 
   ImagesView = (function(_super) {
 
@@ -667,32 +1087,52 @@
 
     function PaginationView() {
       this.buildPageElement = __bind(this.buildPageElement, this);
-      this.buildPageUrl = __bind(this.buildPageUrl, this);
+      this.buildPageElements = __bind(this.buildPageElements, this);
       PaginationView.__super__.constructor.apply(this, arguments);
     }
 
-    PaginationView.prototype.templateId = 'pagination';
+    PaginationView.prototype.className = 'pagination';
 
-    PaginationView.prototype.viewContext = function() {
-      return _.extend(PaginationView.__super__.viewContext.apply(this, arguments), {
-        pages: this.paginate(this.model.get('currentPage'), this.model.get('totalPages')),
-        buildPageElement: this.buildPageElement
-      });
+    PaginationView.prototype.initialize = function(attrs) {
+      PaginationView.__super__.initialize.apply(this, arguments);
+      this.currentPage = attrs.currentPage;
+      return this.totalPages = attrs.totalPages;
     };
 
-    PaginationView.prototype.buildPageUrl = function(page) {
-      var params, _ref;
-      params = {};
-      params[(_ref = this.model.get('pageParam')) != null ? _ref : 'page'] = page.pageNumber;
-      params = _.extend({}, this.model.get('params'), params);
-      return "" + (this.model.get('url')) + "?" + ($.param(params));
+    PaginationView.prototype.events = function() {
+      return {
+        'click [rel=page]': 'navigate'
+      };
+    };
+
+    PaginationView.prototype.render = function() {
+      var paginationList;
+      PaginationView.__super__.render.apply(this, arguments);
+      paginationList = $('<ul>');
+      _.each(this.buildPageElements(), function(el) {
+        return paginationList.append(el);
+      });
+      this.$el.empty().append(paginationList);
+      return this;
+    };
+
+    PaginationView.prototype.navigate = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return this.trigger('navigate', $(e.currentTarget).data('page'));
+    };
+
+    PaginationView.prototype.buildPageElements = function() {
+      var pages;
+      pages = this.paginate(this.currentPage, this.totalPages);
+      return _.map(pages, this.buildPageElement);
     };
 
     PaginationView.prototype.buildPageElement = function(page) {
       if (!page.pageNumber) {
-        return "<a href='javascript:void(0)' class='inactive'>" + page.display + "</a>";
+        return "<a href='#' class='inactive'>" + page.display + "</a>";
       } else {
-        return "<a href='" + (this.buildPageUrl(page)) + "' rel='page'>" + page.display + "</a>";
+        return "<a href='#' rel='page' data-page='" + page.pageNumber + "'>" + page.display + "</a>";
       }
     };
 
@@ -750,7 +1190,7 @@
 
     return PaginationView;
 
-  })(View);
+  })(Backbone.View);
 
   FormPaginationView = (function(_super) {
 
@@ -775,16 +1215,75 @@
   })(PaginationView);
 
   _.extend(exports, {
+    'AppView': AppView,
     'ImageView': ImageView,
     'ImagesView': ImagesView,
     'SpecimenForm': SpecimenForm,
     'SpecimenModal': SpecimenModal,
-    'SpecimenResults': SpecimenResults,
-    'App': App
+    'SpecimenSearchPane': SpecimenSearchPane
   });
 
 }).call(this);
-}, "templates/image-control": function(exports, require, module) {module.exports = function(__obj) {
+}, "templates/app-toolbar": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('\n<div class="app-tools-custom"></div>\n\n');
+    
+      __out.push('\n<div class="app-tools-common">\n    <div class="btn-group">\n        ');
+    
+      if (this.user.loggedIn) {
+        __out.push('\n        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown">\n            <i class="icon-user"></i>\n            ');
+        __out.push(__sanitize(this.user.firstName));
+        __out.push('\n            <span class="caret"></span>\n        </a>\n        <ul class="dropdown-menu">\n            <li>\n            <a rel="logout" href="javascript:void(0);">\n                <i class="icon-off"></i>Log Out\n            </a>\n            </li>\n        </ul>\n        ');
+      } else {
+        __out.push('\n        <a class="btn btn-small" rel="login" href="javascript:void(0);">\n            <i class="icon-user"></i>Sign In\n        </a>\n        ');
+      }
+    
+      __out.push('\n    </div>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/image-control": function(exports, require, module) {module.exports = function(__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
     var out = __out, result;
@@ -916,26 +1415,14 @@
   (function() {
     (function() {
     
-      __out.push('<form action="');
-    
-      __out.push(__sanitize(this.links.login));
-    
-      __out.push('" method="post" class="login-form modal">\n\n    <div class="modal-header">\n        <h3>Radiograph Database - Sign In</h3>\n    </div>\n\n    <div class="modal-body form form-horizontal">\n        <div class="alert alert-error" style="display: none;"></div>\n\n        <div class="control-group">\n            <label class="control-label" for="username">Username:</label>\n            <div class="controls">\n                <input type="text" name="username" value="');
-    
-      __out.push(__sanitize(this.username));
-    
-      __out.push('"/>\n            </div>\n        </div>\n        <div class="control-group">\n            <label class="control-label" for="password">Password:</label>\n            <div class="controls">\n                <input type="password" name="password" value="');
-    
-      __out.push(__sanitize(this.password));
-    
-      __out.push('"/>\n            </div>\n        </div>\n    </div>\n\n    <div class="modal-footer form-actions">\n        <button type="submit" class="btn btn-primary">Sign In</button>\n        <a href="#" class="btn discard">Nevermind</a>\n    </div>\n\n</form>\n');
+      __out.push('<form method="post" class="login-form modal">\n\n    <div class="modal-header">\n        <h3>Radiograph Database - Sign In</h3>\n    </div>\n\n    <div class="modal-body form form-horizontal">\n        <div class="alert alert-error" style="display: none;"></div>\n\n        <div class="control-group">\n            <label class="control-label" for="username">Username:</label>\n            <div class="controls">\n                <input type="text" name="username"/>\n            </div>\n        </div>\n        <div class="control-group">\n            <label class="control-label" for="password">Password:</label>\n            <div class="controls">\n                <input type="password" name="password"/>\n            </div>\n        </div>\n    </div>\n\n    <div class="modal-footer form-actions">\n        <button type="submit" class="btn btn-primary">Sign In</button>\n        <a href="#" class="btn discard">Nevermind</a>\n    </div>\n\n</form>\n');
     
     }).call(this);
     
   }).call(__obj);
   __obj.safe = __objSafe, __obj.escape = __escape;
   return __out.join('');
-}}, "templates/pagination": function(exports, require, module) {module.exports = function(__obj) {
+}}, "templates/specimen-detail": function(exports, require, module) {module.exports = function(__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
     var out = __out, result;
@@ -974,19 +1461,55 @@
   }
   (function() {
     (function() {
-      var page, _i, _len, _ref;
+      var image, _i, _len, _ref;
     
-      __out.push('<div class="pagination">\n    <ul>\n        ');
+      __out.push('<a href="#" rel="back"><- Back to Search</a>\n\n<h1><span class="taxon">');
     
-      _ref = this.pages;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        page = _ref[_i];
-        __out.push('\n            <li>');
-        __out.push(this.buildPageElement(page));
-        __out.push('</li>\n        ');
+      __out.push(__sanitize(this.choices.taxon[this.taxon]));
+    
+      __out.push('</span></h1>\n<table>\n  <tr>\n    <th>Specimen ID</th>\n    <td>');
+    
+      __out.push(__sanitize(this.specimenId));
+    
+      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Sex</th>\n    <td>');
+    
+      __out.push(__sanitize(this.sex));
+    
+      __out.push('</td>\n  </tr>\n  ');
+    
+      if (this.settings) {
+        __out.push('\n  <tr>\n    <th>Settings</th><td>');
+        __out.push(__sanitize(this.settings));
+        __out.push('</td>\n  </tr>\n  ');
       }
     
-      __out.push('\n    </ul>\n</div>\n');
+      __out.push('\n  ');
+    
+      if (this.comments) {
+        __out.push('\n  <tr>\n    <th>Comments</th>\n    <td>');
+        __out.push(__sanitize(this.comments));
+        __out.push('</td>\n  </tr>\n  ');
+      }
+    
+      __out.push('\n  <tr>\n    <th>Images</th>\n    <td>\n      ');
+    
+      if (this.images && this.images.length > 0) {
+        __out.push('\n        ');
+        _ref = this.images;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          image = _ref[_i];
+          __out.push('\n        <a href="');
+          __out.push(__sanitize(image.files.medium));
+          __out.push('">\n            <img src="');
+          __out.push(__sanitize(image.files.thumbnail));
+          __out.push('"/>\n        </a>\n        ');
+        }
+        __out.push('\n    </td>\n    ');
+      } else {
+        __out.push('\n      <span class="empty">No images attached.</span>\n    ');
+      }
+    
+      __out.push('\n  </tr>\n</table>\n');
     
     }).call(this);
     
@@ -1032,14 +1555,164 @@
   }
   (function() {
     (function() {
+      var label, value, _len, _len2, _len3, _ref, _ref2, _ref3;
     
       __out.push('<form class="form-horizontal specimen-form" method="post"\n    action="');
     
-      __out.push(__sanitize(this.links.submit.url));
+      __out.push('" enctype="multipart/form-data">\n\n    <div class="controls">\n        ');
     
-      __out.push('" enctype=\'multipart/form-data">\n    \n    ');
+      if (this.existing) {
+        __out.push('\n        <h2>Edit Specimen</h2>\n        ');
+      } else {
+        __out.push('\n        <h2>Enter New Specimen</h2>\n        ');
+      }
     
-      __out.push('\n    <div class="control-group">\n        <label class="control-label" for="institution-choice">\n            {{ form.institution.label }}\n        </label>\n        <div class="controls">\n            {{ form.institution }}\n        </div>\n    </div>\n\n    {# Specimen id textbox #}\n    <div class="control-group">\n        <label class="control-label" for="specimen-id">\n            {{ form.specimen_id.label }}\n        </label>\n        <div class="controls">\n            {{ form.specimen_id }}\n        </div>\n    </div>\n\n    {# Taxon choice #}\n    <div class="control-group">\n        <label class="control-label" for="taxon-choice">\n            {{ form.taxon.label }}\n        </label>\n        <div class="controls">\n            {{ form.taxon }}\n        </div>\n    </div>\n\n    {# Sex choice #}\n    <div class="control-group">\n        <label class="control-label" for="sex-choice">\n            {{ form.sex.label }}\n        </label>\n        <div class="controls">\n            {{ form.sex }}\n        </div>\n    </div>\n\n    {# Machine settings textbox #}\n    <div class="control-group">\n        <label class="control-label" for="settings">\n            {{ form.settings.label }}\n        </label>\n        <div class="controls">\n            {{ form.settings }}\n        </div>\n    </div>\n\n    {# Comments text area #}\n    <div class="control-group">\n        <label class="control-label" for="comments">\n            {{ form.comments.label }}\n        </label>\n        <div class="controls">\n            {{ form.comments }}\n        </div>\n    </div>\n\n\n    {# Image files #}\n    <div class="control-group">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline image-controls">\n            <input type="hidden" name="prefix" value="{{ images_form.prefix }}"/>\n            {{ images_form.management_form }}\n            <div id="image-controls">\n                {% for image in images_form %}\n                    <div class="image-control">\n                        {{ image.id }}\n                        {{ image.aspect }}\n                        {{ image.image_full }}\n                    </div>\n                {% endfor %}\n            </div>\n        </div>\n    </div>\n\n    </fieldset>\n\n    <div class="form-actions">\n        <button type="submit" class="btn btn-primary">Save</button>\n        <button class="btn btn-primary">Save and Enter Another</button>\n        <a class="btn" href="/">Discard</a>\n    </div>\n\n</form>\n');
+      __out.push('\n    </div>\n    \n    ');
+    
+      __out.push('\n    <div class="control-group institution">\n        <label class="control-label" for="institution">Institution</label>\n        <div class="controls">\n            <select name="institution">\n                ');
+    
+      _ref = this.choices.institution;
+      for (label = 0, _len = _ref.length; label < _len; label++) {
+        value = _ref[label];
+        __out.push('\n                <option value="');
+        __out.push(__sanitize(value));
+        __out.push('">');
+        __out.push(__sanitize(label));
+        __out.push('</option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group specimen-id">\n        <label class="control-label" for="specimenId">Specimen ID</label>\n        <div class="controls">\n            <input type="text" name="specimenId" value="');
+    
+      __out.push(__sanitize(this.values.specimenId));
+    
+      __out.push('"/>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group taxon">\n        <label class="control-label" for="taxon">Taxon</label>\n        <div class="controls">\n            <select name="taxon">\n                ');
+    
+      _ref2 = this.choices.taxon;
+      for (label = 0, _len2 = _ref2.length; label < _len2; label++) {
+        value = _ref2[label];
+        __out.push('\n                <option value="');
+        __out.push(__sanitize(value));
+        __out.push('">');
+        __out.push(__sanitize(label));
+        __out.push('</option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group sex">\n        <label class="control-label" for="sex">Sex</label>\n        <div class="controls">\n            <select name="sex">\n                ');
+    
+      _ref3 = this.choices.sex;
+      for (label = 0, _len3 = _ref3.length; label < _len3; label++) {
+        value = _ref3[label];
+        __out.push('\n                <option value="');
+        __out.push(__sanitize(value));
+        __out.push('">');
+        __out.push(__sanitize(label));
+        __out.push('</option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group measurements">\n        <label class="control-label">Measurements</label>\n        <div class="controls">\n            <table class="specimen-measurements">\n                <tr>\n                    <th>Skull Length</th>\n                    <th>Cranial Width</th>\n                    <th>Neurocranial Height</th>\n                    <th>Facial Height</th>\n                    <th>Palate Length</th>\n                    <th>Palate Width</th>\n                </tr>\n                <tr>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.skullLength));
+    
+      __out.push('" name="skullLength"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.cranialWidth));
+    
+      __out.push('" name="cranial-width"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.neurocranialHeight));
+    
+      __out.push('" name="neurocranial-height"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.facialHeight));
+    
+      __out.push('" name="facial-height"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.palateLength));
+    
+      __out.push('" name="palate-length"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.values.palateWidth));
+    
+      __out.push('" name="palate-width"/></td>\n                </tr>\n            </table>\n        </div>\n    </div>\n\n\n    ');
+    
+      __out.push('\n    <div class="control-group comments">\n        <label class="control-label" for="comments">Comments</label>\n        <div class="controls">\n            <textarea name="comments">');
+    
+      __out.push(__sanitize(this.values.comments));
+    
+      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group settings">\n        <label class="control-label" for="settings">Settings</label>\n        <div class="controls">\n            <textarea name="settings">');
+    
+      __out.push(__sanitize(this.values.settings));
+    
+      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group images">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline image-controls">\n            <div id="image-controls">\n                <div class="image-control">\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <div class="form-actions">\n        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>\n        <a rel="save-and-create" class="btn btn-primary" href="javascript:void(0)">Save and Enter Another</a>\n        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>\n    </div>\n\n</form>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-list-item": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<td class="selection">\n    <input type="checkbox" class="item-selection"\n        value="');
+    
+      __out.push('"/>\n</td>\n<td class="taxon">\n    <a rel="detail" href="#">\n        ');
+    
+      __out.push(__sanitize(this.choices.taxon[this.taxon]));
+    
+      __out.push('\n        Taxon goes here\n    </a>\n</td>\n<td class="sex">');
+    
+      __out.push(__sanitize(this.choices.sex[this.sex]));
+    
+      __out.push('</td>\n<td class="images">\n    <a href="#">Lateral</a>\n    <a href="#">Superior</a>\n</td>\n<td class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit">\n        <i class="icon-edit"></i>\n    </a>\n</td>\n');
     
     }).call(this);
     
@@ -1085,90 +1758,23 @@
   }
   (function() {
     (function() {
-      var alert, label, specimen, value, _i, _j, _len, _len2, _len3, _ref, _ref2, _ref3;
     
-      __out.push('<div class="btn-toolbar">\n    <div class="btn-group">\n        <a class="btn btn-small" href="#">\n            <i class="icon-download"></i>\n            Download\n        </a>\n    </div>\n    <div class="btn-group">\n        ');
+      __out.push('<tr>\n    <td class="selection">\n        <input type="checkbox" class="item-selection"\n            value="');
     
-      if (this.user.loggedIn) {
-        __out.push('\n        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown">\n            <i class="icon-user"></i>\n            ');
-        __out.push(__sanitize(this.user.firstName));
-        __out.push('\n            <span class="caret"></span>\n        </a>\n        <ul class="dropdown-menu">\n            <li>\n            <a rel="logout" href="');
-        __out.push(__sanitize(this.user.links.logout));
-        __out.push('">\n                <i class="icon-off"></i>Log Out\n            </a>\n            </li>\n        </ul>\n        ');
-      } else {
-        __out.push('\n        <a class="btn btn-small" rel="login" href="');
-        __out.push(__sanitize(this.user.links.login));
-        __out.push('">\n            <i class="icon-user"></i>Sign In\n        </a>\n        ');
-      }
+      __out.push(__sanitize(this.href));
     
-      __out.push('\n    </div>\n</div>\n\n<div class="alerts">\n    ');
+      __out.push('"/>\n    </td>\n    <td class="taxon">');
     
-      _ref = this.alerts;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        alert = _ref[_i];
-        __out.push('\n        <div class="alert ');
-        __out.push(__sanitize("alert-" + alert.type));
-        __out.push('">\n            <a class="close" data-dismiss="alert" href="#">×</a>\n            ');
-        __out.push(__sanitize(alert.body));
-        __out.push('\n        </div>\n    ');
-      }
+      __out.push('</td>\n    <td class="sex">');
     
-      __out.push('\n</div>\n\n<div class="pagination-toolbar">\n    ');
-    
-      __out.push(this.pagination);
-    
-      __out.push('\n\n    Showing \n    <span class="dropdown">\n        <a class="dropdown-toggle" data-toggle="dropdown">\n            <span class="results-per-page">\n                ');
-    
-      __out.push(__sanitize(this.search.resultsPerPage));
-    
-      __out.push('\n            </span>\n            <span class="caret"></span>\n        </a>\n        \n        <ul class="dropdown-menu">\n            <li><a href="#">10</a></li>\n            <li><a href="#">20</a></li>\n            <li><a href="#">50</a></li>\n            <li><a href="#">100</a></li>\n            <li><a href="#">&#x221e;</a></li>\n        </ul>\n    </span> results per page\n</div>\n\n<table class="table table-condensed table-striped">\n    <col width="10%"/>\n    <col/>\n    <col width="10%"/>\n    <col width="20%"/>\n    <col width="25"/>\n    <tr>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    <input type="checkbox" class="item-selector"/>\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    <li>\n                        <a href="#" class="item-selection-all">\n                            <i class="icon-ok"></i>\n                            Select All\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-none">\n                            <i class="icon-remove"></i>\n                            Select None\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-invert">\n                            <i class="icon-resize-full"></i>\n                            Invert Selection\n                        </a>\n                    </li>\n                </ul>\n            </span>\n        </th>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Taxon\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    <h1>Surprise!!!</h1>\n                </div>\n                <!--ul class="dropdown-menu">\n                    <li>Sort</li>\n                    <li>Filter</li>\n                </ul-->\n            </span>\n        </th>\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Sex\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    ');
-    
-      _ref2 = this.choices.institutions;
-      for (label = 0, _len2 = _ref2.length; label < _len2; label++) {
-        value = _ref2[label];
-        __out.push('\n                        <li>\n                            <input type="checkbox" id="filter-sex-');
-        __out.push(__sanitize(value));
-        __out.push('"\n                                   name="filter-sex" value="');
-        __out.push(__sanitize(value));
-        __out.push('"/>\n                            <label for="filter-sex-');
-        __out.push(__sanitize(value));
-        __out.push('">');
-        __out.push(__sanitize(label));
-        __out.push('</label>\n                        </li>\n                    ');
-      }
-    
-      __out.push('\n                </ul>\n            </span>\n        </th>\n        <th>Images</th>\n        <th>\n            <a class="btn btn-small" \n               rel="create"\n               href="');
-    
-      __out.push(__sanitize(this.links.createSpecimen));
-    
-      __out.push('"\n               title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n\n    ');
-    
-      _ref3 = this.items;
-      for (_j = 0, _len3 = _ref3.length; _j < _len3; _j++) {
-        specimen = _ref3[_j];
-        __out.push('\n    <tr>\n        <td class="selection">\n            <input type="checkbox" class="item-selection"\n                value="');
-        specimen.id;
-        __out.push('"/>\n        </td>\n        <td class="taxon">');
-        __out.push(__sanitize(this.choices.taxon[specimen.taxon]));
-        __out.push('</td>\n        <td class="sex">');
-        __out.push(__sanitize(this.choices.sex[specimen.sex]));
-        __out.push('</td>\n        <td class="images">\n            <a href="#">Lateral</a>\n            <a href="#">Superior</a>\n        </td>\n        <td class="actions">\n            <a class="btn" title="Edit Specimen" rel="edit"\n               href="');
-        __out.push(__sanitize(specimen.links.edit));
-        __out.push('">\n                <i class="icon-edit"></i> \n            </a>\n        </td>\n    </tr>\n    ');
-      }
-    
-      __out.push('\n</table>\n');
-    
-      __out.push(this.pagination);
-    
-      __out.push('\n');
+      __out.push('</td>\n    <td class="images">\n        <a href="#">Lateral</a>\n        <a href="#">Superior</a>\n    </td>\n    <td class="actions">\n        <a class="btn" title="Edit Specimen" rel="edit" href="javascript:void(0)">\n            <i class="icon-edit"></i> \n        </a>\n    </td>\n</tr>\n');
     
     }).call(this);
     
   }).call(__obj);
   __obj.safe = __objSafe, __obj.escape = __escape;
   return __out.join('');
-}}, "templates/specimen_detail": function(exports, require, module) {module.exports = function(__obj) {
+}}, "templates/specimen-search-form": function(exports, require, module) {module.exports = function(__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
     var out = __out, result;
@@ -1207,55 +1813,28 @@
   }
   (function() {
     (function() {
-      var image, _i, _len, _ref;
     
-      __out.push('<h1><span class="taxon">');
+      __out.push('<form>\n    <div class="pagination-toolbar">\n        ');
     
-      __out.push(__sanitize(this.taxon.label));
+      __out.push('\n        <div class="pagination"></div>\n\n        Showing \n        <span class="dropdown">\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="results-per-page">\n                    ');
     
-      __out.push('</span></h1>\n<table>\n  <tr>\n    <th>Specimen ID</th>\n    <td>');
+      __out.push('\n                    20\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#">10</a></li>\n                <li><a href="#">20</a></li>\n                <li><a href="#">50</a></li>\n                <li><a href="#">100</a></li>\n                <li><a href="#">&#x221e;</a></li>\n            </ul>\n        </span> results per page\n    </div>\n\n    ');
     
-      __out.push(__sanitize(this.specimenId));
+      __out.push('\n    <table class="table table-condensed table-striped">\n        <col width="10%"/>\n        <col/>\n        <col width="10%"/>\n        <col width="20%"/>\n        <col width="25"/>\n        <tr class="header">\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        <input type="checkbox" class="item-selector"/>\n                        <span class="caret"></span>\n                    </a>\n                    <ul class="dropdown-menu">\n                        <li>\n                            <a href="#" class="item-selection-all">\n                                <i class="icon-ok"></i>\n                                Select All\n                            </a>\n                        </li>\n                        <li>\n                            <a href="#" class="item-selection-none">\n                                <i class="icon-remove"></i>\n                                Select None\n                            </a>\n                        </li>\n                        <li>\n                            <a href="#" class="item-selection-invert">\n                                <i class="icon-resize-full"></i>\n                                Invert Selection\n                            </a>\n                        </li>\n                    </ul>\n                </span>\n            </th>\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        Taxon\n                        <span class="caret"></span>\n                    </a>\n                    <div class="dropdown-menu">\n                        <h1>Surprise!!!</h1>\n                    </div>\n                    <!--ul class="dropdown-menu">\n                        <li>Sort</li>\n                        <li>Filter</li>\n                    </ul-->\n                </span>\n            </th>\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        Sex\n                        <span class="caret"></span>\n                    </a>\n                    <ul class="dropdown-menu">\n                        ');
     
-      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Sex</th>\n    <td>');
+      __out.push('\n                            <li>\n                                <input type="checkbox" id="filter-sex-');
     
-      __out.push(__sanitize(this.sex));
+      __out.push('"\n                                       name="filter-sex" value="');
     
-      __out.push('</td>\n  </tr>\n  ');
+      __out.push('"/>\n                                <label for="filter-sex-');
     
-      if (this.settings) {
-        __out.push('\n  <tr>\n    <th>Settings</th><td>');
-        __out.push(__sanitize(this.settings.value));
-        __out.push('</td>\n  </tr>\n  ');
-      }
+      __out.push('">');
     
-      __out.push('\n  ');
+      __out.push('</label>\n                            </li>\n                        ');
     
-      if (this.comments) {
-        __out.push('\n  <tr>\n    <th>Comments</th>\n    <td>');
-        __out.push(__sanitize(this.comments));
-        __out.push('</td>\n  </tr>\n  ');
-      }
+      __out.push('\n                    </ul>\n                </span>\n            </th>\n            <th>Images</th>\n            <th>\n                <a class="btn btn-small" rel="create" title="Create New Specimen">\n                    <i class="icon-plus"></i>\n                </a>\n            </th>\n        </tr>\n        <tr class="results-placeholder" style="display: hidden;"></tr>\n    </table>\n\n    ');
     
-      __out.push('\n  <tr>\n    <th>Images</th>\n    <td>\n      ');
-    
-      if (this.images && this.images.length > 0) {
-        __out.push('\n        ');
-        _ref = this.images;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          image = _ref[_i];
-          __out.push('\n        <a href="');
-          __out.push(__sanitize(image.files.medium));
-          __out.push('">\n            <img src="');
-          __out.push(__sanitize(image.files.thumbnail));
-          __out.push('"/>\n        </a>\n        ');
-        }
-        __out.push('\n    </td>\n    ');
-      } else {
-        __out.push('\n      <span class="empty">No images attached.</span>\n    ');
-      }
-    
-      __out.push('\n  </tr>\n</table>\n');
+      __out.push('\n    <div class="pagination"></div>\n\n</form>\n');
     
     }).call(this);
     
@@ -5269,8 +5848,8 @@ Copyright (c) 2011 by Harvest
         xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
     }
 });
-}, "underscore": function(exports, require, module) {//     Underscore.js 1.1.6
-//     (c) 2011 Jeremy Ashkenas, DocumentCloud Inc.
+}, "underscore": function(exports, require, module) {//     Underscore.js 1.3.3
+//     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore is freely distributable under the MIT license.
 //     Portions of Underscore are inspired or borrowed from Prototype,
 //     Oliver Steele's Functional, and John Resig's Micro-Templating.
@@ -5319,36 +5898,39 @@ Copyright (c) 2011 by Harvest
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) { return new wrapper(obj); };
 
-  // Export the Underscore object for **CommonJS**, with backwards-compatibility
-  // for the old `require()` API. If we're not in CommonJS, add `_` to the
-  // global object.
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = _;
-    _._ = _;
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
   } else {
-    root._ = _;
+    root['_'] = _;
   }
 
   // Current version.
-  _.VERSION = '1.1.6';
+  _.VERSION = '1.3.3';
 
   // Collection Functions
   // --------------------
 
   // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects implementing `forEach`, arrays, and raw objects.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
   // Delegates to **ECMAScript 5**'s native `forEach` if available.
   var each = _.each = _.forEach = function(obj, iterator, context) {
     if (obj == null) return;
     if (nativeForEach && obj.forEach === nativeForEach) {
       obj.forEach(iterator, context);
-    } else if (_.isNumber(obj.length)) {
+    } else if (obj.length === +obj.length) {
       for (var i = 0, l = obj.length; i < l; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+        if (i in obj && iterator.call(context, obj[i], i, obj) === breaker) return;
       }
     } else {
       for (var key in obj) {
-        if (hasOwnProperty.call(obj, key)) {
+        if (_.has(obj, key)) {
           if (iterator.call(context, obj[key], key, obj) === breaker) return;
         }
       }
@@ -5357,47 +5939,50 @@ Copyright (c) 2011 by Harvest
 
   // Return the results of applying the iterator to each element.
   // Delegates to **ECMAScript 5**'s native `map` if available.
-  _.map = function(obj, iterator, context) {
+  _.map = _.collect = function(obj, iterator, context) {
     var results = [];
     if (obj == null) return results;
     if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
     each(obj, function(value, index, list) {
       results[results.length] = iterator.call(context, value, index, list);
     });
+    if (obj.length === +obj.length) results.length = obj.length;
     return results;
   };
 
   // **Reduce** builds up a single result from a list of values, aka `inject`,
   // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
   _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = memo !== void 0;
+    var initial = arguments.length > 2;
     if (obj == null) obj = [];
     if (nativeReduce && obj.reduce === nativeReduce) {
       if (context) iterator = _.bind(iterator, context);
       return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
     }
     each(obj, function(value, index, list) {
-      if (!initial && index === 0) {
+      if (!initial) {
         memo = value;
         initial = true;
       } else {
         memo = iterator.call(context, memo, value, index, list);
       }
     });
-    if (!initial) throw new TypeError("Reduce of empty array with no initial value");
+    if (!initial) throw new TypeError('Reduce of empty array with no initial value');
     return memo;
   };
 
   // The right-associative version of reduce, also known as `foldr`.
   // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
   _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
     if (obj == null) obj = [];
     if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
       if (context) iterator = _.bind(iterator, context);
-      return memo !== void 0 ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
     }
-    var reversed = (_.isArray(obj) ? obj.slice() : _.toArray(obj)).reverse();
-    return _.reduce(reversed, iterator, memo, context);
+    var reversed = _.toArray(obj).reverse();
+    if (context && !initial) iterator = _.bind(iterator, context);
+    return initial ? _.reduce(reversed, iterator, memo, context) : _.reduce(reversed, iterator);
   };
 
   // Return the first value which passes a truth test. Aliased as `detect`.
@@ -5445,7 +6030,7 @@ Copyright (c) 2011 by Harvest
     each(obj, function(value, index, list) {
       if (!(result = result && iterator.call(context, value, index, list))) return breaker;
     });
-    return result;
+    return !!result;
   };
 
   // Determine if at least one element in the object matches a truth test.
@@ -5457,9 +6042,9 @@ Copyright (c) 2011 by Harvest
     if (obj == null) return result;
     if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
     each(obj, function(value, index, list) {
-      if (result = iterator.call(context, value, index, list)) return breaker;
+      if (result || (result = iterator.call(context, value, index, list))) return breaker;
     });
-    return result;
+    return !!result;
   };
 
   // Determine if a given value is included in the array or object using `===`.
@@ -5468,8 +6053,8 @@ Copyright (c) 2011 by Harvest
     var found = false;
     if (obj == null) return found;
     if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    any(obj, function(value) {
-      if (found = value === target) return true;
+    found = any(obj, function(value) {
+      return value === target;
     });
     return found;
   };
@@ -5478,7 +6063,7 @@ Copyright (c) 2011 by Harvest
   _.invoke = function(obj, method) {
     var args = slice.call(arguments, 2);
     return _.map(obj, function(value) {
-      return (method.call ? method || value : value[method]).apply(value, args);
+      return (_.isFunction(method) ? method || value : value[method]).apply(value, args);
     });
   };
 
@@ -5489,7 +6074,8 @@ Copyright (c) 2011 by Harvest
 
   // Return the maximum element or (element-based computation).
   _.max = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0]) return Math.max.apply(Math, obj);
+    if (!iterator && _.isEmpty(obj)) return -Infinity;
     var result = {computed : -Infinity};
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
@@ -5500,7 +6086,8 @@ Copyright (c) 2011 by Harvest
 
   // Return the minimum element (or element-based computation).
   _.min = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj)) return Math.min.apply(Math, obj);
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0]) return Math.min.apply(Math, obj);
+    if (!iterator && _.isEmpty(obj)) return Infinity;
     var result = {computed : Infinity};
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
@@ -5509,8 +6096,20 @@ Copyright (c) 2011 by Harvest
     return result.value;
   };
 
+  // Shuffle an array.
+  _.shuffle = function(obj) {
+    var shuffled = [], rand;
+    each(obj, function(value, index, list) {
+      rand = Math.floor(Math.random() * (index + 1));
+      shuffled[index] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
   // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, iterator, context) {
+  _.sortBy = function(obj, val, context) {
+    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
     return _.pluck(_.map(obj, function(value, index, list) {
       return {
         value : value,
@@ -5518,8 +6117,22 @@ Copyright (c) 2011 by Harvest
       };
     }).sort(function(left, right) {
       var a = left.criteria, b = right.criteria;
+      if (a === void 0) return 1;
+      if (b === void 0) return -1;
       return a < b ? -1 : a > b ? 1 : 0;
     }), 'value');
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = function(obj, val) {
+    var result = {};
+    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
+    each(obj, function(value, index) {
+      var key = iterator(value, index);
+      (result[key] || (result[key] = [])).push(value);
+    });
+    return result;
   };
 
   // Use a comparator function to figure out at what index an object should
@@ -5535,27 +6148,45 @@ Copyright (c) 2011 by Harvest
   };
 
   // Safely convert anything iterable into a real, live array.
-  _.toArray = function(iterable) {
-    if (!iterable)                return [];
-    if (iterable.toArray)         return iterable.toArray();
-    if (_.isArray(iterable))      return iterable;
-    if (_.isArguments(iterable))  return slice.call(iterable);
-    return _.values(iterable);
+  _.toArray = function(obj) {
+    if (!obj)                                     return [];
+    if (_.isArray(obj))                           return slice.call(obj);
+    if (_.isArguments(obj))                       return slice.call(obj);
+    if (obj.toArray && _.isFunction(obj.toArray)) return obj.toArray();
+    return _.values(obj);
   };
 
   // Return the number of elements in an object.
   _.size = function(obj) {
-    return _.toArray(obj).length;
+    return _.isArray(obj) ? obj.length : _.keys(obj).length;
   };
 
   // Array Functions
   // ---------------
 
   // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head`. The **guard** check allows it to work
-  // with `_.map`.
-  _.first = _.head = function(array, n, guard) {
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
     return (n != null) && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the last entry of the array. Especcialy useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if ((n != null) && !guard) {
+      return slice.call(array, Math.max(array.length - n, 0));
+    } else {
+      return array[array.length - 1];
+    }
   };
 
   // Returns everything but the first entry of the array. Aliased as `tail`.
@@ -5566,20 +6197,15 @@ Copyright (c) 2011 by Harvest
     return slice.call(array, (index == null) || guard ? 1 : index);
   };
 
-  // Get the last element of an array.
-  _.last = function(array) {
-    return array[array.length - 1];
-  };
-
   // Trim out all falsy values from an array.
   _.compact = function(array) {
     return _.filter(array, function(value){ return !!value; });
   };
 
   // Return a completely flattened version of an array.
-  _.flatten = function(array) {
+  _.flatten = function(array, shallow) {
     return _.reduce(array, function(memo, value) {
-      if (_.isArray(value)) return memo.concat(_.flatten(value));
+      if (_.isArray(value)) return memo.concat(shallow ? value : _.flatten(value));
       memo[memo.length] = value;
       return memo;
     }, []);
@@ -5587,29 +6213,49 @@ Copyright (c) 2011 by Harvest
 
   // Return a version of the array that does not contain the specified value(s).
   _.without = function(array) {
-    var values = slice.call(arguments, 1);
-    return _.filter(array, function(value){ return !_.include(values, value); });
+    return _.difference(array, slice.call(arguments, 1));
   };
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
   // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted) {
-    return _.reduce(array, function(memo, el, i) {
-      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo[memo.length] = el;
+  _.uniq = _.unique = function(array, isSorted, iterator) {
+    var initial = iterator ? _.map(array, iterator) : array;
+    var results = [];
+    // The `isSorted` flag is irrelevant if the array only contains two elements.
+    if (array.length < 3) isSorted = true;
+    _.reduce(initial, function (memo, value, index) {
+      if (isSorted ? _.last(memo) !== value || !memo.length : !_.include(memo, value)) {
+        memo.push(value);
+        results.push(array[index]);
+      }
       return memo;
     }, []);
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments, true));
   };
 
   // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  _.intersect = function(array) {
+  // passed-in arrays. (Aliased as "intersect" for back-compat.)
+  _.intersection = _.intersect = function(array) {
     var rest = slice.call(arguments, 1);
     return _.filter(_.uniq(array), function(item) {
       return _.every(rest, function(other) {
         return _.indexOf(other, item) >= 0;
       });
     });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = _.flatten(slice.call(arguments, 1), true);
+    return _.filter(array, function(value){ return !_.include(rest, value); });
   };
 
   // Zip together multiple lists into a single array -- elements that share
@@ -5636,17 +6282,16 @@ Copyright (c) 2011 by Harvest
       return array[i] === item ? i : -1;
     }
     if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+    for (i = 0, l = array.length; i < l; i++) if (i in array && array[i] === item) return i;
     return -1;
   };
-
 
   // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
   _.lastIndexOf = function(array, item) {
     if (array == null) return -1;
     if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
     var i = array.length;
-    while (i--) if (array[i] === item) return i;
+    while (i--) if (i in array && array[i] === item) return i;
     return -1;
   };
 
@@ -5675,15 +6320,25 @@ Copyright (c) 2011 by Harvest
   // Function (ahem) Functions
   // ------------------
 
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Binding with arguments is also known as `curry`.
   // Delegates to **ECMAScript 5**'s native `Function.bind` if available.
   // We check for `func.bind` first, to fail fast when `func` is undefined.
-  _.bind = function(func, obj) {
+  _.bind = function bind(func, context) {
+    var bound, args;
     if (func.bind === nativeBind && nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    var args = slice.call(arguments, 2);
-    return function() {
-      return func.apply(obj, args.concat(slice.call(arguments)));
+    if (!_.isFunction(func)) throw new TypeError;
+    args = slice.call(arguments, 2);
+    return bound = function() {
+      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+      ctor.prototype = func.prototype;
+      var self = new ctor;
+      var result = func.apply(self, args.concat(slice.call(arguments)));
+      if (Object(result) === result) return result;
+      return self;
     };
   };
 
@@ -5702,7 +6357,7 @@ Copyright (c) 2011 by Harvest
     hasher || (hasher = _.identity);
     return function() {
       var key = hasher.apply(this, arguments);
-      return hasOwnProperty.call(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
     };
   };
 
@@ -5710,7 +6365,7 @@ Copyright (c) 2011 by Harvest
   // it with the arguments supplied.
   _.delay = function(func, wait) {
     var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(func, args); }, wait);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
@@ -5719,31 +6374,46 @@ Copyright (c) 2011 by Harvest
     return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
   };
 
-  // Internal function used to implement `_.throttle` and `_.debounce`.
-  var limit = function(func, wait, debounce) {
-    var timeout;
-    return function() {
-      var context = this, args = arguments;
-      var throttler = function() {
-        timeout = null;
-        func.apply(context, args);
-      };
-      if (debounce) clearTimeout(timeout);
-      if (debounce || !timeout) timeout = setTimeout(throttler, wait);
-    };
-  };
-
   // Returns a function, that, when invoked, will only be triggered at most once
   // during a given window of time.
   _.throttle = function(func, wait) {
-    return limit(func, wait, false);
+    var context, args, timeout, throttling, more, result;
+    var whenDone = _.debounce(function(){ more = throttling = false; }, wait);
+    return function() {
+      context = this; args = arguments;
+      var later = function() {
+        timeout = null;
+        if (more) func.apply(context, args);
+        whenDone();
+      };
+      if (!timeout) timeout = setTimeout(later, wait);
+      if (throttling) {
+        more = true;
+      } else {
+        result = func.apply(context, args);
+      }
+      whenDone();
+      throttling = true;
+      return result;
+    };
   };
 
   // Returns a function, that, as long as it continues to be invoked, will not
   // be triggered. The function will be called after it stops being called for
-  // N milliseconds.
-  _.debounce = function(func, wait) {
-    return limit(func, wait, true);
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      if (immediate && !timeout) func.apply(context, args);
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   };
 
   // Returns a function that will be executed at most one time, no matter how
@@ -5762,7 +6432,7 @@ Copyright (c) 2011 by Harvest
   // conditionally execute the original function.
   _.wrap = function(func, wrapper) {
     return function() {
-      var args = [func].concat(slice.call(arguments));
+      var args = [func].concat(slice.call(arguments, 0));
       return wrapper.apply(this, args);
     };
   };
@@ -5770,10 +6440,10 @@ Copyright (c) 2011 by Harvest
   // Returns a function that is the composition of a list of functions, each
   // consuming the return value of the function that follows.
   _.compose = function() {
-    var funcs = slice.call(arguments);
+    var funcs = arguments;
     return function() {
-      var args = slice.call(arguments);
-      for (var i=funcs.length-1; i >= 0; i--) {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
         args = [funcs[i].apply(this, args)];
       }
       return args[0];
@@ -5782,11 +6452,11 @@ Copyright (c) 2011 by Harvest
 
   // Returns a function that will only be executed after being called N times.
   _.after = function(times, func) {
+    if (times <= 0) return func();
     return function() {
       if (--times < 1) { return func.apply(this, arguments); }
     };
   };
-
 
   // Object Functions
   // ----------------
@@ -5796,7 +6466,7 @@ Copyright (c) 2011 by Harvest
   _.keys = nativeKeys || function(obj) {
     if (obj !== Object(obj)) throw new TypeError('Invalid object');
     var keys = [];
-    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
+    for (var key in obj) if (_.has(obj, key)) keys[keys.length] = key;
     return keys;
   };
 
@@ -5808,17 +6478,30 @@ Copyright (c) 2011 by Harvest
   // Return a sorted list of the function names available on the object.
   // Aliased as `methods`
   _.functions = _.methods = function(obj) {
-    return _.filter(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
   };
 
   // Extend a given object with all the properties in passed-in object(s).
   _.extend = function(obj) {
     each(slice.call(arguments, 1), function(source) {
       for (var prop in source) {
-        if (source[prop] !== void 0) obj[prop] = source[prop];
+        obj[prop] = source[prop];
       }
     });
     return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var result = {};
+    each(_.flatten(slice.call(arguments, 1)), function(key) {
+      if (key in obj) result[key] = obj[key];
+    });
+    return result;
   };
 
   // Fill in a given object with default properties.
@@ -5833,6 +6516,7 @@ Copyright (c) 2011 by Harvest
 
   // Create a (shallow-cloned) duplicate of an object.
   _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
     return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
   };
 
@@ -5844,49 +6528,105 @@ Copyright (c) 2011 by Harvest
     return obj;
   };
 
-  // Perform a deep comparison to check if two objects are equal.
-  _.isEqual = function(a, b) {
-    // Check object identity.
-    if (a === b) return true;
-    // Different types?
-    var atype = typeof(a), btype = typeof(b);
-    if (atype != btype) return false;
-    // Basic equality test (watch out for coercions).
-    if (a == b) return true;
-    // One is falsy and the other truthy.
-    if ((!a && b) || (a && !b)) return false;
+  // Internal recursive comparison function.
+  function eq(a, b, stack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
     // Unwrap any wrapped objects.
     if (a._chain) a = a._wrapped;
     if (b._chain) b = b._wrapped;
-    // One of them implements an isEqual()?
-    if (a.isEqual) return a.isEqual(b);
-    // Check dates' integer values.
-    if (_.isDate(a) && _.isDate(b)) return a.getTime() === b.getTime();
-    // Both are NaN?
-    if (_.isNaN(a) && _.isNaN(b)) return false;
-    // Compare regular expressions.
-    if (_.isRegExp(a) && _.isRegExp(b))
-      return a.source     === b.source &&
-             a.global     === b.global &&
-             a.ignoreCase === b.ignoreCase &&
-             a.multiline  === b.multiline;
-    // If a is not an object by this point, we can't handle it.
-    if (atype !== 'object') return false;
-    // Check for different array lengths before comparing contents.
-    if (a.length && (a.length !== b.length)) return false;
-    // Nothing else worked, deep compare the contents.
-    var aKeys = _.keys(a), bKeys = _.keys(b);
-    // Different object sizes?
-    if (aKeys.length != bKeys.length) return false;
-    // Recursive comparison of contents.
-    for (var key in a) if (!(key in b) || !_.isEqual(a[key], b[key])) return false;
-    return true;
+    // Invoke a custom `isEqual` method if one is provided.
+    if (a.isEqual && _.isFunction(a.isEqual)) return a.isEqual(b);
+    if (b.isEqual && _.isFunction(b.isEqual)) return b.isEqual(a);
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = stack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (stack[length] == a) return true;
+    }
+    // Add the first object to the stack of traversed objects.
+    stack.push(a);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          // Ensure commutative equality for sparse arrays.
+          if (!(result = size in a == size in b && eq(a[size], b[size], stack))) break;
+        }
+      }
+    } else {
+      // Objects with different constructors are not equivalent.
+      if ('constructor' in a != 'constructor' in b || a.constructor != b.constructor) return false;
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], stack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    stack.pop();
+    return result;
+  }
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, []);
   };
 
-  // Is a given array or object empty?
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
   _.isEmpty = function(obj) {
+    if (obj == null) return true;
     if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (hasOwnProperty.call(obj, key)) return false;
+    for (var key in obj) if (_.has(obj, key)) return false;
     return true;
   };
 
@@ -5898,48 +6638,63 @@ Copyright (c) 2011 by Harvest
   // Is a given value an array?
   // Delegates to ECMA5's native Array.isArray
   _.isArray = nativeIsArray || function(obj) {
-    return toString.call(obj) === '[object Array]';
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
   };
 
   // Is a given variable an arguments object?
   _.isArguments = function(obj) {
-    return !!(obj && hasOwnProperty.call(obj, 'callee'));
+    return toString.call(obj) == '[object Arguments]';
   };
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
 
   // Is a given value a function?
   _.isFunction = function(obj) {
-    return !!(obj && obj.constructor && obj.call && obj.apply);
+    return toString.call(obj) == '[object Function]';
   };
 
   // Is a given value a string?
   _.isString = function(obj) {
-    return !!(obj === '' || (obj && obj.charCodeAt && obj.substr));
+    return toString.call(obj) == '[object String]';
   };
 
   // Is a given value a number?
   _.isNumber = function(obj) {
-    return !!(obj === 0 || (obj && obj.toExponential && obj.toFixed));
+    return toString.call(obj) == '[object Number]';
   };
 
-  // Is the given value `NaN`? `NaN` happens to be the only value in JavaScript
-  // that does not equal itself.
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return _.isNumber(obj) && isFinite(obj);
+  };
+
+  // Is the given value `NaN`?
   _.isNaN = function(obj) {
+    // `NaN` is the only value for which `===` is not reflexive.
     return obj !== obj;
   };
 
   // Is a given value a boolean?
   _.isBoolean = function(obj) {
-    return obj === true || obj === false;
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
   };
 
   // Is a given value a date?
   _.isDate = function(obj) {
-    return !!(obj && obj.getTimezoneOffset && obj.setUTCFullYear);
+    return toString.call(obj) == '[object Date]';
   };
 
   // Is the given value a regular expression?
   _.isRegExp = function(obj) {
-    return !!(obj && obj.test && obj.exec && (obj.ignoreCase || obj.ignoreCase === false));
+    return toString.call(obj) == '[object RegExp]';
   };
 
   // Is a given value equal to null?
@@ -5950,6 +6705,11 @@ Copyright (c) 2011 by Harvest
   // Is a given variable undefined?
   _.isUndefined = function(obj) {
     return obj === void 0;
+  };
+
+  // Has own property?
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
   };
 
   // Utility Functions
@@ -5972,6 +6732,19 @@ Copyright (c) 2011 by Harvest
     for (var i = 0; i < n; i++) iterator.call(context, i);
   };
 
+  // Escape a string for HTML interpolation.
+  _.escape = function(string) {
+    return (''+string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g,'&#x2F;');
+  };
+
+  // If the value of the named property is a function then invoke it;
+  // otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return null;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
   // Add your own custom functions to the Underscore object, ensuring that
   // they're correctly added to the OOP wrapper as well.
   _.mixin = function(obj) {
@@ -5992,31 +6765,86 @@ Copyright (c) 2011 by Harvest
   // following template settings to use alternative delimiters.
   _.templateSettings = {
     evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /.^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    '\\': '\\',
+    "'": "'",
+    'r': '\r',
+    'n': '\n',
+    't': '\t',
+    'u2028': '\u2028',
+    'u2029': '\u2029'
+  };
+
+  for (var p in escapes) escapes[escapes[p]] = p;
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+  var unescaper = /\\(\\|'|r|n|t|u2028|u2029)/g;
+
+  // Within an interpolation, evaluation, or escaping, remove HTML escaping
+  // that had been previously added.
+  var unescape = function(code) {
+    return code.replace(unescaper, function(match, escape) {
+      return escapes[escape];
+    });
   };
 
   // JavaScript micro-templating, similar to John Resig's implementation.
   // Underscore templating handles arbitrary delimiters, preserves whitespace,
   // and correctly escapes quotes within interpolated code.
-  _.template = function(str, data) {
-    var c  = _.templateSettings;
-    var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
-      'with(obj||{}){__p.push(\'' +
-      str.replace(/\\/g, '\\\\')
-         .replace(/'/g, "\\'")
-         .replace(c.interpolate, function(match, code) {
-           return "'," + code.replace(/\\'/g, "'") + ",'";
-         })
-         .replace(c.evaluate || null, function(match, code) {
-           return "');" + code.replace(/\\'/g, "'")
-                              .replace(/[\r\n\t]/g, ' ') + "__p.push('";
-         })
-         .replace(/\r/g, '\\r')
-         .replace(/\n/g, '\\n')
-         .replace(/\t/g, '\\t')
-         + "');}return __p.join('');";
-    var func = new Function('obj', tmpl);
-    return data ? func(data) : func;
+  _.template = function(text, data, settings) {
+    settings = _.defaults(settings || {}, _.templateSettings);
+
+    // Compile the template source, taking care to escape characters that
+    // cannot be included in a string literal and then unescape them in code
+    // blocks.
+    var source = "__p+='" + text
+      .replace(escaper, function(match) {
+        return '\\' + escapes[match];
+      })
+      .replace(settings.escape || noMatch, function(match, code) {
+        return "'+\n_.escape(" + unescape(code) + ")+\n'";
+      })
+      .replace(settings.interpolate || noMatch, function(match, code) {
+        return "'+\n(" + unescape(code) + ")+\n'";
+      })
+      .replace(settings.evaluate || noMatch, function(match, code) {
+        return "';\n" + unescape(code) + "\n;__p+='";
+      }) + "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __p='';" +
+      "var print=function(){__p+=Array.prototype.join.call(arguments, '')};\n" +
+      source + "return __p;\n";
+
+    var render = new Function(settings.variable || 'obj', '_', source);
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for build time
+    // precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' +
+      source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
   };
 
   // The OOP Wrapper
@@ -6051,8 +6879,11 @@ Copyright (c) 2011 by Harvest
   each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
     var method = ArrayProto[name];
     wrapper.prototype[name] = function() {
-      method.apply(this._wrapped, arguments);
-      return result(this._wrapped, this._chain);
+      var wrapped = this._wrapped;
+      method.apply(wrapped, arguments);
+      var length = wrapped.length;
+      if ((name == 'shift' || name == 'splice') && length === 0) delete wrapped[0];
+      return result(wrapped, this._chain);
     };
   });
 
@@ -6075,5 +6906,5 @@ Copyright (c) 2011 by Harvest
     return this._wrapped;
   };
 
-})();
+}).call(this);
 }});

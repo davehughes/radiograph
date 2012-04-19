@@ -1,160 +1,17 @@
-<div class="btn-toolbar">
-    <div class="btn-group">
-        <a class="btn btn-small" href="#">
-            <i class="icon-download"></i>
-            Download
+<tr>
+    <td class="selection">
+        <input type="checkbox" class="item-selection"
+            value="<%= @href %>"/>
+    </td>
+    <td class="taxon"><% # @choices.taxon[specimen.taxon] %></td>
+    <td class="sex"><% #@choices.sex[specimen.sex] %></td>
+    <td class="images">
+        <a href="#">Lateral</a>
+        <a href="#">Superior</a>
+    </td>
+    <td class="actions">
+        <a class="btn" title="Edit Specimen" rel="edit" href="javascript:void(0)">
+            <i class="icon-edit"></i> 
         </a>
-    </div>
-    <div class="btn-group">
-        <% if @user.loggedIn: %>
-        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown">
-            <i class="icon-user"></i>
-            <%= @user.firstName %>
-            <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-            <li>
-            <a rel="logout" href="<%= @user.links.logout %>">
-                <i class="icon-off"></i>Log Out
-            </a>
-            </li>
-        </ul>
-        <% else: %>
-        <a class="btn btn-small" rel="login" href="<%= @user.links.login %>">
-            <i class="icon-user"></i>Sign In
-        </a>
-        <% end %>
-    </div>
-</div>
-
-<div class="alerts">
-    <% for alert in @alerts: %>
-        <div class="alert <%= "alert-#{alert.type}" %>">
-            <a class="close" data-dismiss="alert" href="#">×</a>
-            <%= alert.body %>
-        </div>
-    <% end %>
-</div>
-
-<div class="pagination-toolbar">
-    <%- @pagination %>
-
-    Showing 
-    <span class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown">
-            <span class="results-per-page">
-                <%= @search.resultsPerPage %>
-            </span>
-            <span class="caret"></span>
-        </a>
-        
-        <ul class="dropdown-menu">
-            <li><a href="#">10</a></li>
-            <li><a href="#">20</a></li>
-            <li><a href="#">50</a></li>
-            <li><a href="#">100</a></li>
-            <li><a href="#">&#x221e;</a></li>
-        </ul>
-    </span> results per page
-</div>
-
-<table class="table table-condensed table-striped">
-    <col width="10%"/>
-    <col/>
-    <col width="10%"/>
-    <col width="20%"/>
-    <col width="25"/>
-    <tr>
-        <th>
-            <span class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    <input type="checkbox" class="item-selector"/>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a href="#" class="item-selection-all">
-                            <i class="icon-ok"></i>
-                            Select All
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item-selection-none">
-                            <i class="icon-remove"></i>
-                            Select None
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item-selection-invert">
-                            <i class="icon-resize-full"></i>
-                            Invert Selection
-                        </a>
-                    </li>
-                </ul>
-            </span>
-        </th>
-        <th>
-            <span class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    Taxon
-                    <span class="caret"></span>
-                </a>
-                <div class="dropdown-menu">
-                    <h1>Surprise!!!</h1>
-                </div>
-                <!--ul class="dropdown-menu">
-                    <li>Sort</li>
-                    <li>Filter</li>
-                </ul-->
-            </span>
-        </th>
-        <th>
-            <span class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    Sex
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <% for value, label in @choices.institutions: %>
-                        <li>
-                            <input type="checkbox" id="filter-sex-<%= value %>"
-                                   name="filter-sex" value="<%= value %>"/>
-                            <label for="filter-sex-<%= value %>"><%= label %></label>
-                        </li>
-                    <% end %>
-                </ul>
-            </span>
-        </th>
-        <th>Images</th>
-        <th>
-            <a class="btn btn-small" 
-               rel="create"
-               href="<%= @links.createSpecimen %>"
-               title="Create New Specimen">
-                <i class="icon-plus"></i>
-            </a>
-        </th>
-    </tr>
-
-    <% for specimen in @items: %>
-    <tr>
-        <td class="selection">
-            <input type="checkbox" class="item-selection"
-                value="<% specimen.id %>"/>
-        </td>
-        <td class="taxon"><%= @choices.taxon[specimen.taxon] %></td>
-        <td class="sex"><%= @choices.sex[specimen.sex] %></td>
-        <td class="images">
-            <a href="#">Lateral</a>
-            <a href="#">Superior</a>
-        </td>
-        <td class="actions">
-            <a class="btn" title="Edit Specimen" rel="edit"
-               href="<%= specimen.links.edit %>">
-                <i class="icon-edit"></i> 
-            </a>
-        </td>
-    </tr>
-    <% end %>
-</table>
-<%- @pagination %>
+    </td>
+</tr>

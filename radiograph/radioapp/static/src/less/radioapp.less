@@ -1,4 +1,51 @@
 @import 'bootstrap/bootstrap';
-/* @import 'chosen/chosen.less' */
+@import 'chosen.css.less';
 
 // TODO: hidden file inputs
+input {
+    box-sizing: content-box;
+}
+
+.form-horizontal .control-group {
+    margin-bottom: 9px;
+}
+
+textarea[name=comments],
+textarea[name=settings] {
+    width: 642px;
+}
+
+.control-group.measurements {
+    .control-label {
+        margin-top: 16px;
+    }
+
+    th {
+        font-size: 12px;
+    }
+
+    td input {
+        width: 90px;
+        text-align: right;
+        &[name=neurocranial-height] { width: 120px; }
+    }
+}
+
+// Cosmetic changes to chosen
+.control-group {
+    .chzn-single {
+        height: 26px;
+        background-image: none;
+        box-shadow: none;
+        border-radius: 3px;
+        border-color: #CCC;
+    }
+}
+
+// Login modal
+.login-form {
+    .modal-footer {
+        margin-top: 0;
+        text-align: center;
+    }
+}

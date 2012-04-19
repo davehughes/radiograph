@@ -1,4 +1,6 @@
-<h1><span class="taxon"><%= @taxon.label %></span></h1>
+<a href="#" rel="back"><- Back to Search</a>
+
+<h1><span class="taxon"><%= @choices.taxon[@taxon] %></span></h1>
 <table>
   <tr>
     <th>Specimen ID</th>
@@ -10,7 +12,7 @@
   </tr>
   <% if @settings: %>
   <tr>
-    <th>Settings</th><td><%= @settings.value %></td>
+    <th>Settings</th><td><%= @settings %></td>
   </tr>
   <% end %>
   <% if @comments: %>
