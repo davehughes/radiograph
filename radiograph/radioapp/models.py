@@ -40,6 +40,14 @@ TAXONOMY_LEVELS = (
     (SUBSPECIES, 'Subspecies')
 )
 
+class DeletedMarkerManager(models.Manager):
+    def get_query_set(self):
+        return super(DeletedMarkerManager, self).get_query_set().filter(deleted=False)
+
+class DeletedObjectManager(models.Manager):
+    def get_query_set(self):
+        return super(DeletedObjectManager, self).get_query_set().filter(deleted=True)
+
 class Taxon(models.Model):
     parent = models.ForeignKey('self', null=True)
     level = models.IntegerField(choices=TAXONOMY_LEVELS)
@@ -81,6 +89,8 @@ class Institution(models.Model):
 class Specimen(models.Model):
     SEX_CHOICES = (('M', 'Male'), ('F', 'Female'), ('U', 'Unknown'))
 
+    objects = DeletedMarkerManager()
+
     specimen_id = models.CharField(max_length=255, null=True, verbose_name='Specimen ID')
     taxon = models.ForeignKey('Taxon', related_name='specimens')
     institution = models.ForeignKey('Institution', related_name='specimens')
@@ -101,10 +111,13 @@ class Specimen(models.Model):
     last_modified = models.DateField(auto_now=True)
     last_modified_by = models.ForeignKey(User, related_name='specimens_last_modified', null=True)
 
+    deleted = models.BooleanField(default=False)
+
     def __unicode__(self):
         return '%s - %s' % (self.taxon, self.specimen_id)
 
-class ImageManager(models.Manager):
+
+class ImageManager(DeletedMarkerManager):
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
         tmpdir = tempfile.mkdtemp(dir=tmpdir)
@@ -113,23 +126,24 @@ class ImageManager(models.Manager):
                 img.generate_derivatives(tmpdir=tmpdir, regenerate=regenerate)
             except Exception as e:
                 print 'Error generating image derivatives: %s' % e
-            
 
 class Image(models.Model):
     objects = ImageManager()
+    deleted = DeletedObjectManager()
 
     ASPECT_CHOICES = (
         ('S', 'Superior'),
         ('L', 'Lateral')
         )
     aspect = models.CharField(max_length=1, choices=ASPECT_CHOICES)
-    
     specimen = models.ForeignKey('Specimen', related_name='images')
 
     # image and derivative files
     image_full = models.FileField(upload_to='images/full')
     image_medium = models.FileField(upload_to='images/medium', null=True, blank=True)
     image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True, blank=True)
+
+    deleted = models.BooleanField(default=False)
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
         #source_image = PILImage.open(self.image_full) 
