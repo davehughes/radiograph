@@ -57,74 +57,6 @@
 
   Backbone = require('backbone');
 
-  CollectionModel = (function(_super) {
-
-    __extends(CollectionModel, _super);
-
-    function CollectionModel() {
-      CollectionModel.__super__.constructor.apply(this, arguments);
-    }
-
-    CollectionModel.prototype.itemModel = function() {
-      return CollectionItemModel;
-    };
-
-    CollectionModel.prototype.defaults = function() {
-      return {
-        version: null,
-        href: null,
-        items: [],
-        links: [],
-        template: null,
-        queries: [],
-        error: null,
-        pagination: {
-          currentPage: 1,
-          totalPages: 1
-        }
-      };
-    };
-
-    CollectionModel.prototype.parse = function(input) {
-      var ItemModel, collection,
-        _this = this;
-      collection = input.collection;
-      ItemModel = this.itemModel();
-      collection.items = _.map(collection.items, function(i) {
-        var item;
-        item = new ItemModel(i, {
-          parse: true
-        });
-        item.collection = _this;
-        return item;
-      });
-      return collection;
-    };
-
-    CollectionModel.prototype.getLink = function(rel) {
-      return _.find(this.links, function(l) {
-        return l.rel === rel;
-      });
-    };
-
-    CollectionModel.prototype.fetchTemplate = function(callback) {
-      if (this.get('template')) callback(this.get('template'));
-      if (this.getLink('template')) {
-        if (!this._templateXHR) {
-          this._templateXHR = $.ajax({
-            url: this.getLink('template'),
-            dataType: 'json'
-          });
-        }
-        this._templateXHR.done(callback);
-      }
-      return null;
-    };
-
-    return CollectionModel;
-
-  })(Backbone.Model);
-
   CollectionItemModel = (function(_super) {
 
     __extends(CollectionItemModel, _super);
@@ -138,6 +70,11 @@
         href: null,
         links: []
       };
+    };
+
+    CollectionItemModel.prototype.initialize = function() {
+      CollectionItemModel.__super__.initialize.apply(this, arguments);
+      return this.url = this.get('href');
     };
 
     /*
@@ -169,14 +106,197 @@
 
   })(Backbone.Model);
 
+  CollectionModel = (function(_super) {
+
+    __extends(CollectionModel, _super);
+
+    function CollectionModel() {
+      CollectionModel.__super__.constructor.apply(this, arguments);
+    }
+
+    CollectionModel.prototype.itemModel = CollectionItemModel;
+
+    CollectionModel.prototype.defaults = function() {
+      return {
+        version: null,
+        href: null,
+        items: [],
+        links: [],
+        template: null,
+        queries: [],
+        error: null,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1
+        }
+      };
+    };
+
+    CollectionModel.prototype.parse = function(input) {
+      var collection,
+        _this = this;
+      collection = input.collection;
+      collection.items = _.map(collection.items, function(i) {
+        var item;
+        item = new _this.itemModel(i, {
+          parse: true
+        });
+        item.collection = _this;
+        return item;
+      });
+      return collection;
+    };
+
+    CollectionModel.prototype.getLink = function(rel) {
+      return _.find(this.links, function(l) {
+        return l.rel === rel;
+      });
+    };
+
+    CollectionModel.prototype.fetchTemplate = function(callback) {
+      if (this.get('template')) callback(this.get('template'));
+      if (this.getLink('template')) {
+        if (!this._templateXHR) {
+          this._templateXHR = $.ajax({
+            url: this.getLink('template'),
+            dataType: 'json'
+          });
+        }
+        this._templateXHR.done(callback);
+      }
+      return null;
+    };
+
+    CollectionModel.prototype.fetchChoices = function(url, callback) {
+      return $.ajax({
+        type: 'GET',
+        dataType: 'json'
+      });
+    };
+
+    return CollectionModel;
+
+  })(Backbone.Model);
+
   _.extend(exports, {
     'CollectionModel': CollectionModel,
     'CollectionItemModel': CollectionItemModel
   });
 
 }).call(this);
+}, "radioapp/app": function(exports, require, module) {(function() {
+  var Backbone, RadioappRouter, api, createResourceCollection, createResources, models, resourceConfigs, views, _,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  _ = require('underscore')._;
+
+  Backbone = require('backbone');
+
+  views = require('radioapp/views');
+
+  models = require('radioapp/models');
+
+  api = require('radioapp/api');
+
+  createResources = function(resourceMap) {
+    var cfg, defaultConfig, output, rName, rUrl, _ref;
+    defaultConfig = {
+      collection: api.CollectionModel,
+      item: api.CollectionItemModel
+    };
+    output = {};
+    for (rName in resourceMap) {
+      rUrl = resourceMap[rName];
+      cfg = _.extend(defaultConfig, (_ref = resourceConfigs[rName]) != null ? _ref : {});
+      output[rName] = createResourceCollection(rUrl, cfg.collection, cfg.item);
+    }
+    return output;
+  };
+
+  resourceConfigs = {
+    specimens: {
+      collection: models.SpecimenCollection,
+      item: models.Specimen
+    }
+  };
+
+  createResourceCollection = function(url, collectionModel, itemModel) {
+    var resource;
+    if (collectionModel == null) collectionModel = api.CollectionModel;
+    if (itemModel == null) itemModel = api.CollectionItemModel;
+    resource = new collectionModel();
+    resource.url = url;
+    resource.itemModel = itemModel;
+    return resource;
+  };
+
+  RadioappRouter = (function(_super) {
+
+    __extends(RadioappRouter, _super);
+
+    function RadioappRouter() {
+      RadioappRouter.__super__.constructor.apply(this, arguments);
+    }
+
+    RadioappRouter.prototype.routes = {
+      '': 'specimenList',
+      'specimens': 'specimenList',
+      'specimens/:id': 'specimenDetail',
+      'specimens/:id/edit': 'specimenEdit'
+    };
+
+    RadioappRouter.prototype.specimenList = function() {
+      var _this = this;
+      return App.resources.specimens.fetch({
+        success: function() {
+          return App.view.pushPane(new views.SpecimenSearchPane({
+            model: App.resources.specimens
+          }));
+        }
+      });
+    };
+
+    RadioappRouter.prototype.specimenDetail = function(id) {
+      var model;
+      model = App.resources.specimens.get({
+        id: id
+      }) || new Specimen({
+        id: id
+      });
+      return App.view.pushPane(new views.SpecimenDetailPane({
+        model: model
+      }));
+    };
+
+    RadioappRouter.prototype.specimenEdit = function(id) {
+      var model;
+      model = App.resources.specimens.get({
+        id: id
+      }) || new Specimen({
+        id: id
+      });
+      return App.view.pushPane(new views.SpecimenForm({
+        model: model
+      }));
+    };
+
+    RadioappRouter.prototype.imageDetail = function(id) {};
+
+    RadioappRouter.prototype.imageFile = function(id, deriv) {};
+
+    return RadioappRouter;
+
+  })(Backbone.Router);
+
+  _.extend(exports, {
+    'RadioappRouter': RadioappRouter,
+    'createResources': createResources
+  });
+
+}).call(this);
 }, "radioapp/models": function(exports, require, module) {(function() {
-  var Backbone, File, Image, ImageCollection, Specimen, SpecimenCollection, User, api, util, _,
+  var Backbone, Image, ImageCollection, SearchManager, Specimen, SpecimenCollection, User, api, util, _,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -188,6 +308,50 @@
 
   util = require('radioapp/util');
 
+  Specimen = (function(_super) {
+
+    __extends(Specimen, _super);
+
+    function Specimen() {
+      Specimen.__super__.constructor.apply(this, arguments);
+    }
+
+    Specimen.prototype.urlRoot = '/specimens';
+
+    Specimen.prototype.defaults = function() {
+      return {
+        institution: null,
+        sex: null,
+        taxon: null,
+        specimenId: null,
+        settings: null,
+        comments: null,
+        skullLength: null,
+        cranialWidth: null,
+        neurocranialHeight: null,
+        facialHeight: null,
+        palateLength: null,
+        palateWidth: null,
+        images: new ImageCollection([])
+      };
+    };
+
+    Specimen.prototype.parseImages = function(value) {
+      return new ImageCollection(_.map(value, function(v) {
+        return new Image(v);
+      }));
+    };
+
+    Specimen.prototype.toJSON = function() {
+      return _.extend(Specimen.__super__.toJSON.apply(this, arguments), {
+        images: this.get('images').toJSON()
+      });
+    };
+
+    return Specimen;
+
+  })(api.CollectionItemModel);
+
   SpecimenCollection = (function(_super) {
 
     __extends(SpecimenCollection, _super);
@@ -196,9 +360,7 @@
       SpecimenCollection.__super__.constructor.apply(this, arguments);
     }
 
-    SpecimenCollection.prototype.itemModel = function() {
-      return Specimen;
-    };
+    SpecimenCollection.prototype.itemModel = Specimen;
 
     SpecimenCollection.prototype.defaults = function() {
       return {
@@ -248,41 +410,6 @@
 
   })(api.CollectionModel);
 
-  Specimen = (function(_super) {
-
-    __extends(Specimen, _super);
-
-    function Specimen() {
-      Specimen.__super__.constructor.apply(this, arguments);
-    }
-
-    Specimen.prototype.defaults = function() {
-      return {
-        institution: null,
-        sex: null,
-        taxon: null,
-        specimen_id: null,
-        settings: null,
-        comments: null,
-        skull_length: null,
-        cranial_width: null,
-        neurocranial_height: null,
-        facial_height: null,
-        palate_length: null,
-        palate_width: null,
-        images: new ImageCollection([])
-      };
-    };
-
-    Specimen.prototype.parseImages = function(value) {
-      console.log('parsing images');
-      return value;
-    };
-
-    return Specimen;
-
-  })(api.CollectionItemModel);
-
   Image = (function(_super) {
 
     __extends(Image, _super);
@@ -293,10 +420,11 @@
 
     Image.prototype.defaults = function() {
       return {
-        uri: null,
-        file: null,
+        href: null,
+        name: null,
+        url: null,
+        aspect: 'L',
         replacementFile: null,
-        aspect: null,
         links: {
           profile: null,
           thumb: null,
@@ -304,14 +432,6 @@
           large: null
         }
       };
-    };
-
-    Image.prototype.toJSON = function() {
-      var _ref, _ref2;
-      return _.extend(Image.__super__.toJSON.apply(this, arguments), {
-        currentFile: (_ref = this.get('file')) != null ? _ref.toJSON() : void 0,
-        replacementFile: (_ref2 = this.get('replacementFile')) != null ? _ref2.toJSON() : void 0
-      });
     };
 
     return Image;
@@ -358,22 +478,36 @@
 
   })(Backbone.Model);
 
-  File = (function(_super) {
+  SearchManager = (function(_super) {
 
-    __extends(File, _super);
+    __extends(SearchManager, _super);
 
-    function File() {
-      File.__super__.constructor.apply(this, arguments);
+    function SearchManager() {
+      SearchManager.__super__.constructor.apply(this, arguments);
     }
 
-    File.prototype.defaults = function() {
+    SearchManager.prototype.defaults = function() {
       return {
-        name: null,
-        url: null
+        page: null,
+        sort: null,
+        sortDirection: null,
+        perPage: 20,
+        query: null
       };
     };
 
-    return File;
+    SearchManager.prototype.toJSON = function() {
+      var json, k, _i, _len, _ref;
+      json = SearchManager.__super__.toJSON.apply(this, arguments);
+      _ref = _.keys(json);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        k = _ref[_i];
+        if (!json[k]) delete json[k];
+      }
+      return json;
+    };
+
+    return SearchManager;
 
   })(Backbone.Model);
 
@@ -382,7 +516,8 @@
     'Specimen': Specimen,
     'SpecimenCollection': SpecimenCollection,
     'Image': Image,
-    'ImageCollection': ImageCollection
+    'ImageCollection': ImageCollection,
+    'SearchManager': SearchManager
   });
 
 }).call(this);
@@ -428,10 +563,11 @@
 
 }).call(this);
 }, "radioapp/views": function(exports, require, module) {(function() {
-  var AlertsView, AppToolbar, AppView, Backbone, FormPaginationView, ImageView, ImagesView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
+  var AlertsView, AppToolbar, AppView, Backbone, FormPaginationView, ImageView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __slice = Array.prototype.slice;
 
   _ = require('underscore')._;
 
@@ -442,6 +578,8 @@
   require('bootstrap');
 
   require('jquery.chosen');
+
+  require('jquery.fileupload');
 
   View = (function(_super) {
 
@@ -475,6 +613,11 @@
 
     View.prototype.updateAuthz = function(user) {};
 
+    View.prototype.ignore = function(e) {
+      e.preventDefault();
+      return e.stopPropagation();
+    };
+
     return View;
 
   })(Backbone.View);
@@ -484,26 +627,51 @@
     __extends(SpecimenForm, _super);
 
     function SpecimenForm() {
+      this.getSpecimenData = __bind(this.getSpecimenData, this);
+      this.addImage = __bind(this.addImage, this);
       SpecimenForm.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenForm.prototype.templateId = 'templates/specimen-edit';
 
     SpecimenForm.prototype.events = function() {
+      var _this = this;
       return {
-        'click [rel=discard]': 'discard'
+        'click [rel=discard]': 'discard',
+        'click .dropdown.sex .dropdown-menu': 'ignore',
+        'click [rel=save]': 'save',
+        'click [rel=add-image]': function(e) {
+          var img;
+          e.preventDefault();
+          e.stopPropagation();
+          img = new models.Image();
+          this.model.get('images').add(img, {
+            silent: true
+          });
+          return this.addImage(img);
+        },
+        'change [name=institution],\
+            [name=specimenId],\
+            [name=taxon],\
+            [name=sex],\
+            [name=skullLength],\
+            [name=cranialWidth],\
+            [name=neurocranialHeight],\
+            [name=facialHeight],\
+            [name=palateLength],\
+            [name=palateWidth],\
+            [name=comments],\
+            [name=settings]': function(e) {
+          var control;
+          control = $(e.currentTarget);
+          return _this.model.set(control.attr('name'), control.val());
+        }
       };
     };
 
     SpecimenForm.prototype.viewContext = function() {
       return _.extend(SpecimenForm.__super__.viewContext.apply(this, arguments), {
         existing: this.model ? true : false,
-        values: {},
-        choices: {
-          institution: [],
-          sex: [],
-          taxon: []
-        },
         links: {}
       });
     };
@@ -511,14 +679,102 @@
     SpecimenForm.prototype.render = function() {
       var _this = this;
       SpecimenForm.__super__.render.apply(this, arguments);
+      this.$('[name=institution]').val(this.model.get('institution'));
+      this.$('[name=taxon]').val(this.model.get('taxon'));
+      this.$('[name=sex]').val(this.model.get('sex'));
       _.defer(function() {
-        return _this.$('select[name=taxon]').chosen();
+        return _this.$('[name=taxon]').chosen();
+      });
+      this.model.get('images').each(this.addImage);
+      this.$('form').fileupload({
+        url: this.model.get('href') || this.model.collection.get('href'),
+        formData: this.getSpecimenData,
+        fileInput: null,
+        dropZone: null
       });
       return this;
     };
 
+    SpecimenForm.prototype.addImage = function(img) {
+      var imgView;
+      imgView = new ImageView({
+        model: img
+      });
+      return this.$('.image-controls').append(imgView.render().$el);
+    };
+
     SpecimenForm.prototype.discard = function() {
       return App.view.popPane();
+    };
+
+    SpecimenForm.prototype.save = function(e) {
+      var ajaxData, fileInputs, files, paramNames, specimenData, xhr,
+        _this = this;
+      fileInputs = _.filter(this.$('.replacementFile input[type=file]'), function(input) {
+        return $(input).val();
+      });
+      if (fileInputs.length === 0) {
+        specimenData = this.getSpecimenData()[0];
+        ajaxData = {};
+        ajaxData[specimenData.name] = specimenData.value;
+        xhr = $.ajax({
+          url: this.model.get('href') || this.model.collection.get('href'),
+          type: 'POST',
+          data: ajaxData
+        });
+      } else {
+        files = _.map(fileInputs, function(f) {
+          return f.files[0];
+        });
+        paramNames = _.map(fileInputs, function(f) {
+          return $(f).attr('name');
+        });
+        xhr = this.$('form').fileupload('send', {
+          files: files,
+          paramName: paramNames
+        });
+        this.$('.submission-status').show().find('.bar').css('width', 0);
+        this.$('form').on('fileuploadprogress', function(e, data) {
+          var width;
+          width = "" + ((data.loaded * 100) / data.total) + "%";
+          _this.$('.submission-status .bar').css('width', width);
+          return console.log("progress: " + width);
+        });
+      }
+      this.$('[rel=save], [rel=discard]').attr('disabled', 'disabled').addClass('disabled');
+      xhr.done(function(response) {
+        console.log('save successful');
+        return App.view.popPane();
+      });
+      xhr.fail(function(response) {
+        return alert('Error saving specimen');
+      });
+      return xhr.always(function() {
+        _this.$('.submission-status').hide().find('.bar').css('width', 0);
+        return _this.$('[rel=save], [rel=discard]').removeAttr('disabled').removeClass('disabled');
+      });
+    };
+
+    SpecimenForm.prototype.getSpecimenData = function() {
+      var args, specimenData;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      specimenData = this.model.toJSON();
+      _.each(specimenData.images || [], function(img) {
+        delete img.links;
+        delete img.name;
+        delete img.url;
+        if (img.replacementFile) {
+          return img.replacementFile = img.replacementFile.file;
+        } else {
+          return delete img.replacementFile;
+        }
+      });
+      return [
+        {
+          name: 'specimen',
+          value: JSON.stringify(specimenData)
+        }
+      ];
     };
 
     return SpecimenForm;
@@ -558,38 +814,65 @@
     __extends(SpecimenSearchPane, _super);
 
     function SpecimenSearchPane() {
+      this.loadSearch = __bind(this.loadSearch, this);
       this.showCreateItemPane = __bind(this.showCreateItemPane, this);
-      this.navigateToPage = __bind(this.navigateToPage, this);
       SpecimenSearchPane.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenSearchPane.prototype.templateId = 'templates/specimen-search-form';
 
     SpecimenSearchPane.prototype.events = function() {
+      var _this = this;
       return {
-        'click [rel=create]': 'showCreateItemPane'
+        'click [rel=create]': 'showCreateItemPane',
+        'click .icon-search': 'setQuery',
+        'keydown [name=q]': function(e) {
+          if (e.keyCode === 13) return _this.setQuery();
+        },
+        'click [rel=results-per-page]': 'setResultsPerPage',
+        'click [rel=sort-field]': 'setSortField',
+        'click [rel=sort-direction]': 'setSortDirection'
       };
     };
 
+    SpecimenSearchPane.prototype.initialize = function() {
+      SpecimenSearchPane.__super__.initialize.apply(this, arguments);
+      this.searchMgr = new models.SearchManager();
+      return this.searchMgr.on('change', this.loadSearch);
+    };
+
     SpecimenSearchPane.prototype.render = function() {
-      var _this = this;
       SpecimenSearchPane.__super__.render.apply(this, arguments);
+      this.renderPagination();
+      this.renderResults();
+      this.$('.results-loading').hide();
+      return this;
+    };
+
+    SpecimenSearchPane.prototype.renderPagination = function() {
+      var _this = this;
       if (this.model.get('pagination')) {
-        _.each(this.$('.pagination'), function(placeholder) {
+        return _.each(this.$('.pagination'), function(placeholder) {
           var paginationView;
           paginationView = new PaginationView(_this.model.get('pagination'));
           $(placeholder).replaceWith(paginationView.render().$el);
-          return paginationView.on('navigate', _this.navigateToPage);
+          return paginationView.on('navigate', function(page) {
+            return _this.searchMgr.set('page', page);
+          });
         });
       }
-      _.each(this.model.get('items'), function(s) {
+    };
+
+    SpecimenSearchPane.prototype.renderResults = function() {
+      var _this = this;
+      this.$('table tbody').empty();
+      return _.each(this.model.get('items'), function(s) {
         var view;
         view = new SpecimenResult({
           model: s
         });
         return _this.$('table tbody').append(view.render().$el);
       });
-      return this;
     };
 
     SpecimenSearchPane.prototype.updateAuthz = function(user) {
@@ -601,14 +884,60 @@
       }
     };
 
-    SpecimenSearchPane.prototype.navigateToPage = function(page) {
-      return console.log("navigate to page " + page);
-    };
-
     SpecimenSearchPane.prototype.showCreateItemPane = function(e) {
+      var model;
       e.preventDefault();
       e.stopPropagation();
-      return App.view.pushPane(new SpecimenForm());
+      model = new models.Specimen();
+      model.collection = this.model;
+      App.router.navigate("/specimens/${model.id}");
+      return App.view.pushPane(new views.SpecimenForm({
+        model: model
+      }));
+    };
+
+    SpecimenSearchPane.prototype.loadSearch = function(e) {
+      var xhr,
+        _this = this;
+      $('.results-loading').show();
+      $('.results-placeholder').hide();
+      xhr = $.ajax({
+        type: 'GET',
+        url: this.model.get('href'),
+        data: this.searchMgr.toJSON(),
+        dataType: 'json'
+      });
+      return xhr.done(function(data) {
+        _this.model = new models.SpecimenCollection(data, {
+          parse: true
+        });
+        _this.renderPagination();
+        _this.renderResults();
+        $('.results-loading').hide();
+        return $('.results-placeholder').show();
+      });
+    };
+
+    SpecimenSearchPane.prototype.setQuery = function(e) {
+      return this.searchMgr.set('query', this.$('input[name=q]').val());
+    };
+
+    SpecimenSearchPane.prototype.setResultsPerPage = function(e) {
+      this.searchMgr.set({
+        perPage: $(e.currentTarget).text(),
+        page: null
+      });
+      return $(e.currentTarget).parents('.dropdown').find('.dropdown-display').text($(e.currentTarget).text());
+    };
+
+    SpecimenSearchPane.prototype.setSortField = function(e) {
+      this.searchMgr.set('searchField', $(e.currentTarget).data('value'));
+      return $(e.currentTarget).parents('.dropdown').find('.dropdown-display').text($(e.currentTarget).text());
+    };
+
+    SpecimenSearchPane.prototype.setSortDirection = function(e) {
+      this.searchMgr.set('sortDirection', $(e.currentTarget).data('value'));
+      return $(e.currentTarget).hide().siblings().show();
     };
 
     return SpecimenSearchPane;
@@ -636,19 +965,14 @@
       };
     };
 
-    SpecimenResult.prototype.viewContext = function() {
-      return _.extend(SpecimenResult.__super__.viewContext.apply(this, arguments), {
-        choices: {
-          taxon: {},
-          sex: {},
-          institution: {}
-        }
-      });
+    SpecimenResult.prototype.initialize = function() {
+      return this.model.on('change', this.render, this);
     };
 
     SpecimenResult.prototype.showEditPane = function(e) {
       e.preventDefault();
       e.stopPropagation();
+      App.router.navigate("" + this.model.url + "/edit");
       return App.view.pushPane(new SpecimenForm({
         model: this.model
       }));
@@ -657,7 +981,10 @@
     SpecimenResult.prototype.showDetailPane = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      return App.view.pushPane(new SpecimenDetailPane());
+      App.router.navigate("" + this.model.url);
+      return App.view.pushPane(new SpecimenDetailPane({
+        model: this.model
+      }));
     };
 
     return SpecimenResult;
@@ -669,6 +996,7 @@
     __extends(SpecimenDetailPane, _super);
 
     function SpecimenDetailPane() {
+      this.showEditPane = __bind(this.showEditPane, this);
       SpecimenDetailPane.__super__.constructor.apply(this, arguments);
     }
 
@@ -676,24 +1004,24 @@
 
     SpecimenDetailPane.prototype.events = function() {
       return {
-        'click [rel=back]': 'back'
+        'click [rel=back]': 'back',
+        'click [rel=edit]': 'showEditPane'
       };
-    };
-
-    SpecimenDetailPane.prototype.viewContext = function() {
-      return _.extend(SpecimenDetailPane.__super__.viewContext.apply(this, arguments), {
-        choices: {
-          taxon: {},
-          sex: {},
-          institution: {}
-        }
-      });
     };
 
     SpecimenDetailPane.prototype.back = function(e) {
       e.preventDefault();
       e.stopPropagation();
       return App.view.popPane();
+    };
+
+    SpecimenDetailPane.prototype.showEditPane = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      App.router.navigate("" + this.model.url + "/edit");
+      return App.view.pushPane(new SpecimenForm({
+        model: this.model
+      }));
     };
 
     return SpecimenDetailPane;
@@ -945,131 +1273,57 @@
 
   })(View);
 
-  ImagesView = (function(_super) {
-
-    __extends(ImagesView, _super);
-
-    function ImagesView() {
-      ImagesView.__super__.constructor.apply(this, arguments);
-    }
-
-    ImagesView.prototype.initialize = function() {
-      var images,
-        _this = this;
-      images = _.map(this.$('.image-control'), function(i) {
-        i = $(i);
-        return new Image({
-          id: i.find('input[type=hidden]').val(),
-          aspect: i.find('select').val(),
-          currentFile: new File({
-            name: i.find('a').text(),
-            url: i.find('a').attr('href')
-          })
-        });
-      });
-      this.model = new ImageCollection(images);
-      this.model.on('add', this.addImageView, this);
-      return this.render();
-    };
-
-    ImagesView.prototype.events = function() {
-      return {
-        'click .add-image': 'addImage'
-      };
-    };
-
-    ImagesView.prototype.render = function() {
-      var _this = this;
-      this.$el.empty();
-      this.$el.append($('<a class="btn add-image"><i class="icon-plus"></i>Add Image</a>'));
-      return this.model.each(function(img) {
-        return addImageView(img);
-      });
-    };
-
-    ImagesView.prototype.addImage = function() {
-      return this.model.add(new Image());
-    };
-
-    ImagesView.prototype.addImageView = function(img) {
-      var imgView;
-      imgView = new ImageView({
-        model: img
-      });
-      return this.$('.add-image').before(imgView.render().$el);
-    };
-
-    return ImagesView;
-
-  })(Backbone.View);
-
   ImageView = (function(_super) {
 
     __extends(ImageView, _super);
 
     function ImageView() {
+      this.cancelReplacement = __bind(this.cancelReplacement, this);
+      this.replaceFile = __bind(this.replaceFile, this);
+      this.render = __bind(this.render, this);
       ImageView.__super__.constructor.apply(this, arguments);
     }
 
+    ImageView.prototype.templateId = 'templates/image-control';
+
+    ImageView.prototype.className = 'image-view';
+
     ImageView.prototype.initialize = function() {
-      return this.model.on('change', this.render, this);
+      return this.model.on('change', this.render);
     };
 
     ImageView.prototype.events = function() {
       return {
         'change input[type=file]': 'replaceFile',
         'click .cancel-replace': 'cancelReplacement',
-        'click .remove-image': 'remove'
+        'click [rel=remove-image]': 'remove'
       };
     };
 
     ImageView.prototype.render = function() {
-      var collection_prefix, fileInput, item_prefix, template;
-      template = require('templates/image-control');
-      fileInput = this.$('.fileinput-button input[type=file]');
-      collection_prefix = this.model.collection.cid;
-      item_prefix = this.model.cid;
-      this.$el.html(template({
-        image: this.model.toJSON(),
-        aspectOptions: this.aspectOptions()
-      }));
-      if (fileInput.length > 0) {
-        this.$('.fileinput-button input[type=file]').replaceWith(fileInput);
-      }
+      var replacementInput;
+      replacementInput = this.$('.replacementFile input[type=file]');
+      ImageView.__super__.render.apply(this, arguments);
+      this.$('.replacementFile').empty().append(replacementInput);
       this.$('.dropdown-toggle').dropdown();
       return this;
     };
 
-    ImageView.prototype.replaceFile = function() {
-      var replacementFile;
-      replacementFile = new File({
-        name: $(e.currentTarget).val().replace("C:\\fakepath\\", "")
+    ImageView.prototype.replaceFile = function(e) {
+      var fileId, fileInput;
+      fileInput = $(e.currentTarget);
+      fileId = "file-" + this.model.cid;
+      fileInput.attr('name', fileId);
+      this.$('.replacementFile').empty().append(fileInput);
+      return this.model.set('replacementFile', {
+        name: fileInput.val().replace("C:\\fakepath\\", ""),
+        file: fileId
       });
-      return this.model.set('replacementFile', replacementFile);
     };
 
     ImageView.prototype.cancelReplacement = function() {
+      this.$('.replacementFile').empty();
       return this.model.set('replacementFile', null);
-    };
-
-    ImageView.prototype.aspectOptions = function() {
-      var options,
-        _this = this;
-      options = [
-        {
-          value: '',
-          label: '---------'
-        }, {
-          value: 'L',
-          label: 'Lateral'
-        }, {
-          value: 'S',
-          label: 'Superior'
-        }
-      ];
-      return _.map(options, function(x) {
-        return x.selected = x.value === _this.model.get('aspect');
-      });
     };
 
     ImageView.prototype.remove = function() {
@@ -1079,7 +1333,7 @@
 
     return ImageView;
 
-  })(Backbone.View);
+  })(View);
 
   PaginationView = (function(_super) {
 
@@ -1130,9 +1384,9 @@
 
     PaginationView.prototype.buildPageElement = function(page) {
       if (!page.pageNumber) {
-        return "<a href='#' class='inactive'>" + page.display + "</a>";
+        return "<li><a href='#' class='inactive'>" + page.display + "</a></li>";
       } else {
-        return "<a href='#' rel='page' data-page='" + page.pageNumber + "'>" + page.display + "</a>";
+        return "<li><a href='#' rel='page' data-page='" + page.pageNumber + "'>" + page.display + "</a></li>";
       }
     };
 
@@ -1172,11 +1426,11 @@
       }
       pages = _.map(_.range(chunkstart, chunkend + 1), createPageNav);
       if (ellipsisPre) {
-        pages.unshift(createPaginationStruct(null, '...'));
+        pages.unshift(createPaginationStruct(null, '&hellip;'));
         pages.unshift(createPageNav(1));
       }
       if (ellipsisPost) {
-        pages.push(createPaginationStruct(null, '...'));
+        pages.push(createPaginationStruct(null, '&hellip;'));
         pages.push(createPageNav(totalPages));
       }
       if (currentPage > 1) {
@@ -1217,10 +1471,10 @@
   _.extend(exports, {
     'AppView': AppView,
     'ImageView': ImageView,
-    'ImagesView': ImagesView,
     'SpecimenForm': SpecimenForm,
     'SpecimenModal': SpecimenModal,
-    'SpecimenSearchPane': SpecimenSearchPane
+    'SpecimenSearchPane': SpecimenSearchPane,
+    'SpecimenDetailPane': SpecimenDetailPane
   });
 
 }).call(this);
@@ -1322,53 +1576,59 @@
   }
   (function() {
     (function() {
-      var option, _i, _len, _ref;
+      var label, value, _i, _len, _ref, _ref2;
     
-      __out.push('<div>\n  <input type="hidden" value="');
+      __out.push('<input type="hidden" value="');
     
-      __out.push(__sanitize(this.image.id));
+      __out.push(__sanitize(this.id));
     
-      __out.push('" name="id"/>\n  <select class="span2" name="aspect">\n    ');
+      __out.push('" name="id"/>\n<span class="replacementFile" style="display: none;"></span>\n\n<select class="span2" name="aspect">\n');
     
-      _ref = this.aspectOptions();
+      _ref = App.choices.aspect;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        option = _ref[_i];
-        __out.push('\n      <option value="');
-        __out.push(__sanitize(option.value));
-        __out.push('">');
-        __out.push(__sanitize(option.label));
-        __out.push('</option>\n    ');
+        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
+        __out.push('\n  <option value="');
+        __out.push(__sanitize(value));
+        __out.push('" ');
+        if (value === this.aspect) __out.push('selected="selected"');
+        __out.push('>');
+        __out.push(__sanitize(label));
+        __out.push('</option>\n');
       }
     
-      __out.push('\n  </select>\n      \n  ');
+      __out.push('\n</select>\n  \n');
     
-      if (this.image.currentFile) {
-        __out.push('\n    ');
-        if (!this.image.replacementFile) {
-          __out.push('\n        <span class="dropdown">\n          <span class="dropdown-toggle" data-toggle="dropdown">\n            Existing file:\n            <a href="');
-          __out.push(__sanitize(this.image.currentFile.url));
-          __out.push('" class="download-file">\n              ');
-          __out.push(__sanitize(this.image.currentFile.name));
-          __out.push('\n            </a>\n            <span class="caret">&nbsp;</span>\n          </span>\n          <ul class="dropdown-menu">\n            <li>\n              <a href="');
-          __out.push(__sanitize(this.image.currentFile.url));
-          __out.push('" class="download-file">\n                <i class="icon-download"></i>\n                Download Existing File\n              </a>\n            </li>\n            <li>\n              <a href="javascript:void(0)" class="replace-file fileinput-button">\n                <i class="icon-random"></i>\n                Replace File\n                <input type="file" name="replacement"/>\n              </a>\n            </li>\n          </ul>\n       </span>\n    ');
-        } else {
-          __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Replace\n        <a href="');
-          __out.push(__sanitize(this.image.currentFile.url));
+      if (this.name) {
+        __out.push('\n');
+        if (!this.replacementFile) {
+          __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Existing file:\n        <a href="');
+          __out.push(__sanitize(this.url));
           __out.push('" class="download-file">\n          ');
-          __out.push(__sanitize(this.image.currentFile.name));
-          __out.push('\n        </a>  \n        with\n        <a class="fileinput-button" style="display:inline-block">\n          ');
-          __out.push(__sanitize(this.image.replacementFile.name));
-          __out.push('\n          <input type="file" name="replacement-file"/>\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu">\n        <li>\n          <a href="');
-          __out.push(__sanitize(this.image.currentFile.url));
-          __out.push('" class="download-file">\n            <i class="icon-download"></i>\n            Download Existing File\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file" name="replacement-file"/>\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="cancel-replace">\n            <i class="icon-remove"></i>\n            Cancel Replacement\n          </a>\n        </li>\n      </ul>\n    </span>\n  ');
-          if (this.image.replacementFile) {
-            __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Upload file:\n        <a class=\\\'fileinput-button\\\' style="display:inline-block">\n          ');
-            __out.push(__sanitize(this.image.replacementFile.name));
-            __out.push('\n          <input type="file" name="replacement-file"/>\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu"> \n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file" name="replacement-file"/>\n          </a>\n        </li>\n      </ul>\n    </span>\n    <a class="fileinput-button">\n      Upload an Image\n      <i class="icon-upload"></i>\n      <input type="file" name="replacement-file"/>\n    </a>\n    <a href="javascript:void(0)" class="btn btn-small remove-image">\n      <i class="icon-remove"></i>\n    </a>\n</div>\n');
-          }
+          __out.push(__sanitize(this.name));
+          __out.push('\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu">\n        <li>\n          <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n            <i class="icon-download"></i>\n            Download Existing File\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file"/>\n          </a>\n        </li>\n      </ul>\n   </span>\n');
+        } else {
+          __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Replace\n    <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n      ');
+          __out.push(__sanitize(this.name));
+          __out.push('\n    </a>  \n    with\n    <a class="fileinput-button" style="display:inline-block">\n      ');
+          __out.push(__sanitize(this.replacementFile.name));
+          __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu">\n    <li>\n      <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n        <i class="icon-download"></i>\n        Download Existing File\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="cancel-replace">\n        <i class="icon-remove"></i>\n        Cancel Replacement\n      </a>\n    </li>\n  </ul>\n</span>\n');
         }
+        __out.push('\n');
+      } else if (this.replacementFile) {
+        __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Upload file:\n    <a class="fileinput-button" style="display:inline-block">\n      ');
+        __out.push(__sanitize(this.replacementFile.name));
+        __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu"> \n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n  </ul>\n</span>\n');
+      } else {
+        __out.push('\n<a class="fileinput-button">\n  Upload an Image\n  <i class="icon-upload"></i>\n  <input type="file"/>\n</a>\n');
       }
+    
+      __out.push('\n\n<a href="#" rel="remove-image">\n  <i class="icon-remove"></i>\n</a>\n');
     
     }).call(this);
     
@@ -1461,19 +1721,26 @@
   }
   (function() {
     (function() {
-      var image, _i, _len, _ref;
     
-      __out.push('<a href="#" rel="back"><- Back to Search</a>\n\n<h1><span class="taxon">');
+      __out.push('<a rel="back" href="#" class="btn"><i class="icon-chevron-left"></i> Back to Search</a>\n<a rel="edit" href="#" class="btn">Edit</a>\n\n<h3>\n    ');
     
-      __out.push(__sanitize(this.choices.taxon[this.taxon]));
+      __out.push(__sanitize(this.specimenId));
     
-      __out.push('</span></h1>\n<table>\n  <tr>\n    <th>Specimen ID</th>\n    <td>');
+      __out.push(' -\n    <span class="taxon">');
+    
+      __out.push(__sanitize(App.choiceMap.taxon[this.taxon]));
+    
+      __out.push('</span>\n</h3>\n<table>\n  <tr>\n    <th>Institution</th>\n    <td>');
+    
+      __out.push(__sanitize(App.choiceMap.institution[this.institution]));
+    
+      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Specimen ID</th>\n    <td>');
     
       __out.push(__sanitize(this.specimenId));
     
       __out.push('</td>\n  </tr>\n  <tr>\n    <th>Sex</th>\n    <td>');
     
-      __out.push(__sanitize(this.sex));
+      __out.push(__sanitize(App.choiceMap.sex[this.sex]));
     
       __out.push('</td>\n  </tr>\n  ');
     
@@ -1493,23 +1760,31 @@
     
       __out.push('\n  <tr>\n    <th>Images</th>\n    <td>\n      ');
     
-      if (this.images && this.images.length > 0) {
-        __out.push('\n        ');
-        _ref = this.images;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          image = _ref[_i];
-          __out.push('\n        <a href="');
-          __out.push(__sanitize(image.files.medium));
-          __out.push('">\n            <img src="');
-          __out.push(__sanitize(image.files.thumbnail));
-          __out.push('"/>\n        </a>\n        ');
-        }
-        __out.push('\n    </td>\n    ');
-      } else {
-        __out.push('\n      <span class="empty">No images attached.</span>\n    ');
-      }
+      __out.push('\n        ');
     
-      __out.push('\n  </tr>\n</table>\n');
+      __out.push('\n        <a href="');
+    
+      __out.push(__sanitize);
+    
+      __out.push('">\n            <img src="');
+    
+      __out.push(__sanitize);
+    
+      __out.push('"/>\n        </a>\n        ');
+    
+      __out.push('\n      ');
+    
+      __out.push('\n        <span class="empty">No images attached.</span>\n      ');
+    
+      __out.push('\n    </td>\n  </tr>\n  <tr>\n    <th>Last Modified</th>\n    <td>');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Created</th>\n    <td>');
+    
+      __out.push(__sanitize(this.created));
+    
+      __out.push('</td>\n  </tr>\n</table>\n');
     
     }).call(this);
     
@@ -1555,7 +1830,7 @@
   }
   (function() {
     (function() {
-      var label, value, _len, _len2, _len3, _ref, _ref2, _ref3;
+      var label, value, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
     
       __out.push('<form class="form-horizontal specimen-form" method="post"\n    action="');
     
@@ -1569,93 +1844,101 @@
     
       __out.push('\n    </div>\n    \n    ');
     
-      __out.push('\n    <div class="control-group institution">\n        <label class="control-label" for="institution">Institution</label>\n        <div class="controls">\n            <select name="institution">\n                ');
+      __out.push('\n    <div class="control-group institution">\n        <label class="control-label" for="institution">Institution</label>\n        <div class="controls">\n            <select name="institution">\n                <option>---------</option>\n                ');
     
-      _ref = this.choices.institution;
-      for (label = 0, _len = _ref.length; label < _len; label++) {
-        value = _ref[label];
-        __out.push('\n                <option value="');
+      _ref = App.choices.institution;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
+        __out.push('\n                    <option value="');
         __out.push(__sanitize(value));
-        __out.push('">');
+        __out.push('"\n                        ');
+        if (value === this.institution) __out.push('selected="selected"');
+        __out.push('>\n                        ');
         __out.push(__sanitize(label));
-        __out.push('</option>\n                ');
+        __out.push('\n                    </option>\n                ');
       }
     
       __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
     
       __out.push('\n    <div class="control-group specimen-id">\n        <label class="control-label" for="specimenId">Specimen ID</label>\n        <div class="controls">\n            <input type="text" name="specimenId" value="');
     
-      __out.push(__sanitize(this.values.specimenId));
+      __out.push(__sanitize(this.specimenId));
     
       __out.push('"/>\n        </div>\n    </div>\n\n    ');
     
-      __out.push('\n    <div class="control-group taxon">\n        <label class="control-label" for="taxon">Taxon</label>\n        <div class="controls">\n            <select name="taxon">\n                ');
+      __out.push('\n    <div class="control-group taxon">\n        <label class="control-label" for="taxon">Taxon</label>\n        <div class="controls">\n            <select name="taxon">\n                <option>---------</option>\n                ');
     
-      _ref2 = this.choices.taxon;
-      for (label = 0, _len2 = _ref2.length; label < _len2; label++) {
-        value = _ref2[label];
-        __out.push('\n                <option value="');
+      _ref3 = App.choices.taxon;
+      for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
+        _ref4 = _ref3[_j], value = _ref4[0], label = _ref4[1];
+        __out.push('\n                    <option value="');
         __out.push(__sanitize(value));
-        __out.push('">');
+        __out.push('" \n                        ');
+        if (value === this.taxon) __out.push('selected="selected"');
+        __out.push('>\n                        ');
         __out.push(__sanitize(label));
-        __out.push('</option>\n                ');
+        __out.push('\n                    </option>\n                ');
       }
     
       __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
     
-      __out.push('\n    <div class="control-group sex">\n        <label class="control-label" for="sex">Sex</label>\n        <div class="controls">\n            <select name="sex">\n                ');
+      __out.push('\n    <div class="control-group sex">\n        <label class="control-label" for="sex">Sex</label>\n        <div class="controls">\n            <select name="sex">\n                <option>---------</option>\n                ');
     
-      _ref3 = this.choices.sex;
-      for (label = 0, _len3 = _ref3.length; label < _len3; label++) {
-        value = _ref3[label];
-        __out.push('\n                <option value="');
+      _ref5 = App.choices.sex;
+      for (_k = 0, _len3 = _ref5.length; _k < _len3; _k++) {
+        _ref6 = _ref5[_k], value = _ref6[0], label = _ref6[1];
+        __out.push('\n                    <option value="');
         __out.push(__sanitize(value));
-        __out.push('">');
+        __out.push('"\n                        ');
+        if (value === this.sex) __out.push('selected="selected"');
+        __out.push('>\n                        ');
         __out.push(__sanitize(label));
-        __out.push('</option>\n                ');
+        __out.push('\n                    </option>\n                ');
       }
     
       __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
     
       __out.push('\n    <div class="control-group measurements">\n        <label class="control-label">Measurements</label>\n        <div class="controls">\n            <table class="specimen-measurements">\n                <tr>\n                    <th>Skull Length</th>\n                    <th>Cranial Width</th>\n                    <th>Neurocranial Height</th>\n                    <th>Facial Height</th>\n                    <th>Palate Length</th>\n                    <th>Palate Width</th>\n                </tr>\n                <tr>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.skullLength));
+      __out.push(__sanitize(this.skullLength));
     
       __out.push('" name="skullLength"/></td>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.cranialWidth));
+      __out.push(__sanitize(this.cranialWidth));
     
-      __out.push('" name="cranial-width"/></td>\n                    <td><input type="text" value="');
+      __out.push('" name="cranialWidth"/></td>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.neurocranialHeight));
+      __out.push(__sanitize(this.neurocranialHeight));
     
-      __out.push('" name="neurocranial-height"/></td>\n                    <td><input type="text" value="');
+      __out.push('" name="neurocranialHeight"/></td>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.facialHeight));
+      __out.push(__sanitize(this.facialHeight));
     
-      __out.push('" name="facial-height"/></td>\n                    <td><input type="text" value="');
+      __out.push('" name="facialHeight"/></td>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.palateLength));
+      __out.push(__sanitize(this.palateLength));
     
-      __out.push('" name="palate-length"/></td>\n                    <td><input type="text" value="');
+      __out.push('" name="palateLength"/></td>\n                    <td><input type="text" value="');
     
-      __out.push(__sanitize(this.values.palateWidth));
+      __out.push(__sanitize(this.palateWidth));
     
-      __out.push('" name="palate-width"/></td>\n                </tr>\n            </table>\n        </div>\n    </div>\n\n\n    ');
+      __out.push('" name="palateWidth"/></td>\n                </tr>\n            </table>\n        </div>\n    </div>\n\n\n    ');
     
       __out.push('\n    <div class="control-group comments">\n        <label class="control-label" for="comments">Comments</label>\n        <div class="controls">\n            <textarea name="comments">');
     
-      __out.push(__sanitize(this.values.comments));
+      __out.push(__sanitize(this.comments));
     
       __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
     
       __out.push('\n    <div class="control-group settings">\n        <label class="control-label" for="settings">Settings</label>\n        <div class="controls">\n            <textarea name="settings">');
     
-      __out.push(__sanitize(this.values.settings));
+      __out.push(__sanitize(this.settings));
     
       __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
     
-      __out.push('\n    <div class="control-group images">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline image-controls">\n            <div id="image-controls">\n                <div class="image-control">\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <div class="form-actions">\n        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>\n        <a rel="save-and-create" class="btn btn-primary" href="javascript:void(0)">Save and Enter Another</a>\n        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>\n    </div>\n\n</form>\n');
+      __out.push('\n    <div class="control-group images">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline">\n            ');
+    
+      __out.push('\n            <div class="image-controls"></div>\n            <a href="#" class="btn" rel="add-image">\n                <i class="icon-plus"></i>\n                Add Image\n            </a>\n        </div>\n    </div>\n\n    <div class="form-actions">\n        <div class="submission-status progress progress-striped active" style="display: none;">\n            <div class="bar"></div>\n        </div>\n        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>\n        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>\n    </div>\n\n</form>\n');
     
     }).call(this);
     
@@ -1704,15 +1987,25 @@
     
       __out.push('<td class="selection">\n    <input type="checkbox" class="item-selection"\n        value="');
     
-      __out.push('"/>\n</td>\n<td class="taxon">\n    <a rel="detail" href="#">\n        ');
+      this.id;
     
-      __out.push(__sanitize(this.choices.taxon[this.taxon]));
+      __out.push('"/>\n</td>\n<td class="specimen-id">\n    ');
     
-      __out.push('\n        Taxon goes here\n    </a>\n</td>\n<td class="sex">');
+      __out.push(__sanitize(this.specimenId));
     
-      __out.push(__sanitize(this.choices.sex[this.sex]));
+      __out.push('\n</td>\n<td class="taxon">\n    <a rel="detail" href="#">\n        ');
     
-      __out.push('</td>\n<td class="images">\n    <a href="#">Lateral</a>\n    <a href="#">Superior</a>\n</td>\n<td class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit">\n        <i class="icon-edit"></i>\n    </a>\n</td>\n');
+      __out.push(__sanitize(App.choiceMap.taxon[this.taxon]));
+    
+      __out.push('\n    </a>\n</td>\n<td class="sex">');
+    
+      __out.push(__sanitize(App.choiceMap.sex[this.sex]));
+    
+      __out.push('</td>\n<td class="images">\n    <a href="#">Lateral</a> | \n    <a href="#">Superior</a>\n</td>\n<td class="last-modified">\n    ');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('\n</td>\n<td class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit"><i class="icon-edit"></i></a>\n</td>\n');
     
     }).call(this);
     
@@ -1813,28 +2106,34 @@
   }
   (function() {
     (function() {
+      var label, value, _i, _len, _ref, _ref2;
     
-      __out.push('<form>\n    <div class="pagination-toolbar">\n        ');
+      __out.push('<div class="search-bar">\n    <div class="specimen-query">\n        <input type="text" name="q" placeholder="Search specimens..."/>\n        <i class="icon-search"></i>\n    </div>\n\n    <div class="search-params pull-right">\n        <span class="dropdown">\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="dropdown-display">\n                    ');
     
-      __out.push('\n        <div class="pagination"></div>\n\n        Showing \n        <span class="dropdown">\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="results-per-page">\n                    ');
+      __out.push('\n                    20\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#" rel="results-per-page">10</a></li>\n                <li><a href="#" rel="results-per-page">20</a></li>\n                <li><a href="#" rel="results-per-page">50</a></li>\n                <li><a href="#" rel="results-per-page">100</a></li>\n            </ul>\n        </span> \n        results per page, sorted by\n        <span class="dropdown">\n            <input type="hidden" name="sort-field"/>\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="dropdown-display">\n                    ');
     
-      __out.push('\n                    20\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#">10</a></li>\n                <li><a href="#">20</a></li>\n                <li><a href="#">50</a></li>\n                <li><a href="#">100</a></li>\n                <li><a href="#">&#x221e;</a></li>\n            </ul>\n        </span> results per page\n    </div>\n\n    ');
+      __out.push('\n                    Relevance\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#" rel="sort-field" data-value="relevance">Relevance</a></li>\n                <li><a href="#" rel="sort-field" data-value="taxon">Taxon</a></li>\n                <li><a href="#" rel="sort-field" data-value="sex">Sex</a></li>\n                <li><a href="#" rel="sort-field" data-value="modified_date">Modified Date</a></li>\n            </ul>\n        </span>\n        <span class="sort-direction-toggle" title="Ascending">\n            <a href="#" rel="sort-direction" data-value="asc">Ascending &darr;</a> \n            <a href="#" rel="sort-direction" data-value="desc">Descending &uarr;</a> \n        </span>\n    </div>\n</div>\n\n');
     
-      __out.push('\n    <table class="table table-condensed table-striped">\n        <col width="10%"/>\n        <col/>\n        <col width="10%"/>\n        <col width="20%"/>\n        <col width="25"/>\n        <tr class="header">\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        <input type="checkbox" class="item-selector"/>\n                        <span class="caret"></span>\n                    </a>\n                    <ul class="dropdown-menu">\n                        <li>\n                            <a href="#" class="item-selection-all">\n                                <i class="icon-ok"></i>\n                                Select All\n                            </a>\n                        </li>\n                        <li>\n                            <a href="#" class="item-selection-none">\n                                <i class="icon-remove"></i>\n                                Select None\n                            </a>\n                        </li>\n                        <li>\n                            <a href="#" class="item-selection-invert">\n                                <i class="icon-resize-full"></i>\n                                Invert Selection\n                            </a>\n                        </li>\n                    </ul>\n                </span>\n            </th>\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        Taxon\n                        <span class="caret"></span>\n                    </a>\n                    <div class="dropdown-menu">\n                        <h1>Surprise!!!</h1>\n                    </div>\n                    <!--ul class="dropdown-menu">\n                        <li>Sort</li>\n                        <li>Filter</li>\n                    </ul-->\n                </span>\n            </th>\n            <th>\n                <span class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                        Sex\n                        <span class="caret"></span>\n                    </a>\n                    <ul class="dropdown-menu">\n                        ');
+      __out.push('\n<div class="pagination"></div>\n\n');
     
-      __out.push('\n                            <li>\n                                <input type="checkbox" id="filter-sex-');
+      __out.push('\n<table class="table table-condensed table-striped">\n    <col width="40"/>\n    <col width="70"/>\n    <col/>\n    <col width="80"/>\n    <col width="140"/>\n    <col width="120"/>\n    <col width="25"/>\n    <tr class="header">\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    <input type="checkbox" class="item-selector"/>\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    <li>\n                        <a href="#" class="item-selection-all">\n                            <i class="icon-ok"></i>\n                            Select All\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-none">\n                            <i class="icon-remove"></i>\n                            Select None\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-invert">\n                            <i class="icon-resize-full"></i>\n                            Invert Selection\n                        </a>\n                    </li>\n                </ul>\n            </span>\n        </th>\n        <th>ID</th>\n        <th>\n            <span class="dropdown taxon">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Taxon\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    TODO: put Taxon filter tree here\n                </div>\n            </span>\n        </th>\n        <th>\n            <span class="dropdown sex">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Sex\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    ');
     
-      __out.push('"\n                                       name="filter-sex" value="');
+      _ref = App.choices.sex;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
+        __out.push('\n                            <input type="checkbox" id="filter-sex-');
+        __out.push('"\n                                   name="filter-sex" value="');
+        __out.push(__sanitize(value));
+        __out.push('"/>\n                            <label for="filter-sex-');
+        __out.push(__sanitize(value));
+        __out.push('">');
+        __out.push(__sanitize(label));
+        __out.push('</label>\n                    ');
+      }
     
-      __out.push('"/>\n                                <label for="filter-sex-');
+      __out.push('\n                    <a href="#" class="btn btn-primary">Filter</a>\n                </div>\n            </span>\n        </th>\n        <th>Images</th>\n        <th>Last Modified</th>\n        <th>\n            <a class="btn btn-small" rel="create" title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n    <tr class="results-placeholder" style="display: hidden;"></tr>\n    <tr class="results-loading">\n        <td colspan="7">\n            <span>\n                <img src="/static/img/loading.gif">  Loading results...\n            </span>\n        </td>\n    </tr>\n</table>\n\n');
     
-      __out.push('">');
-    
-      __out.push('</label>\n                            </li>\n                        ');
-    
-      __out.push('\n                    </ul>\n                </span>\n            </th>\n            <th>Images</th>\n            <th>\n                <a class="btn btn-small" rel="create" title="Create New Specimen">\n                    <i class="icon-plus"></i>\n                </a>\n            </th>\n        </tr>\n        <tr class="results-placeholder" style="display: hidden;"></tr>\n    </table>\n\n    ');
-    
-      __out.push('\n    <div class="pagination"></div>\n\n</form>\n');
+      __out.push('\n<div class="pagination"></div>\n');
     
     }).call(this);
     
@@ -5848,6 +6147,910 @@ Copyright (c) 2011 by Harvest
         xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
     }
 });
+}, "jquery.fileupload": function(exports, require, module) {/*
+ * jQuery File Upload Plugin 5.10.1
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+
+/*jslint nomen: true, unparam: true, regexp: true */
+/*global define, window, document, Blob, FormData, location */
+
+(function (factory) {
+    'use strict';
+    if (typeof define === 'function' && define.amd) {
+        // Register as an anonymous AMD module:
+        define([
+            'jquery',
+            'jquery.ui.widget'
+        ], factory);
+    } else {
+        // Browser globals:
+        factory(window.jQuery);
+    }
+}(function ($) {
+    'use strict';
+
+    // The FileReader API is not actually used, but works as feature detection,
+    // as e.g. Safari supports XHR file uploads via the FormData API,
+    // but not non-multipart XHR file uploads:
+    $.support.xhrFileUpload = !!(window.XMLHttpRequestUpload && window.FileReader);
+    $.support.xhrFormDataFileUpload = !!window.FormData;
+
+    // The fileupload widget listens for change events on file input fields defined
+    // via fileInput setting and paste or drop events of the given dropZone.
+    // In addition to the default jQuery Widget methods, the fileupload widget
+    // exposes the "add" and "send" methods, to add or directly send files using
+    // the fileupload API.
+    // By default, files added via file input selection, paste, drag & drop or
+    // "add" method are uploaded immediately, but it is possible to override
+    // the "add" callback option to queue file uploads.
+    $.widget('blueimp.fileupload', {
+
+        options: {
+            // The namespace used for event handler binding on the dropZone and
+            // fileInput collections.
+            // If not set, the name of the widget ("fileupload") is used.
+            namespace: undefined,
+            // The drop target collection, by the default the complete document.
+            // Set to null or an empty collection to disable drag & drop support:
+            dropZone: $(document),
+            // The file input field collection, that is listened for change events.
+            // If undefined, it is set to the file input fields inside
+            // of the widget element on plugin initialization.
+            // Set to null or an empty collection to disable the change listener.
+            fileInput: undefined,
+            // By default, the file input field is replaced with a clone after
+            // each input field change event. This is required for iframe transport
+            // queues and allows change events to be fired for the same file
+            // selection, but can be disabled by setting the following option to false:
+            replaceFileInput: true,
+            // The parameter name for the file form data (the request argument name).
+            // If undefined or empty, the name property of the file input field is
+            // used, or "files[]" if the file input name property is also empty,
+            // can be a string or an array of strings:
+            paramName: undefined,
+            // By default, each file of a selection is uploaded using an individual
+            // request for XHR type uploads. Set to false to upload file
+            // selections in one request each:
+            singleFileUploads: true,
+            // To limit the number of files uploaded with one XHR request,
+            // set the following option to an integer greater than 0:
+            limitMultiFileUploads: undefined,
+            // Set the following option to true to issue all file upload requests
+            // in a sequential order:
+            sequentialUploads: false,
+            // To limit the number of concurrent uploads,
+            // set the following option to an integer greater than 0:
+            limitConcurrentUploads: undefined,
+            // Set the following option to true to force iframe transport uploads:
+            forceIframeTransport: false,
+            // Set the following option to the location of a redirect url on the
+            // origin server, for cross-domain iframe transport uploads:
+            redirect: undefined,
+            // The parameter name for the redirect url, sent as part of the form
+            // data and set to 'redirect' if this option is empty:
+            redirectParamName: undefined,
+            // Set the following option to the location of a postMessage window,
+            // to enable postMessage transport uploads:
+            postMessage: undefined,
+            // By default, XHR file uploads are sent as multipart/form-data.
+            // The iframe transport is always using multipart/form-data.
+            // Set to false to enable non-multipart XHR uploads:
+            multipart: true,
+            // To upload large files in smaller chunks, set the following option
+            // to a preferred maximum chunk size. If set to 0, null or undefined,
+            // or the browser does not support the required Blob API, files will
+            // be uploaded as a whole.
+            maxChunkSize: undefined,
+            // When a non-multipart upload or a chunked multipart upload has been
+            // aborted, this option can be used to resume the upload by setting
+            // it to the size of the already uploaded bytes. This option is most
+            // useful when modifying the options object inside of the "add" or
+            // "send" callbacks, as the options are cloned for each file upload.
+            uploadedBytes: undefined,
+            // By default, failed (abort or error) file uploads are removed from the
+            // global progress calculation. Set the following option to false to
+            // prevent recalculating the global progress data:
+            recalculateProgress: true,
+
+            // Additional form data to be sent along with the file uploads can be set
+            // using this option, which accepts an array of objects with name and
+            // value properties, a function returning such an array, a FormData
+            // object (for XHR file uploads), or a simple object.
+            // The form of the first fileInput is given as parameter to the function:
+            formData: function (form) {
+                return form.serializeArray();
+            },
+
+            // The add callback is invoked as soon as files are added to the fileupload
+            // widget (via file input selection, drag & drop, paste or add API call).
+            // If the singleFileUploads option is enabled, this callback will be
+            // called once for each file in the selection for XHR file uplaods, else
+            // once for each file selection.
+            // The upload starts when the submit method is invoked on the data parameter.
+            // The data object contains a files property holding the added files
+            // and allows to override plugin options as well as define ajax settings.
+            // Listeners for this callback can also be bound the following way:
+            // .bind('fileuploadadd', func);
+            // data.submit() returns a Promise object and allows to attach additional
+            // handlers using jQuery's Deferred callbacks:
+            // data.submit().done(func).fail(func).always(func);
+            add: function (e, data) {
+                data.submit();
+            },
+
+            // Other callbacks:
+            // Callback for the submit event of each file upload:
+            // submit: function (e, data) {}, // .bind('fileuploadsubmit', func);
+            // Callback for the start of each file upload request:
+            // send: function (e, data) {}, // .bind('fileuploadsend', func);
+            // Callback for successful uploads:
+            // done: function (e, data) {}, // .bind('fileuploaddone', func);
+            // Callback for failed (abort or error) uploads:
+            // fail: function (e, data) {}, // .bind('fileuploadfail', func);
+            // Callback for completed (success, abort or error) requests:
+            // always: function (e, data) {}, // .bind('fileuploadalways', func);
+            // Callback for upload progress events:
+            // progress: function (e, data) {}, // .bind('fileuploadprogress', func);
+            // Callback for global upload progress events:
+            // progressall: function (e, data) {}, // .bind('fileuploadprogressall', func);
+            // Callback for uploads start, equivalent to the global ajaxStart event:
+            // start: function (e) {}, // .bind('fileuploadstart', func);
+            // Callback for uploads stop, equivalent to the global ajaxStop event:
+            // stop: function (e) {}, // .bind('fileuploadstop', func);
+            // Callback for change events of the fileInput collection:
+            // change: function (e, data) {}, // .bind('fileuploadchange', func);
+            // Callback for paste events to the dropZone collection:
+            // paste: function (e, data) {}, // .bind('fileuploadpaste', func);
+            // Callback for drop events of the dropZone collection:
+            // drop: function (e, data) {}, // .bind('fileuploaddrop', func);
+            // Callback for dragover events of the dropZone collection:
+            // dragover: function (e) {}, // .bind('fileuploaddragover', func);
+
+            // The plugin options are used as settings object for the ajax calls.
+            // The following are jQuery ajax settings required for the file uploads:
+            processData: false,
+            contentType: false,
+            cache: false
+        },
+
+        // A list of options that require a refresh after assigning a new value:
+        _refreshOptionsList: [
+            'namespace',
+            'dropZone',
+            'fileInput',
+            'multipart',
+            'forceIframeTransport'
+        ],
+
+        _isXHRUpload: function (options) {
+            return !options.forceIframeTransport &&
+                ((!options.multipart && $.support.xhrFileUpload) ||
+                $.support.xhrFormDataFileUpload);
+        },
+
+        _getFormData: function (options) {
+            var formData;
+            if (typeof options.formData === 'function') {
+                return options.formData(options.form);
+            } else if ($.isArray(options.formData)) {
+                return options.formData;
+            } else if (options.formData) {
+                formData = [];
+                $.each(options.formData, function (name, value) {
+                    formData.push({name: name, value: value});
+                });
+                return formData;
+            }
+            return [];
+        },
+
+        _getTotal: function (files) {
+            var total = 0;
+            $.each(files, function (index, file) {
+                total += file.size || 1;
+            });
+            return total;
+        },
+
+        _onProgress: function (e, data) {
+            if (e.lengthComputable) {
+                var total = data.total || this._getTotal(data.files),
+                    loaded = parseInt(
+                        e.loaded / e.total * (data.chunkSize || total),
+                        10
+                    ) + (data.uploadedBytes || 0);
+                this._loaded += loaded - (data.loaded || data.uploadedBytes || 0);
+                data.lengthComputable = true;
+                data.loaded = loaded;
+                data.total = total;
+                // Trigger a custom progress event with a total data property set
+                // to the file size(s) of the current upload and a loaded data
+                // property calculated accordingly:
+                this._trigger('progress', e, data);
+                // Trigger a global progress event for all current file uploads,
+                // including ajax calls queued for sequential file uploads:
+                this._trigger('progressall', e, {
+                    lengthComputable: true,
+                    loaded: this._loaded,
+                    total: this._total
+                });
+            }
+        },
+
+        _initProgressListener: function (options) {
+            var that = this,
+                xhr = options.xhr ? options.xhr() : $.ajaxSettings.xhr();
+            // Accesss to the native XHR object is required to add event listeners
+            // for the upload progress event:
+            if (xhr.upload) {
+                $(xhr.upload).bind('progress', function (e) {
+                    var oe = e.originalEvent;
+                    // Make sure the progress event properties get copied over:
+                    e.lengthComputable = oe.lengthComputable;
+                    e.loaded = oe.loaded;
+                    e.total = oe.total;
+                    that._onProgress(e, options);
+                });
+                options.xhr = function () {
+                    return xhr;
+                };
+            }
+        },
+
+        _initXHRData: function (options) {
+            var formData,
+                file = options.files[0],
+                // Ignore non-multipart setting if not supported:
+                multipart = options.multipart || !$.support.xhrFileUpload,
+                paramName = options.paramName[0];
+            if (!multipart || options.blob) {
+                // For non-multipart uploads and chunked uploads,
+                // file meta data is not part of the request body,
+                // so we transmit this data as part of the HTTP headers.
+                // For cross domain requests, these headers must be allowed
+                // via Access-Control-Allow-Headers or removed using
+                // the beforeSend callback:
+                options.headers = $.extend(options.headers, {
+                    'X-File-Name': file.name,
+                    'X-File-Type': file.type,
+                    'X-File-Size': file.size
+                });
+                if (!options.blob) {
+                    // Non-chunked non-multipart upload:
+                    options.contentType = file.type;
+                    options.data = file;
+                } else if (!multipart) {
+                    // Chunked non-multipart upload:
+                    options.contentType = 'application/octet-stream';
+                    options.data = options.blob;
+                }
+            }
+            if (multipart && $.support.xhrFormDataFileUpload) {
+                if (options.postMessage) {
+                    // window.postMessage does not allow sending FormData
+                    // objects, so we just add the File/Blob objects to
+                    // the formData array and let the postMessage window
+                    // create the FormData object out of this array:
+                    formData = this._getFormData(options);
+                    if (options.blob) {
+                        formData.push({
+                            name: paramName,
+                            value: options.blob
+                        });
+                    } else {
+                        $.each(options.files, function (index, file) {
+                            formData.push({
+                                name: options.paramName[index] || paramName,
+                                value: file
+                            });
+                        });
+                    }
+                } else {
+                    if (options.formData instanceof FormData) {
+                        formData = options.formData;
+                    } else {
+                        formData = new FormData();
+                        $.each(this._getFormData(options), function (index, field) {
+                            formData.append(field.name, field.value);
+                        });
+                    }
+                    if (options.blob) {
+                        formData.append(paramName, options.blob, file.name);
+                    } else {
+                        $.each(options.files, function (index, file) {
+                            // File objects are also Blob instances.
+                            // This check allows the tests to run with
+                            // dummy objects:
+                            if (file instanceof Blob) {
+                                formData.append(
+                                    options.paramName[index] || paramName,
+                                    file,
+                                    file.name
+                                );
+                            }
+                        });
+                    }
+                }
+                options.data = formData;
+            }
+            // Blob reference is not needed anymore, free memory:
+            options.blob = null;
+        },
+
+        _initIframeSettings: function (options) {
+            // Setting the dataType to iframe enables the iframe transport:
+            options.dataType = 'iframe ' + (options.dataType || '');
+            // The iframe transport accepts a serialized array as form data:
+            options.formData = this._getFormData(options);
+            // Add redirect url to form data on cross-domain uploads:
+            if (options.redirect && $('<a></a>').prop('href', options.url)
+                    .prop('host') !== location.host) {
+                options.formData.push({
+                    name: options.redirectParamName || 'redirect',
+                    value: options.redirect
+                });
+            }
+        },
+
+        _initDataSettings: function (options) {
+            if (this._isXHRUpload(options)) {
+                if (!this._chunkedUpload(options, true)) {
+                    if (!options.data) {
+                        this._initXHRData(options);
+                    }
+                    this._initProgressListener(options);
+                }
+                if (options.postMessage) {
+                    // Setting the dataType to postmessage enables the
+                    // postMessage transport:
+                    options.dataType = 'postmessage ' + (options.dataType || '');
+                }
+            } else {
+                this._initIframeSettings(options, 'iframe');
+            }
+        },
+
+        _getParamName: function (options) {
+            var fileInput = $(options.fileInput),
+                paramName = options.paramName;
+            if (!paramName) {
+                paramName = [];
+                fileInput.each(function () {
+                    var input = $(this),
+                        name = input.prop('name') || 'files[]',
+                        i = (input.prop('files') || [1]).length;
+                    while (i) {
+                        paramName.push(name);
+                        i -= 1;
+                    }
+                });
+                if (!paramName.length) {
+                    paramName = [fileInput.prop('name') || 'files[]'];
+                }
+            } else if (!$.isArray(paramName)) {
+                paramName = [paramName];
+            }
+            return paramName;
+        },
+
+        _initFormSettings: function (options) {
+            // Retrieve missing options from the input field and the
+            // associated form, if available:
+            if (!options.form || !options.form.length) {
+                options.form = $(options.fileInput.prop('form'));
+            }
+            options.paramName = this._getParamName(options);
+            if (!options.url) {
+                options.url = options.form.prop('action') || location.href;
+            }
+            // The HTTP request method must be "POST" or "PUT":
+            options.type = (options.type || options.form.prop('method') || '')
+                .toUpperCase();
+            if (options.type !== 'POST' && options.type !== 'PUT') {
+                options.type = 'POST';
+            }
+        },
+
+        _getAJAXSettings: function (data) {
+            var options = $.extend({}, this.options, data);
+            this._initFormSettings(options);
+            this._initDataSettings(options);
+            return options;
+        },
+
+        // Maps jqXHR callbacks to the equivalent
+        // methods of the given Promise object:
+        _enhancePromise: function (promise) {
+            promise.success = promise.done;
+            promise.error = promise.fail;
+            promise.complete = promise.always;
+            return promise;
+        },
+
+        // Creates and returns a Promise object enhanced with
+        // the jqXHR methods abort, success, error and complete:
+        _getXHRPromise: function (resolveOrReject, context, args) {
+            var dfd = $.Deferred(),
+                promise = dfd.promise();
+            context = context || this.options.context || promise;
+            if (resolveOrReject === true) {
+                dfd.resolveWith(context, args);
+            } else if (resolveOrReject === false) {
+                dfd.rejectWith(context, args);
+            }
+            promise.abort = dfd.promise;
+            return this._enhancePromise(promise);
+        },
+
+        // Uploads a file in multiple, sequential requests
+        // by splitting the file up in multiple blob chunks.
+        // If the second parameter is true, only tests if the file
+        // should be uploaded in chunks, but does not invoke any
+        // upload requests:
+        _chunkedUpload: function (options, testOnly) {
+            var that = this,
+                file = options.files[0],
+                fs = file.size,
+                ub = options.uploadedBytes = options.uploadedBytes || 0,
+                mcs = options.maxChunkSize || fs,
+                // Use the Blob methods with the slice implementation
+                // according to the W3C Blob API specification:
+                slice = file.webkitSlice || file.mozSlice || file.slice,
+                upload,
+                n,
+                jqXHR,
+                pipe;
+            if (!(this._isXHRUpload(options) && slice && (ub || mcs < fs)) ||
+                    options.data) {
+                return false;
+            }
+            if (testOnly) {
+                return true;
+            }
+            if (ub >= fs) {
+                file.error = 'uploadedBytes';
+                return this._getXHRPromise(
+                    false,
+                    options.context,
+                    [null, 'error', file.error]
+                );
+            }
+            // n is the number of blobs to upload,
+            // calculated via filesize, uploaded bytes and max chunk size:
+            n = Math.ceil((fs - ub) / mcs);
+            // The chunk upload method accepting the chunk number as parameter:
+            upload = function (i) {
+                if (!i) {
+                    return that._getXHRPromise(true, options.context);
+                }
+                // Upload the blobs in sequential order:
+                return upload(i -= 1).pipe(function () {
+                    // Clone the options object for each chunk upload:
+                    var o = $.extend({}, options);
+                    o.blob = slice.call(
+                        file,
+                        ub + i * mcs,
+                        ub + (i + 1) * mcs
+                    );
+                    // Store the current chunk size, as the blob itself
+                    // will be dereferenced after data processing:
+                    o.chunkSize = o.blob.size;
+                    // Process the upload data (the blob and potential form data):
+                    that._initXHRData(o);
+                    // Add progress listeners for this chunk upload:
+                    that._initProgressListener(o);
+                    jqXHR = ($.ajax(o) || that._getXHRPromise(false, o.context))
+                        .done(function () {
+                            // Create a progress event if upload is done and
+                            // no progress event has been invoked for this chunk:
+                            if (!o.loaded) {
+                                that._onProgress($.Event('progress', {
+                                    lengthComputable: true,
+                                    loaded: o.chunkSize,
+                                    total: o.chunkSize
+                                }), o);
+                            }
+                            options.uploadedBytes = o.uploadedBytes +=
+                                o.chunkSize;
+                        });
+                    return jqXHR;
+                });
+            };
+            // Return the piped Promise object, enhanced with an abort method,
+            // which is delegated to the jqXHR object of the current upload,
+            // and jqXHR callbacks mapped to the equivalent Promise methods:
+            pipe = upload(n);
+            pipe.abort = function () {
+                return jqXHR.abort();
+            };
+            return this._enhancePromise(pipe);
+        },
+
+        _beforeSend: function (e, data) {
+            if (this._active === 0) {
+                // the start callback is triggered when an upload starts
+                // and no other uploads are currently running,
+                // equivalent to the global ajaxStart event:
+                this._trigger('start');
+            }
+            this._active += 1;
+            // Initialize the global progress values:
+            this._loaded += data.uploadedBytes || 0;
+            this._total += this._getTotal(data.files);
+        },
+
+        _onDone: function (result, textStatus, jqXHR, options) {
+            if (!this._isXHRUpload(options)) {
+                // Create a progress event for each iframe load:
+                this._onProgress($.Event('progress', {
+                    lengthComputable: true,
+                    loaded: 1,
+                    total: 1
+                }), options);
+            }
+            options.result = result;
+            options.textStatus = textStatus;
+            options.jqXHR = jqXHR;
+            this._trigger('done', null, options);
+        },
+
+        _onFail: function (jqXHR, textStatus, errorThrown, options) {
+            options.jqXHR = jqXHR;
+            options.textStatus = textStatus;
+            options.errorThrown = errorThrown;
+            this._trigger('fail', null, options);
+            if (options.recalculateProgress) {
+                // Remove the failed (error or abort) file upload from
+                // the global progress calculation:
+                this._loaded -= options.loaded || options.uploadedBytes || 0;
+                this._total -= options.total || this._getTotal(options.files);
+            }
+        },
+
+        _onAlways: function (jqXHRorResult, textStatus, jqXHRorError, options) {
+            this._active -= 1;
+            options.textStatus = textStatus;
+            if (jqXHRorError && jqXHRorError.always) {
+                options.jqXHR = jqXHRorError;
+                options.result = jqXHRorResult;
+            } else {
+                options.jqXHR = jqXHRorResult;
+                options.errorThrown = jqXHRorError;
+            }
+            this._trigger('always', null, options);
+            if (this._active === 0) {
+                // The stop callback is triggered when all uploads have
+                // been completed, equivalent to the global ajaxStop event:
+                this._trigger('stop');
+                // Reset the global progress values:
+                this._loaded = this._total = 0;
+            }
+        },
+
+        _onSend: function (e, data) {
+            var that = this,
+                jqXHR,
+                slot,
+                pipe,
+                options = that._getAJAXSettings(data),
+                send = function (resolve, args) {
+                    that._sending += 1;
+                    jqXHR = jqXHR || (
+                        (resolve !== false &&
+                        that._trigger('send', e, options) !== false &&
+                        (that._chunkedUpload(options) || $.ajax(options))) ||
+                        that._getXHRPromise(false, options.context, args)
+                    ).done(function (result, textStatus, jqXHR) {
+                        that._onDone(result, textStatus, jqXHR, options);
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        that._onFail(jqXHR, textStatus, errorThrown, options);
+                    }).always(function (jqXHRorResult, textStatus, jqXHRorError) {
+                        that._sending -= 1;
+                        that._onAlways(
+                            jqXHRorResult,
+                            textStatus,
+                            jqXHRorError,
+                            options
+                        );
+                        if (options.limitConcurrentUploads &&
+                                options.limitConcurrentUploads > that._sending) {
+                            // Start the next queued upload,
+                            // that has not been aborted:
+                            var nextSlot = that._slots.shift();
+                            while (nextSlot) {
+                                if (!nextSlot.isRejected()) {
+                                    nextSlot.resolve();
+                                    break;
+                                }
+                                nextSlot = that._slots.shift();
+                            }
+                        }
+                    });
+                    return jqXHR;
+                };
+            this._beforeSend(e, options);
+            if (this.options.sequentialUploads ||
+                    (this.options.limitConcurrentUploads &&
+                    this.options.limitConcurrentUploads <= this._sending)) {
+                if (this.options.limitConcurrentUploads > 1) {
+                    slot = $.Deferred();
+                    this._slots.push(slot);
+                    pipe = slot.pipe(send);
+                } else {
+                    pipe = (this._sequence = this._sequence.pipe(send, send));
+                }
+                // Return the piped Promise object, enhanced with an abort method,
+                // which is delegated to the jqXHR object of the current upload,
+                // and jqXHR callbacks mapped to the equivalent Promise methods:
+                pipe.abort = function () {
+                    var args = [undefined, 'abort', 'abort'];
+                    if (!jqXHR) {
+                        if (slot) {
+                            slot.rejectWith(args);
+                        }
+                        return send(false, args);
+                    }
+                    return jqXHR.abort();
+                };
+                return this._enhancePromise(pipe);
+            }
+            return send();
+        },
+
+        _onAdd: function (e, data) {
+            var that = this,
+                result = true,
+                options = $.extend({}, this.options, data),
+                limit = options.limitMultiFileUploads,
+                paramName = this._getParamName(options),
+                paramNameSet,
+                paramNameSlice,
+                fileSet,
+                i;
+            if (!(options.singleFileUploads || limit) ||
+                    !this._isXHRUpload(options)) {
+                fileSet = [data.files];
+                paramNameSet = [paramName];
+            } else if (!options.singleFileUploads && limit) {
+                fileSet = [];
+                paramNameSet = [];
+                for (i = 0; i < data.files.length; i += limit) {
+                    fileSet.push(data.files.slice(i, i + limit));
+                    paramNameSlice = paramName.slice(i, i + limit);
+                    if (!paramNameSlice.length) {
+                        paramNameSlice = paramName;
+                    }
+                    paramNameSet.push(paramNameSlice);
+                }
+            } else {
+                paramNameSet = paramName;
+            }
+            data.originalFiles = data.files;
+            $.each(fileSet || data.files, function (index, element) {
+                var newData = $.extend({}, data);
+                newData.files = fileSet ? element : [element];
+                newData.paramName = paramNameSet[index];
+                newData.submit = function () {
+                    newData.jqXHR = this.jqXHR =
+                        (that._trigger('submit', e, this) !== false) &&
+                        that._onSend(e, this);
+                    return this.jqXHR;
+                };
+                return (result = that._trigger('add', e, newData));
+            });
+            return result;
+        },
+
+        // File Normalization for Gecko 1.9.1 (Firefox 3.5) support:
+        _normalizeFile: function (index, file) {
+            if (file.name === undefined && file.size === undefined) {
+                file.name = file.fileName;
+                file.size = file.fileSize;
+            }
+        },
+
+        _replaceFileInput: function (input) {
+            var inputClone = input.clone(true);
+            $('<form></form>').append(inputClone)[0].reset();
+            // Detaching allows to insert the fileInput on another form
+            // without loosing the file input value:
+            input.after(inputClone).detach();
+            // Avoid memory leaks with the detached file input:
+            $.cleanData(input.unbind('remove'));
+            // Replace the original file input element in the fileInput
+            // collection with the clone, which has been copied including
+            // event handlers:
+            this.options.fileInput = this.options.fileInput.map(function (i, el) {
+                if (el === input[0]) {
+                    return inputClone[0];
+                }
+                return el;
+            });
+            // If the widget has been initialized on the file input itself,
+            // override this.element with the file input clone:
+            if (input[0] === this.element[0]) {
+                this.element = inputClone;
+            }
+        },
+
+        _onChange: function (e) {
+            var that = e.data.fileupload,
+                data = {
+                    files: $.each($.makeArray(e.target.files), that._normalizeFile),
+                    fileInput: $(e.target),
+                    form: $(e.target.form)
+                };
+            if (!data.files.length) {
+                // If the files property is not available, the browser does not
+                // support the File API and we add a pseudo File object with
+                // the input value as name with path information removed:
+                data.files = [{name: e.target.value.replace(/^.*\\/, '')}];
+            }
+            if (that.options.replaceFileInput) {
+                that._replaceFileInput(data.fileInput);
+            }
+            if (that._trigger('change', e, data) === false ||
+                    that._onAdd(e, data) === false) {
+                return false;
+            }
+        },
+
+        _onPaste: function (e) {
+            var that = e.data.fileupload,
+                cbd = e.originalEvent.clipboardData,
+                items = (cbd && cbd.items) || [],
+                data = {files: []};
+            $.each(items, function (index, item) {
+                var file = item.getAsFile && item.getAsFile();
+                if (file) {
+                    data.files.push(file);
+                }
+            });
+            if (that._trigger('paste', e, data) === false ||
+                    that._onAdd(e, data) === false) {
+                return false;
+            }
+        },
+
+        _onDrop: function (e) {
+            var that = e.data.fileupload,
+                dataTransfer = e.dataTransfer = e.originalEvent.dataTransfer,
+                data = {
+                    files: $.each(
+                        $.makeArray(dataTransfer && dataTransfer.files),
+                        that._normalizeFile
+                    )
+                };
+            if (that._trigger('drop', e, data) === false ||
+                    that._onAdd(e, data) === false) {
+                return false;
+            }
+            e.preventDefault();
+        },
+
+        _onDragOver: function (e) {
+            var that = e.data.fileupload,
+                dataTransfer = e.dataTransfer = e.originalEvent.dataTransfer;
+            if (that._trigger('dragover', e) === false) {
+                return false;
+            }
+            if (dataTransfer) {
+                dataTransfer.dropEffect = dataTransfer.effectAllowed = 'copy';
+            }
+            e.preventDefault();
+        },
+
+        _initEventHandlers: function () {
+            var ns = this.options.namespace;
+            if (this._isXHRUpload(this.options)) {
+                this.options.dropZone
+                    .bind('dragover.' + ns, {fileupload: this}, this._onDragOver)
+                    .bind('drop.' + ns, {fileupload: this}, this._onDrop)
+                    .bind('paste.' + ns, {fileupload: this}, this._onPaste);
+            }
+            this.options.fileInput
+                .bind('change.' + ns, {fileupload: this}, this._onChange);
+        },
+
+        _destroyEventHandlers: function () {
+            var ns = this.options.namespace;
+            this.options.dropZone
+                .unbind('dragover.' + ns, this._onDragOver)
+                .unbind('drop.' + ns, this._onDrop)
+                .unbind('paste.' + ns, this._onPaste);
+            this.options.fileInput
+                .unbind('change.' + ns, this._onChange);
+        },
+
+        _setOption: function (key, value) {
+            var refresh = $.inArray(key, this._refreshOptionsList) !== -1;
+            if (refresh) {
+                this._destroyEventHandlers();
+            }
+            $.Widget.prototype._setOption.call(this, key, value);
+            if (refresh) {
+                this._initSpecialOptions();
+                this._initEventHandlers();
+            }
+        },
+
+        _initSpecialOptions: function () {
+            var options = this.options;
+            if (options.fileInput === undefined) {
+                options.fileInput = this.element.is('input:file') ?
+                        this.element : this.element.find('input:file');
+            } else if (!(options.fileInput instanceof $)) {
+                options.fileInput = $(options.fileInput);
+            }
+            if (!(options.dropZone instanceof $)) {
+                options.dropZone = $(options.dropZone);
+            }
+        },
+
+        _create: function () {
+            var options = this.options;
+            // Initialize options set via HTML5 data-attributes:
+            $.extend(options, $(this.element[0].cloneNode(false)).data());
+            options.namespace = options.namespace || this.widgetName;
+            this._initSpecialOptions();
+            this._slots = [];
+            this._sequence = this._getXHRPromise(true);
+            this._sending = this._active = this._loaded = this._total = 0;
+            this._initEventHandlers();
+        },
+
+        destroy: function () {
+            this._destroyEventHandlers();
+            $.Widget.prototype.destroy.call(this);
+        },
+
+        enable: function () {
+            $.Widget.prototype.enable.call(this);
+            this._initEventHandlers();
+        },
+
+        disable: function () {
+            this._destroyEventHandlers();
+            $.Widget.prototype.disable.call(this);
+        },
+
+        // This method is exposed to the widget API and allows adding files
+        // using the fileupload API. The data parameter accepts an object which
+        // must have a files property and can contain additional options:
+        // .fileupload('add', {files: filesList});
+        add: function (data) {
+            if (!data || this.options.disabled) {
+                return;
+            }
+            data.files = $.each($.makeArray(data.files), this._normalizeFile);
+            this._onAdd(null, data);
+        },
+
+        // This method is exposed to the widget API and allows sending files
+        // using the fileupload API. The data parameter accepts an object which
+        // must have a files property and can contain additional options:
+        // .fileupload('send', {files: filesList});
+        // The method returns a Promise object for the file upload call.
+        send: function (data) {
+            if (data && !this.options.disabled) {
+                data.files = $.each($.makeArray(data.files), this._normalizeFile);
+                if (data.files.length) {
+                    return this._onSend(null, data);
+                }
+            }
+            return this._getXHRPromise(false, data && data.context);
+        }
+
+    });
+
+}));
 }, "underscore": function(exports, require, module) {//     Underscore.js 1.3.3
 //     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore is freely distributable under the MIT license.

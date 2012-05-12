@@ -1,6 +1,7 @@
 from django import forms
-from django.forms import fields, models as form_models, widgets
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.forms import fields, models as form_models, widgets
 from peak.util.proxies import ObjectWrapper
 from radioapp import models
 
@@ -45,6 +46,21 @@ class SpecimenForm(forms.ModelForm):
                              widget=forms.Select(attrs=_taxon_attrs))
     institution = InstitutionChoiceField(label="Institution",
                                          queryset=models.Institution.objects.all())
+    created_by = form_models.ModelChoiceField(queryset=User.objects.all())
+
+    specimen_id = fields.CharField(required=False)
+    sex = form_models.ChoiceField(required=False, 
+                                  choices=models.Specimen.SEX_CHOICES)
+    settings = fields.CharField(required=False)
+    comments = fields.CharField(required=False)
+
+    # cranial measurements
+    skull_length = fields.DecimalField(required=False)
+    cranial_width = fields.DecimalField(required=False)
+    neurocranial_height = fields.DecimalField(required=False)
+    facial_height = fields.DecimalField(required=False)
+    palate_length = fields.DecimalField(required=False)
+    palate_width = fields.DecimalField(required=False)
 
     class Meta:
         model = models.Specimen

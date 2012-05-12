@@ -47,7 +47,8 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/mnt/storage/radiograph/media'
+#MEDIA_ROOT = '/mnt/storage/radiograph/media'
+MEDIA_ROOT = '/mnt/storage/radiograph/media-test'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).

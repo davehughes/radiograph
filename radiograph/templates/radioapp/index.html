@@ -7,6 +7,7 @@
     {{ block.super }}
 
     <script type="text/javascript">
+        var app = require('radioapp/app');
         var views = require('radioapp/views');
         var models = require('radioapp/models');
         var util = require('radioapp/util');
@@ -16,15 +17,21 @@
         App.alerts = new util.Alerts();
         App.view = new views.AppView();
         App.links = {{ links|jsonify }};
+        App.choices = {{ choices|jsonify }};
+        App.choiceMap = {};
+        _.each(App.choices, function(vals, category) {
+            var map = App.choiceMap[category] = {};
+            _.each(vals, function(v) { map[v[0]] = v[1]; });
+        });
+
+        App.resources = app.createResources({{ resources|jsonify }});
+
+        App.router = new app.RadioappRouter();
+        Backbone.history.start({pushState: true});
 
         $(function() {
             var specimens = new models.SpecimenCollection({{ specimens|jsonify }}, {parse: true});
             $(document).find('body').append(App.view.render().$el);
-
-            var specimenSearchPane = new views.SpecimenSearchPane({model: specimens});
-            App.view.pushPane(specimenSearchPane);
-
-            App.alerts.publish('success', 'Welcome!')
         });
     </script>
 {% endblock %}

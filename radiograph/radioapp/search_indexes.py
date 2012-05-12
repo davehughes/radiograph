@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.core.urlresolvers import reverse
 from haystack.indexes import *
@@ -21,6 +22,7 @@ class SpecimenIndex(SearchIndex):
     sex = FacetCharField(model_attr='sex', null=True)
     sex_label = FacetCharField(null=True)
     taxa = FacetMultiValueField()
+    taxon_label_facet = FacetCharField()
     json_doc = FacetCharField()
 
     def prepare(self, obj):
@@ -35,21 +37,29 @@ class SpecimenIndex(SearchIndex):
                                      if t.level >= 7]),
             'taxa': [t.id for t in obj.taxon.hierarchy]
             })
+        doc['taxon_label_facet'] = doc['taxon_label']
 
         doc['json_doc'] = json.dumps({
+            'id': obj.id,
+            'specimenId': obj.specimen_id,
             'institution': obj.institution.id,
             'sex': obj.sex,
             'taxon': obj.taxon.id,
-            'skull_length': obj.skull_length,
-            'cranial_width': obj.cranial_width,
-            'neurocranial_height': obj.neurocranial_height,
-            'facial_height': obj.facial_height,
-            'palate_length': obj.palate_length,
-            'palate_width': obj.palate_width,
+            'comments': obj.comments,
+            'settings': obj.settings,
+            'skullLength': obj.skull_length,
+            'cranialWidth': obj.cranial_width,
+            'neurocranialHeight': obj.neurocranial_height,
+            'facialHeight': obj.facial_height,
+            'palateLength': obj.palate_length,
+            'palateWidth': obj.palate_width,
             'images': [{'href': reverse('image', args=[img.id]),
                         'aspect': img.aspect,
-                        'file': reverse('image-file', args=[img.id, 'full'])}
-                       for img in obj.images.all()]
+                        'name': os.path.basename(img.image_full.name),
+                        'url': reverse('image-file', args=[img.id, 'full'])}
+                       for img in obj.images.all()],
+            'created': obj.created.isoformat(),
+            'lastModified': obj.last_modified.isoformat()
             })
         return doc
 

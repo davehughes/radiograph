@@ -6,8 +6,13 @@ from radioapp.views import SearchView
 admin.autodiscover()
 
 urlpatterns = patterns('',
+
+    # Admin and accounts
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),
+
+    # API
+    url(r'^api/', include('radioapp.api.urls', namespace='api')),
 
     url(r'^accounts/login/$', 
         'radioapp.views.login',
@@ -19,6 +24,7 @@ urlpatterns = patterns('',
         {'next_page': '/'},
         name='logout'),
 
+    # Specimens
     url(r'^specimens/$',
         'radioapp.views.specimens',
         name='specimen-collection'),
@@ -27,22 +33,23 @@ urlpatterns = patterns('',
         search_view_factory(SearchView),
         name='specimen-search'),
 
-    url(r'^specimens/new$',
-        'radioapp.views.new_specimen',
-        name='specimen-new'),
+    # url(r'^specimens/new$',
+    #     'radioapp.views.new_specimen',
+    #     name='specimen-new'),
 
     url(r'^specimens/(?P<specimen_id>[^/]+)$',
         'radioapp.views.specimen',
         name='specimen'),
 
-    url(r'^specimens/(?P<specimen_id>[^/]+)/edit$',
-        'radioapp.views.edit_specimen',
-        name='specimen-edit'),
+    # url(r'^specimens/(?P<specimen_id>[^/]+)/edit$',
+    #     'radioapp.views.edit_specimen',
+    #     name='specimen-edit'),
 
-    url(r'^specimens/(?P<specimen_id>[^/]+)/delete$',
-        'radioapp.views.delete_specimen',
-        name='specimen-delete'),
+    # url(r'^specimens/(?P<specimen_id>[^/]+)/delete$',
+    #     'radioapp.views.delete_specimen',
+    #     name='specimen-delete'),
 
+    # Images and derivatives
     url(r'^images/(?P<image_id>[^/]+)$',
         'radioapp.views.image',
         name='image'),
@@ -51,9 +58,14 @@ urlpatterns = patterns('',
         'radioapp.views.image_file',
         name='image-file'),
 
-    url(r'^app/state',
-        'radioapp.views.app_state',
-        name='app-state'),
+    # Taxa
+    url(r'^taxa$',
+        'radioapp.views.taxa',
+        name='taxa'),
+
+    url(r'^taxa/(?P<taxon_id>[^/]+)$',
+        'radioapp.views.taxon',
+        name='taxon'),
 
     # Endpoints exposing choices for various fields
     url(r'^choices/(?P<field>[^/]+)$', 

@@ -3,6 +3,7 @@ Backbone = require('backbone')
 models = require('radioapp/models')
 require('bootstrap')
 require('jquery.chosen')
+require('jquery.fileupload')
 
 class View extends Backbone.View 
   templateId: null 
@@ -21,29 +22,121 @@ class View extends Backbone.View
 
   updateAuthz: (user) ->
 
+  ignore: (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+
 class SpecimenForm extends View
   templateId: 'templates/specimen-edit'
 
   events: ->
     'click [rel=discard]': 'discard'
+    'click .dropdown.sex .dropdown-menu': 'ignore'
+    'click [rel=save]': 'save'
+    'click [rel=add-image]': (e) ->
+      e.preventDefault()
+      e.stopPropagation()
+      img = new models.Image()
+      @model.get('images').add(img, {silent: true})
+      @addImage(img)
+    'change [name=institution],
+            [name=specimenId],
+            [name=taxon],
+            [name=sex],
+            [name=skullLength],
+            [name=cranialWidth],
+            [name=neurocranialHeight],
+            [name=facialHeight],
+            [name=palateLength],
+            [name=palateWidth],
+            [name=comments],
+            [name=settings]': (e) =>
+      control = $(e.currentTarget)
+      @model.set(control.attr('name'), control.val())
 
   viewContext: -> _.extend super,
     existing: if @model then true else false
-    values: {}
-    choices:
-      institution: []
-      sex: []
-      taxon: []
     links: {}
 
   render: ->
     super
-    _.defer => @$('select[name=taxon]').chosen()
-    # new ImagesView({el: @$('.image-controls')})
+
+    # set select values
+    @$('[name=institution]').val(@model.get('institution'))
+    @$('[name=taxon]').val(@model.get('taxon'))
+    @$('[name=sex]').val(@model.get('sex'))
+
+    _.defer => @$('[name=taxon]').chosen()
+    
+    @model.get('images').each @addImage
+
+    @$('form').fileupload
+      url: @model.get('href') or @model.collection.get('href')
+      # url: '/specimens/'
+      formData: @getSpecimenData
+      fileInput: null
+      dropZone: null
+
     @
+
+  addImage: (img) =>
+    imgView = new ImageView({model: img})
+    @$('.image-controls').append(imgView.render().$el)
 
   discard: ->
     App.view.popPane()
+
+  save: (e) ->
+    fileInputs = _.filter @$('.replacementFile input[type=file]'), (input) => $(input).val()
+    if fileInputs.length == 0
+      specimenData = @getSpecimenData()[0]
+      ajaxData = {}
+      ajaxData[specimenData.name] = specimenData.value
+    
+      xhr = $.ajax
+        url: @model.get('href') or @model.collection.get('href')
+        type: 'POST'
+        data: ajaxData
+    else
+      files = _.map(fileInputs, (f) -> f.files[0])
+      paramNames = _.map(fileInputs, (f) -> $(f).attr('name'))
+      xhr = @$('form').fileupload 'send',
+        files: files
+        paramName: paramNames
+
+      @$('.submission-status').show()
+        .find('.bar').css('width', 0)
+      @$('form').on 'fileuploadprogress', (e, data) =>
+        width = "#{(data.loaded * 100) / data.total}%"
+        @$('.submission-status .bar').css('width', width)
+        console.log "progress: #{width}"
+
+    @$('[rel=save], [rel=discard]').attr('disabled', 'disabled').addClass('disabled')
+
+    xhr.done (response) =>
+      console.log 'save successful'
+      App.view.popPane()
+
+    xhr.fail (response) =>
+      alert 'Error saving specimen'
+
+    xhr.always =>
+      @$('.submission-status').hide()
+        .find('.bar').css('width', 0)
+      @$('[rel=save], [rel=discard]').removeAttr('disabled').removeClass('disabled')
+
+  getSpecimenData: (args...) =>
+    specimenData = @model.toJSON()
+    _.each specimenData.images or [], (img) ->
+      delete img.links
+      delete img.name
+      delete img.url
+      if img.replacementFile
+        img.replacementFile = img.replacementFile.file
+      else
+        delete img.replacementFile
+
+    [{name: 'specimen', value: JSON.stringify specimenData}]
 
 class SpecimenModal extends SpecimenForm
   className = 'modal specimen-modal'
@@ -60,19 +153,37 @@ class SpecimenSearchPane extends View
   templateId: 'templates/specimen-search-form'
 
   events: ->
-    'click [rel=create]': 'showCreateItemPane',
+    'click [rel=create]': 'showCreateItemPane'
+    'click .icon-search': 'setQuery'
+    'keydown [name=q]': (e) => if e.keyCode == 13 then @setQuery()
+    'click [rel=results-per-page]': 'setResultsPerPage'
+    'click [rel=sort-field]': 'setSortField'
+    'click [rel=sort-direction]': 'setSortDirection'
+  
+  initialize: ->
+    super
+    @searchMgr = new models.SearchManager()
+    @searchMgr.on 'change', @loadSearch
 
   render: ->
     super
+    @renderPagination()
+    @renderResults()
+    @$('.results-loading').hide()
+    @
+
+  renderPagination: ->
     if @model.get('pagination')
       _.each @$('.pagination'), (placeholder) =>
         paginationView = new PaginationView(@model.get('pagination'))
         $(placeholder).replaceWith(paginationView.render().$el)
-        paginationView.on 'navigate', @navigateToPage
+        paginationView.on 'navigate', (page) => @searchMgr.set 'page', page
+
+  renderResults: ->
+    @$('table tbody').empty()
     _.each @model.get('items'), (s) =>
       view = new SpecimenResult({model: s})
       @$('table tbody').append(view.render().$el)
-    @
 
   updateAuthz: (user=App.user) ->
     if user.get('isStaff')
@@ -80,14 +191,54 @@ class SpecimenSearchPane extends View
     else
       @$('[rel=edit],[rel=create]').hide()
 
-  navigateToPage: (page) =>
-    console.log "navigate to page #{page}"
-    # TODO: fill in form template, setting page, then submit
-
   showCreateItemPane: (e) =>
     e.preventDefault()
     e.stopPropagation()
-    App.view.pushPane(new SpecimenForm())
+    model = new models.Specimen()
+    model.collection = @model
+
+    App.router.navigate "/specimens/${model.id}"
+    App.view.pushPane new views.SpecimenForm(model: model)
+
+  loadSearch: (e) =>
+    $('.results-loading').show()
+    $('.results-placeholder').hide()
+    xhr = $.ajax
+      type: 'GET'
+      url: @model.get('href')
+      data: @searchMgr.toJSON()
+      dataType: 'json'
+
+    xhr.done (data) =>
+      # TODO: update results
+      @model = new models.SpecimenCollection(data, {parse: true})
+      @renderPagination()
+      @renderResults()
+      $('.results-loading').hide()
+      $('.results-placeholder').show()
+
+  setQuery: (e) ->
+    @searchMgr.set 'query', @$('input[name=q]').val()
+
+  setResultsPerPage: (e) ->
+    @searchMgr.set
+      perPage: $(e.currentTarget).text()
+      page: null
+    $(e.currentTarget)
+      .parents('.dropdown')
+      .find('.dropdown-display')
+      .text $(e.currentTarget).text()
+
+  setSortField: (e) ->
+    @searchMgr.set 'searchField', $(e.currentTarget).data('value')
+    $(e.currentTarget)
+      .parents('.dropdown')
+      .find('.dropdown-display')
+      .text $(e.currentTarget).text()
+
+  setSortDirection: (e) ->
+    @searchMgr.set 'sortDirection', $(e.currentTarget).data('value')
+    $(e.currentTarget).hide().siblings().show()
 
 class SpecimenResult extends View
   templateId: 'templates/specimen-list-item'
@@ -97,37 +248,38 @@ class SpecimenResult extends View
     'click [rel=edit]': 'showEditPane'
     'click [rel=detail]': 'showDetailPane'
 
-  viewContext: -> _.extend super,
-    choices:
-      taxon: {}
-      sex: {}
-      institution: {}
+  initialize: ->
+    @model.on 'change', @render, @
 
   showEditPane: (e) =>
     e.preventDefault()
     e.stopPropagation()
-    App.view.pushPane(new SpecimenForm({model: @model}))
+    App.router.navigate "#{@model.url}/edit"
+    App.view.pushPane new SpecimenForm(model: @model)
+    
 
   showDetailPane: (e) =>
     e.preventDefault()
     e.stopPropagation()
-    App.view.pushPane(new SpecimenDetailPane())
+    App.router.navigate "#{@model.url}"
+    App.view.pushPane new SpecimenDetailPane(model: @model)
 
 class SpecimenDetailPane extends View
   templateId: 'templates/specimen-detail'
   events: ->
     'click [rel=back]': 'back'
-
-  viewContext: -> _.extend super,
-    choices:
-      taxon: {}
-      sex: {}
-      institution: {}
+    'click [rel=edit]': 'showEditPane'
 
   back: (e) ->
     e.preventDefault()
     e.stopPropagation()
     App.view.popPane()
+
+  showEditPane: (e) =>
+    e.preventDefault()
+    e.stopPropagation()
+    App.router.navigate "#{@model.url}/edit"
+    App.view.pushPane(new SpecimenForm(model: @model))
 
 class LoginFormView extends View
   templateId: 'templates/login'
@@ -258,92 +410,38 @@ class AppView extends Backbone.View
 class SpecimenEditPane extends View
   templateId: 'templates/specimen-edit'
 
-#class SpecimenSearchPane extends View
-  # subelements: search form, results
-  # data: specimens or specimens endpoint
+class ImageView extends View
+  templateId: 'templates/image-control'
+  className: 'image-view'
 
-#class SpecimenSearchForm extends View
-  # subelements: pagination, results container
-  # actions: go to detail, go to other page, delete, edit, create, download
-  # data: pagination data, search results
-
-#class SpecimenDetailPane extends View
-  # subelements: image thumbnails, image modal (popup)
-  # actions: view image detail, edit specimen
-  # data: specimen, (+images)
-
-#class SpecimenEditPane extends View
-  # subelements: just edit form?
-  # actions: save, discard
-  # data: specimen data (+images), template and choices
-
-class ImagesView extends Backbone.View
   initialize: ->
-    images = _.map @$('.image-control'), (i) =>
-      i = $(i)
-      new Image
-        id: i.find('input[type=hidden]').val(),
-        aspect: i.find('select').val(),
-        currentFile: new File
-          name: i.find('a').text(),
-          url: i.find('a').attr('href')
-
-    @model = new ImageCollection(images)
-    @model.on 'add', @addImageView, this
-    @render()
-
-  events: ->
-    'click .add-image': 'addImage'
-
-  render: ->
-    @$el.empty()
-    @$el.append($('<a class="btn add-image"><i class="icon-plus"></i>Add Image</a>'))
-    @model.each (img) => addImageView(img)
-  
-  addImage: -> @model.add(new Image())
-
-  addImageView: (img) ->
-    imgView = new ImageView({model: img})
-    @$('.add-image').before(imgView.render().$el)
-
-class ImageView extends Backbone.View
-  initialize: ->
-    @model.on 'change', @render, this
+    @model.on 'change', @render
 
   events: ->
     'change input[type=file]': 'replaceFile',
     'click .cancel-replace': 'cancelReplacement',
-    'click .remove-image': 'remove'
+    'click [rel=remove-image]': 'remove'
 
-  render: ->
-    template = require('templates/image-control')
-    fileInput = @$('.fileinput-button input[type=file]')
-    collection_prefix = @model.collection.cid
-    item_prefix = @model.cid
-    @$el.html template
-      image: @model.toJSON(),
-      aspectOptions: @aspectOptions()
-        
-    if fileInput.length > 0
-      @$('.fileinput-button input[type=file]').replaceWith(fileInput)
+  render: =>
+    # transfer existing file inputs over to the new rendered element
+    replacementInput = @$('.replacementFile input[type=file]')
+    super
+    @$('.replacementFile').empty().append(replacementInput)
     @$('.dropdown-toggle').dropdown()
-    return this
+    @
 
-  replaceFile: ->
-    replacementFile = new File
-      name: $(e.currentTarget).val().replace("C:\\fakepath\\", "")
-    @model.set('replacementFile', replacementFile)
+  replaceFile: (e) =>
+    fileInput = $(e.currentTarget)
+    fileId = "file-#{@model.cid}"
+    fileInput.attr('name', fileId)
+    @$('.replacementFile').empty().append(fileInput)
+    @model.set 'replacementFile',
+      name: fileInput.val().replace("C:\\fakepath\\", "")
+      file: fileId
 
-  cancelReplacement: -> @model.set('replacementFile', null)
-
-  aspectOptions: ->
-    options = [
-      {value: '', label: '---------'}
-      {value: 'L', label: 'Lateral'}
-      {value: 'S', label: 'Superior'}
-    ]
-    return _.map options, (x) =>
-      x.selected = x.value == @model.get('aspect')
+  cancelReplacement: =>
+    @$('.replacementFile').empty()
+    @model.set 'replacementFile', null
 
   remove: ->
     @model.collection.remove(@model)
@@ -378,9 +476,9 @@ class PaginationView extends Backbone.View
 
   buildPageElement: (page) =>
     if not page.pageNumber
-      "<a href='#' class='inactive'>#{page.display}</a>"
+      "<li><a href='#' class='inactive'>#{page.display}</a></li>"
     else
-      "<a href='#' rel='page' data-page='#{page.pageNumber}'>#{page.display}</a>"
+      "<li><a href='#' rel='page' data-page='#{page.pageNumber}'>#{page.display}</a></li>"
 
   paginate: (currentPage, totalPages, adjacent=2) ->
     adjacent ?= 2
@@ -413,10 +511,10 @@ class PaginationView extends Backbone.View
 
     pages = _.map(_.range(chunkstart, chunkend + 1), createPageNav)
     if (ellipsisPre)
-      pages.unshift(createPaginationStruct(null, '...'))
+      pages.unshift(createPaginationStruct(null, '&hellip;'))
       pages.unshift(createPageNav(1))
     if (ellipsisPost)
-      pages.push(createPaginationStruct(null, '...'))
+      pages.push(createPaginationStruct(null, '&hellip;'))
       pages.push(createPageNav(totalPages))
     if (currentPage > 1)
       pages.unshift(createPaginationStruct(currentPage - 1, '&#xab;'))
@@ -436,7 +534,7 @@ class FormPaginationView extends PaginationView
 _.extend exports,
   'AppView': AppView
   'ImageView': ImageView
-  'ImagesView': ImagesView
   'SpecimenForm': SpecimenForm
   'SpecimenModal': SpecimenModal
   'SpecimenSearchPane': SpecimenSearchPane
+  'SpecimenDetailPane': SpecimenDetailPane

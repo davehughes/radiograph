@@ -1,7 +1,47 @@
 @import 'bootstrap/bootstrap';
 @import 'chosen.css.less';
 
-// TODO: hidden file inputs
+.appview {
+    width: 950px;
+    margin: auto;
+    .box-shadow(0 0 40px 1px rgba(0,0,0,0.1));
+    padding: 10px;
+}
+
+.search-bar {
+    border-bottom: 1px solid #DDD;
+    .specimen-query {
+        display: inline;
+    }
+
+    .search-params {
+        display: inline-block;
+        margin-top: 8px;
+    }
+}
+
+.results-loading td {
+    text-align: center;
+    padding-top: 100px;
+    height: 500px;
+
+    span {
+        border: 3px solid #08c;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #6CF;
+        color: #0077B3;
+        font-weight: bold;
+    }
+}
+
+table.specimen-results {
+    th, td {
+        vertical-align: middle;
+    }
+}
+
+// Specimen edit controls
 input {
     box-sizing: content-box;
 }
@@ -10,9 +50,25 @@ input {
     margin-bottom: 9px;
 }
 
-textarea[name=comments],
-textarea[name=settings] {
+[name=institution],
+[name=sex],
+[name=specimenId],
+[name=taxon] {
+    width: 300px;
+}
+
+[name=comments],
+[name=settings] {
     width: 642px;
+}
+
+.submission-status {
+    margin-bottom: 8px;
+    margin-top: -8px;
+}
+
+.control-group.specimen-id {
+    input { width: 290px; }
 }
 
 .control-group.measurements {
@@ -31,6 +87,58 @@ textarea[name=settings] {
     }
 }
 
+.image-view {
+    width: 642px;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #DDD;
+
+    [rel=remove-image] {
+        .opacity(40);
+        float: right;
+        margin-top: 8px;
+        margin-right: 8px;
+
+        &:hover {
+            .opacity(100);
+        }
+    }
+}
+
+// hidden file inputs
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+  /* float: left; */
+  margin-right: 4px;
+  .ie7-inline-block;
+  display: inline-block;
+}
+
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  border: solid transparent;
+  border-width: 0 0 100px 200px;
+  .opacity(0);
+  -moz-transform: translate(-300px, 0) scale(4);
+  direction: ltr;
+  cursor: pointer;
+}
+
+/* Fix for IE 6: */
+*html .fileinput-button {
+  line-height: 22px;
+  margin: 1px -3px 0 0;
+}
+
+/* Fix for IE 7: */
+*+html .fileinput-button {
+  margin: 1px 0 0 0;
+}
+
 // Cosmetic changes to chosen
 .control-group {
     .chzn-single {
@@ -47,5 +155,56 @@ textarea[name=settings] {
     .modal-footer {
         margin-top: 0;
         text-align: center;
+    }
+}
+
+// Search form and filtering
+.specimen-query {
+    input {
+        padding-right: 24px;
+        padding-left: 4px;
+    }
+    i { 
+        margin-left: -24px;
+        margin-top: -2px;
+        .opacity(30);
+        &:hover {
+          .opacity(100);
+          cursor: pointer;
+        }
+    }
+}
+
+.pagination {
+    margin: 0 4px;
+    text-align: center;
+
+    a {
+        padding: 0 12px;
+        line-height: 28px;
+    }
+}
+
+table {
+    font-size: 14px;
+}
+
+.search-params {
+    .dropdown, .sort-direction-toggle {
+        .border-radius(8px);
+        background-color: #EEE;
+        padding: 4px 4px 4px 8px;
+        margin-right: 4px;
+        cursor: pointer;
+    }
+}
+
+.dropdown.sex {
+    label { 
+        display: inline; 
+    }
+
+    input[type=checkbox] {
+        margin-left: 4px;
     }
 }

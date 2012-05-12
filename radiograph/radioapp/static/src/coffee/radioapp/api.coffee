@@ -1,44 +1,14 @@
 _ = require('underscore')._
 Backbone = require('backbone')
 
-class CollectionModel extends Backbone.Model
-  itemModel: -> CollectionItemModel
-  defaults: ->
-    version: null
-    href: null
-    items: []
-    links: []
-    template: null
-    queries: []
-    error: null
-    pagination:
-      currentPage: 1
-      totalPages: 1
-
-  parse: (input) ->
-    collection = input.collection
-    ItemModel = @itemModel()
-    collection.items = _.map collection.items, (i) =>
-      item = new ItemModel(i, {parse: true})
-      item.collection = @
-      return item
-    return collection
-
-  getLink: (rel) -> _.find(@links, (l) -> l.rel == rel)
-  fetchTemplate: (callback) ->
-    if @get('template') then callback(@get('template'))
-    if @getLink('template')
-      if not @_templateXHR
-        @_templateXHR = $.ajax
-          url: @getLink('template')
-          dataType: 'json'
-      @_templateXHR.done(callback)
-    return null 
-
 class CollectionItemModel extends Backbone.Model
   defaults: ->
     href: null
     links: []
+
+  initialize: ->
+    super
+    @url = @get('href')
 
   ###
   Map from collection+json style data fields (e.g. [{name: 'foo', value: 'bar'}, ...])
@@ -58,6 +28,45 @@ class CollectionItemModel extends Backbone.Model
     return _.extend fieldValues,
       href: input.href
       links: input.links
+
+class CollectionModel extends Backbone.Model
+  itemModel: CollectionItemModel
+  defaults: ->
+    version: null
+    href: null
+    items: []
+    links: []
+    template: null
+    queries: []
+    error: null
+    pagination:
+      currentPage: 1
+      totalPages: 1
+
+  parse: (input) ->
+    collection = input.collection
+    collection.items = _.map collection.items, (i) =>
+      item = new @itemModel(i, {parse: true})
+      item.collection = @
+      return item
+    return collection
+
+  getLink: (rel) -> _.find(@links, (l) -> l.rel == rel)
+  fetchTemplate: (callback) ->
+    if @get('template') then callback(@get('template'))
+    if @getLink('template')
+      if not @_templateXHR
+        @_templateXHR = $.ajax
+          url: @getLink('template')
+          dataType: 'json'
+      @_templateXHR.done(callback)
+    return null 
+
+  fetchChoices: (url, callback) ->
+    $.ajax
+      type: 'GET'
+      dataType: 'json'
+
 
 _.extend exports,
   'CollectionModel': CollectionModel

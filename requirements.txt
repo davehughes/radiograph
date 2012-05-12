@@ -6,3 +6,4 @@ proxytypes>=0.9
 psycopg2>=2.4.1
 pysolr>=2.0
 python-magic
+djangorestframework==0.3.3

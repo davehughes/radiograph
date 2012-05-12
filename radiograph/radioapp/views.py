@@ -1,16 +1,19 @@
 import copy
 import datetime
 import json
+import math
 import mimetypes
 import os
+import types
 
 from django.conf import settings
 from django.contrib.auth import views as authviews
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, InvalidPage
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
+from django.db import transaction
 from django.forms import fields as formfields
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django import http
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.http import require_http_methods
@@ -18,7 +21,9 @@ import haystack.forms
 import haystack.views
 from haystack.query import SearchQuerySet
 import pysolr
-from radioapp import forms, models
+from radioapp import forms, models, util, search_indexes
+
+specimen_index = search_indexes.SpecimenIndex(models.Specimen)
 
 class SearchView(haystack.views.FacetedSearchView):
     template = 'radioapp/specimen_list.html'
@@ -32,7 +37,7 @@ class SearchView(haystack.views.FacetedSearchView):
         if self.form.is_valid():
             ctx = self.create_context(*args, **kwargs)
         if self.request.is_ajax():
-            return HttpResponse(json.dumps(ctx), 
+            return http.HttpResponse(json.dumps(ctx), 
                                 content_type='application/json')
         else:
             ctx_instance = self.context_class(self.request)
@@ -77,7 +82,9 @@ class SearchView(haystack.views.FacetedSearchView):
 
 
 class SearchForm(haystack.forms.FacetedModelSearchForm):
+    page = formfields.IntegerField(required=False)
     results_per_page = formfields.IntegerField(initial=20, required=False)
+    sort = formfields.CharField(required=False)
 
     facets = [{
         'field': 'sex', 
@@ -88,6 +95,13 @@ class SearchForm(haystack.forms.FacetedModelSearchForm):
         'label': 'Taxon',
         'multi': True
     }]
+
+    sortmap = {
+        'sex': 'sex_label',
+        'taxon': 'taxon_label_facet',
+        # 'last_modified': 'last_modified',
+        'default': 'score'
+    }
 
     def __init__(self, *args, **kwargs):
         self.selected_facets = kwargs.pop("selected_facets", [])
@@ -121,14 +135,20 @@ class SearchForm(haystack.forms.FacetedModelSearchForm):
             clauses = [u'%s:"%s"' % (field, sqs.query.clean(v)) for v in vals]
             sqs = sqs.narrow(' OR '.join(clauses))
 
+        sqs = sqs.order_by(self.sortmap[self.cleaned_data['sort']], 'score')
+
         return sqs
 
     def clean(self):
         cleaned_data = super(SearchForm, self).clean()
-        cleaned_data['results_per_page'] = cleaned_data['results_per_page'] or 20
-        cleaned_data['q'] = cleaned_data['q'] or ''
+        cleaned_data['page'] = cleaned_data.get('page', 1) or 1
+        cleaned_data['results_per_page'] = cleaned_data.get('results_per_page', 20) or 20
+        cleaned_data['q'] = cleaned_data.get('q', '')
+        sort = cleaned_data.get('sort', 'default')
+        if sort not in self.sortmap:
+            sort = 'default'
+        cleaned_data['sort'] = sort
         return cleaned_data
-
 
 def create_user_struct(request):
     if request.user.is_authenticated():
@@ -151,10 +171,10 @@ def login(request, *args, **kwargs):
 
     user_struct = create_user_struct(request)
     if request.user.is_authenticated():
-        return HttpResponse(json.dumps({'success': True, 'user': user_struct}),
+        return http.HttpResponse(json.dumps({'success': True, 'user': user_struct}),
                             content_type='application/json')
     else:
-        return HttpResponse(json.dumps({'success': False, 'user': user_struct}),
+        return http.HttpResponse(json.dumps({'success': False, 'user': user_struct}),
                             status=401,
                             content_type='application/json')
         
@@ -170,32 +190,29 @@ def logout(request, *args, **kwargs):
             'links': {'login': reverse('login')}
             }
         }
-    return HttpResponse(json.dumps(json_response),
+    return http.HttpResponse(json.dumps(json_response),
                         content_type='application/json')
 
 def index(request):
     ctx = {
         'user': create_user_struct(request),
         'specimens': _specimens(request),
-        'links': {
-            'login': reverse('login'),
-            'logout': reverse('logout')
-            }
-    }
-    return render(request, 'radioapp/index.html', ctx)
-
-def app_state(request):
-    return HttpResponse(json.dumps(_app_state(request)), content_type='application_json')
-
-def _app_state(request):
-    return {
-        'user': create_user_struct(request),
         'choices': {
             'taxon': _taxon_choices(),
             'institution': _institution_choices(),
-            'sex': models.Specimen.SEX_CHOICES
+            'sex': models.Specimen.SEX_CHOICES,
+            'aspect': models.Image.ASPECT_CHOICES
+            },
+        'links': {
+            'login': reverse('login'),
+            'logout': reverse('logout')
+            },
+        'resources': {
+            'specimens': reverse('specimen-collection'),
+            # 'images': reverse('image-collection'
             }
     }
+    return render(request, 'radioapp/index.html', ctx)
 
 def field_choices(request, field):
     if field == 'institution':
@@ -204,10 +221,16 @@ def field_choices(request, field):
         result = _taxon_choices()
     else:
         result = []
-    return HttpResponse(json.dumps(result), content_type='application/json')
+    return http.HttpResponse(json.dumps(result), content_type='application/json')
 
 def _institution_choices():
     return [(i.id, i.name) for i in models.Institution.objects.all()]
+
+def taxa(request):
+    pass
+
+def taxon(request, taxon_id):
+    pass
 
 def _taxon_choices():
     solr = pysolr.Solr(settings.HAYSTACK_SOLR_URL)
@@ -225,7 +248,7 @@ def image_file(request, image_id, derivative='full'):
         image = get_object_or_404(models.Image, id=image_id)
         imgfile = getattr(image, 'image_%s' % derivative)
         if not imgfile:
-            raise Http404()        
+            raise http.Http404()        
         
         taxon = ' '.join([t.name for t in image.specimen.taxon.hierarchy if t.level >= 7])
         _, ext = os.path.splitext(imgfile.path)
@@ -236,7 +259,7 @@ def image_file(request, image_id, derivative='full'):
                                       ext)
         filepath = os.path.join(settings.MEDIA_ROOT, imgfile.path)
                                   
-        response = HttpResponse()
+        response = http.HttpResponse()
         response['X-Sendfile'] = filepath
         response['Content-Length'] = imgfile.size
         response['Content-Type'] = '%s; %s' % mimetypes.guess_type(filepath)
@@ -249,32 +272,32 @@ def image_file(request, image_id, derivative='full'):
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
-def specimen(request, specimen_id):
-    if request.method == 'GET':
-        specimen = get_object_or_404(models.Specimen, id=specimen_id)
-        ctx = RequestContext(request, {'specimen': specimen})
-        return render_to_response('radioapp/specimen_detail.html',
-                                  context_instance=ctx)
-    elif request.method == 'POST':
-        return save_specimen_changes(request, specimen_id)
-    else:
-        return HttpResponseNotAllowed(['GET', 'POST'])
+# def specimen(request, specimen_id):
+#     if request.method == 'GET':
+#         specimen = get_object_or_404(models.Specimen, id=specimen_id)
+#         ctx = RequestContext(request, {'specimen': specimen})
+#         return render_to_response('radioapp/specimen_detail.html',
+#                                   context_instance=ctx)
+#     elif request.method == 'POST':
+#         return save_specimen_changes(request, specimen_id)
+#     else:
+#         return http.HttpResponseNotAllowed(['GET', 'POST'])
 
-@user_passes_test(lambda u: u.is_staff)
-def save_specimen_changes(request, specimen_id):
-    specimen = get_object_or_404(models.Specimen, id=specimen_id)
-    specimen_form = forms.SpecimenForm(request.POST, instance=specimen)
-    images_form = forms.ImageFormSet(request.POST, request.FILES, 
-                                     instance=specimen,
-                                     prefix='IMAGES_%s' % specimen_id)
-    if specimen_form.is_valid() and images_form.is_valid():
-        #specimen_form.save()
+# @user_passes_test(lambda u: u.is_staff)
+# def save_specimen_changes(request, specimen_id):
+#     specimen = get_object_or_404(models.Specimen, id=specimen_id)
+#     specimen_form = forms.SpecimenForm(request.POST, instance=specimen)
+#     images_form = forms.ImageFormSet(request.POST, request.FILES, 
+#                                      instance=specimen,
+#                                      prefix='IMAGES_%s' % specimen_id)
+#     if specimen_form.is_valid() and images_form.is_valid():
+#         #specimen_form.save()
 
-        # save images
-        return HttpResponseRedirect(reverse('specimen-edit', args=[specimen_id]))
-    else:
-        import ipdb; ipdb.set_trace();
-        raise Exception("Error was encountered")
+#         # save images
+#         return http.HttpResponseRedirect(reverse('specimen-edit', args=[specimen_id]))
+#     else:
+#         import ipdb; ipdb.set_trace();
+#         raise Exception("Error was encountered")
 
 def template(request, mediatype):
     if mediatype == 'image':
@@ -282,14 +305,15 @@ def template(request, mediatype):
     elif mediatype == 'specimen':
         result = SPECIMEN_TEMPLATE()
     else:
-        return Http404()
-    return HttpResponse(json.dumps(result), content_type='application/json')
+        return http.Http404()
+    return http.HttpResponse(json.dumps(result), content_type='application/json')
 
 def IMAGE_TEMPLATE():
     return {
         'data': [
-            {'name': 'uri', 'value': None, 'prompt': 'Image URI'},
-            {'name': 'file', 'value': None, 'prompt': 'Image File'},
+            {'name': 'href', 'value': None, 'prompt': 'Image URI'},
+            {'name': 'url', 'value': None, 'prompt': 'Image File URL'},
+            {'name': 'name', 'value': None, 'prompt': 'Image Filename'},
             {'name': 'aspect', 'value': None, 'prompt': 'Aspect',
              'choices': models.Image.ASPECT_CHOICES}
             ]
@@ -334,10 +358,10 @@ def SPECIMEN_SEARCH_TEMPLATE():
     }
 
 def image_template(request):
-    return HttpResponse(json.dumps(IMAGE_TEMPLATE()), content_type='application/json')
+    return http.HttpResponse(json.dumps(IMAGE_TEMPLATE()), content_type='application/json')
 
 def specimen_template(request):
-    return HttpResponse(json.dumps(SPECIMEN_TEMPLATE()), content_type='application/json')
+    return http.HttpResponse(json.dumps(SPECIMEN_TEMPLATE()), content_type='application/json')
 
 #@user_passes_test(lambda u: u.is_staff)
 
@@ -345,47 +369,34 @@ def _specimens(request):
     '''
     Return paginated application/vnd.collection+json item list.
     '''
+    params = {'q': '*:*', 'results_per_page': 20, 'page': 1, 
+              'sort_field': None, 'sort_direction': 'asc'}
+    params.update(request.REQUEST)
 
-    # TODO: apply search filters, etc. to arrive at values list
-    values = [{
-        'django_id': 1,
-        'taxon': 15,
-        'institution': 1,
-        'sex': 'M',
-        'comments': 'This is a bogus comment',
-        'settings': '1.21 Gw',
-        'created': datetime.datetime.now(),
-        'created_by': None,
-        'last_modified': datetime.datetime.now(),
-        'last_modified_by': None,
-        'images': [{
-            'uri': reverse('image', args=['{id}']),
-            'aspect': 'Lateral',
-            'files': {
-                'thumbnail': reverse('image-file', args=['{id}', 'thumb']),
-                'medium': reverse('image-file', args=['{id}', 'medium']),
-                'large': reverse('image-file', args=['{id}', 'large']),
-                'full': reverse('image-file', args=['{id}', 'full'])
-                }
-            }]
-        }]
+    form = SearchForm(params)
+    if form.is_valid():
+        print 'form is valid!'
+    sqs = form.search()
+
+    current_page = form.cleaned_data['page']
+    results_per_page = form.cleaned_data['results_per_page']
+    total_pages = int(math.ceil(sqs.count() / (results_per_page * 1.0)))
+    offset = (current_page - 1) * results_per_page
+    limit = offset + results_per_page
+    values = [json.loads(r.json_doc) for r in sqs[offset:limit]]
 
     def create_specimen_item(idx_value):
-        specimen_id = idx_value['django_id']
-
-        template = SPECIMEN_TEMPLATE()
-        for field in template.get('data', []):
-            field['value'] = idx_value.get(field['name'])
-
+        specimen_id = idx_value['id']
+        data = [{'name': k, 'value': v} for k, v in idx_value.items()]
         return {
             'href': reverse('specimen', args=[specimen_id]),
-            'data': template['data']
+            'data': data
             }
 
     return {
         'collection': {
             'version': '1.0',
-            'href': request.build_absolute_uri(),
+            'href': reverse('specimen-collection'),
             'items': [create_specimen_item(v) for v in values],
             'queries': [SPECIMEN_SEARCH_TEMPLATE()],
             'links': [
@@ -393,53 +404,122 @@ def _specimens(request):
                 # {'rel': 'profile', ...}
                 ],
             'pagination': {
-                'currentPage': 5,
-                'totalPages': 15
+                'currentPage': current_page,
+                'totalPages': total_pages
                 }
             }
         }
             
 def specimens(request):
     if request.method == 'GET':
-        return HttpResponse(json.dumps(_specimen(request)), 
-                            content_type='application/json')
-
+        return list_specimens(request)
     elif request.method == 'POST':
-        # create new specimen from values
-        specimen_form = forms.SpecimenForm(request.POST)
-        images_form = forms.ImageFormSet(request.POST, request.FILES, 
-                                         prefix='IMAGES_new')
-        if specimen_form.is_valid():
-            new_specimen = specimen_form.save()
-            return HttpResponseRedirect(reverse('specimen-edit', args=[new_specimen.id]))
+        try: 
+            specimen = create_or_update_specimen(request)
+        except Exception as e:
+            import ipdb; ipdb.set_trace();
+            return http.HttpResponse(json.dumps({'success': False}), 
+                                     content_type="application/json")
+        else:
+            result = {
+                'success': True,
+                'href': reverse('specimen', args=[specimen.id])
+                }
+            return http.HttpResponse(json.dumps(result),
+                                     content_type="application/json")
     else:
-        return HttpResponseNotAllowed(['GET', 'POST'])
+        return http.HttpResponseNotAllowed(['GET', 'POST'])
 
-@user_passes_test(lambda u: u.is_staff)
-def new_specimen(request):
+def specimen(request, specimen_id):
     if request.method == 'GET':
-        images_form = forms.ImageFormSet(prefix='IMAGES_new')
-        ctx = RequestContext(request, {
-            'form': forms.SpecimenForm(),
-            'images_form': images_form
-            })
-        return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
+        pass
+    elif request.method == 'POST':
+        try: 
+            specimen = create_or_update_specimen(request, specimen_id)
+        # except Exception as e:
+        except KeyError:
+            return http.HttpResponse(json.dumps({'success': False}), 
+                                     content_type="application/json")
+        else:
+            result = {
+                'success': True,
+                'href': reverse('specimen', args=[specimen.id])
+                }
+            return http.HttpResponse(json.dumps(result),
+                                     content_type="application/json")
     else:
-        return HttpResponseNotAllowed(['GET'])
+        return http.HttpResponseNotAllowed(['GET', 'POST'])
+
+def get_model_from_uri(model_class, uri, pkarg=0, target_route_name=None):
+    route = resolve(uri)
+    if target_route_name and route.url_name is not target_route_name:
+        raise ValueError('Resolved route did not match expected route')
+
+    if type(pkarg) == types.IntType:
+        pk = route.args[pkarg]
+    else:
+        pk = route.kwargs.get(pkarg)
+
+    return model_class.objects.get(pk=pk)
 
 @user_passes_test(lambda u: u.is_staff)
-def edit_specimen(request, specimen_id):
-    specimen = get_object_or_404(models.Specimen, id=specimen_id)
-    ctx = RequestContext(request, {
-        'form': forms.SpecimenForm(instance=specimen),
-        'images_form': forms.ImageFormSet(instance=specimen,
-                                          prefix='IMAGES_%s' % specimen.id)
-        })
-    return render_to_response('radioapp/specimen_edit.html', context_instance=ctx)
+@transaction.commit_on_success
+def create_or_update_specimen(request, specimen_id=None):
 
-@user_passes_test(lambda u: u.is_staff)
-def delete_specimen(request, specimen_id):
-    pass
+    specimen = None
+    specimen_data = json.loads(request.POST.get('specimen'))
+    specimen_data = util.underscorize(specimen_data)
+    images = specimen_data.pop('images', [])
+
+    if specimen_id:
+        specimen = get_object_or_404(models.Specimen, id=specimen_id)
+        specimen_data['last_modified_by'] = request.user.id
+        specimen_data['created_by'] = specimen.created_by.id
+        del specimen_data['last_modified']
+        del specimen_data['created']
+    else:
+        specimen_data['created_by'] = request.user.id
+        specimen_data['last_modified_by'] = request.user.id
+
+    # create new specimen from values
+    specimen_form = forms.SpecimenForm(specimen_data, instance=specimen)
+    if not specimen_form.is_valid():
+        errors = specimen_form.errors
+        raise Exception('Form validation failed')
+
+    specimen = specimen_form.save()
+    images_seen = []
+
+    # Process and save specimen images
+    for image_data in images:
+        if image_data.get('href'):
+            image = get_model_from_uri(models.Image, image_data['href'], 'image_id', 'image')
+            if image.specimen != specimen:
+                raise Exception('Cannot reassign image to new specimen')
+        else:
+            image = models.Image(specimen=specimen)
+
+        image.aspect = image_data.get('aspect', image.aspect)
+        if not image.aspect in [x for x, _ in models.Image.ASPECT_CHOICES]:
+            raise ValueError('Invalid aspect value: %s' % image.aspect)
+        if image_data.get('replacement_file'):
+            image.image_full = request.FILES.get(image_data['replacement_file'])
+
+        image.save() 
+        images_seen.append(image.id)
+
+    # delete unreferenced images
+    for img in specimen.images.exclude(id__in=images_seen):
+        img.deleted = True
+        img.save()
+    
+    # (re)index specimen
+    specimen_index.update_object(specimen)
+    return specimen
+
+def list_specimens(request):
+    return http.HttpResponse(json.dumps(_specimens(request)), 
+                        content_type='application/json')
 
 def build_taxa_tree():
     taxa = (models.Taxon.objects.order_by('level')
