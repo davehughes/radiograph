@@ -123,7 +123,7 @@
             </a>
         </th>
     </tr>
-    <tr class="results-placeholder" style="display: hidden;"></tr>
+    
     <tr class="results-loading">
         <td colspan="7">
             <span>
@@ -131,6 +131,10 @@
             </span>
         </td>
     </tr>
+
+    <% # this is how results will be displayed %>
+    <tr class="result-row" style="display: hidden;"></tr>
+
 </table>
 
 <% # Pagination placeholder %>

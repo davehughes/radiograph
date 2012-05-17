@@ -80,16 +80,25 @@ class User extends Backbone.Model
 class SearchManager extends Backbone.Model
   defaults: ->
     page: null
-    sort: null
+    sortField: null
     sortDirection: null
     perPage: 20
     query: null
 
   toJSON: ->
+    keymap = 
+      sortField: 'sort_field'
+      sortDirection: 'sort_direction'
+      perPage: 'results_per_page'
+      query: 'q'
     json = super
     for k in _.keys(json)
-      if not json[k] then delete json[k]
-    json
+      if not json[k]
+        delete json[k]
+      else if keymap[k]
+        json[keymap[k]] = json[k]
+        delete json[k]
+    return json
 
 _.extend exports,
   'User': User

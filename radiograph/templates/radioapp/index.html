@@ -5,6 +5,7 @@
 
 {% block scripts %}
     {{ block.super }}
+    <script type="text/javascript" src="/static/js/d3.js"></script>
 
     <script type="text/javascript">
         var app = require('radioapp/app');
@@ -32,6 +33,7 @@
         $(function() {
             var specimens = new models.SpecimenCollection({{ specimens|jsonify }}, {parse: true});
             $(document).find('body').append(App.view.render().$el);
+            //App.view.pushPane(new views.DataView());
         });
     </script>
 {% endblock %}

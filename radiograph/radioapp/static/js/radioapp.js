@@ -489,7 +489,7 @@
     SearchManager.prototype.defaults = function() {
       return {
         page: null,
-        sort: null,
+        sortField: null,
         sortDirection: null,
         perPage: 20,
         query: null
@@ -497,12 +497,23 @@
     };
 
     SearchManager.prototype.toJSON = function() {
-      var json, k, _i, _len, _ref;
+      var json, k, keymap, _i, _len, _ref;
+      keymap = {
+        sortField: 'sort_field',
+        sortDirection: 'sort_direction',
+        perPage: 'results_per_page',
+        query: 'q'
+      };
       json = SearchManager.__super__.toJSON.apply(this, arguments);
       _ref = _.keys(json);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         k = _ref[_i];
-        if (!json[k]) delete json[k];
+        if (!json[k]) {
+          delete json[k];
+        } else if (keymap[k]) {
+          json[keymap[k]] = json[k];
+          delete json[k];
+        }
       }
       return json;
     };
@@ -563,7 +574,7 @@
 
 }).call(this);
 }, "radioapp/views": function(exports, require, module) {(function() {
-  var AlertsView, AppToolbar, AppView, Backbone, FormPaginationView, ImageView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
+  var AlertsView, AppToolbar, AppView, Backbone, DataView, FormPaginationView, ImageView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -865,7 +876,7 @@
 
     SpecimenSearchPane.prototype.renderResults = function() {
       var _this = this;
-      this.$('table tbody').empty();
+      this.$('table tbody .result-row').remove();
       return _.each(this.model.get('items'), function(s) {
         var view;
         view = new SpecimenResult({
@@ -931,7 +942,7 @@
     };
 
     SpecimenSearchPane.prototype.setSortField = function(e) {
-      this.searchMgr.set('searchField', $(e.currentTarget).data('value'));
+      this.searchMgr.set('sortField', $(e.currentTarget).data('value'));
       return $(e.currentTarget).parents('.dropdown').find('.dropdown-display').text($(e.currentTarget).text());
     };
 
@@ -957,6 +968,8 @@
     SpecimenResult.prototype.templateId = 'templates/specimen-list-item';
 
     SpecimenResult.prototype.tagName = 'tr';
+
+    SpecimenResult.prototype.className = 'result-row';
 
     SpecimenResult.prototype.events = function() {
       return {
@@ -1109,6 +1122,47 @@
 
   })(View);
 
+  DataView = (function(_super) {
+
+    __extends(DataView, _super);
+
+    function DataView() {
+      DataView.__super__.constructor.apply(this, arguments);
+    }
+
+    DataView.prototype.render = function() {
+      var circles, data, h, w, x, xAxis, y, yAxis;
+      DataView.__super__.render.apply(this, arguments);
+      w = 500;
+      h = 500;
+      this.svg = d3.select(this.el).append('svg:svg').attr('width', w).attr('height', h);
+      this.chart = this.svg.append('rect').attr('x', 0.1 * this.svg.attr('width')).attr('y', 0).attr('width', 0.9 * this.svg.attr('width')).attr('height', 0.9 * this.svg.attr('height')).style('fill', 'green');
+      x = d3.scale.linear().range([this.chart.attr('x'), parseInt(this.chart.attr('x')) + parseInt(this.chart.attr('width'))]);
+      y = d3.scale.linear().range([parseInt(this.chart.attr('y')) + parseInt(this.chart.attr('height')), this.chart.attr('y')]);
+      xAxis = d3.svg.axis().scale(x).orient('bottom');
+      yAxis = d3.svg.axis().scale(y).orient('left');
+      this.svg.append('svg:g').call(xAxis).attr('transform', "translate(0, " + (0.9 * this.svg.attr('height')) + ")");
+      this.svg.append('svg:g').call(yAxis).attr('transform', "translate(" + (0.1 * this.svg.attr('width')) + ", 0)");
+      data = _.map(d3.range(20), function() {
+        return {
+          x: Math.random(),
+          y: Math.random()
+        };
+      });
+      circles = this.svg.selectAll('circle').data(data);
+      circles.enter().append('svg:circle').attr('cx', function(d) {
+        return x(d.x);
+      }).attr('cy', function(d) {
+        return y(d.y);
+      }).attr('r', 3).style('stroke', 'black').style('fill', 'red');
+      circles.exit().remove();
+      return this;
+    };
+
+    return DataView;
+
+  })(Backbone.View);
+
   AlertsView = (function(_super) {
 
     __extends(AlertsView, _super);
@@ -1150,7 +1204,8 @@
     AppToolbar.prototype.events = function() {
       return {
         'click [rel=login]': 'showLogin',
-        'click [rel=logout]': 'logout'
+        'click [rel=logout]': 'logout',
+        'click [rel=visualize]': 'showVisualizations'
       };
     };
 
@@ -1193,6 +1248,10 @@
           return App.trigger('change:user');
         }
       });
+    };
+
+    AppToolbar.prototype.showVisualizations = function() {
+      return App.view.pushPane(new DataView());
     };
 
     return AppToolbar;
@@ -1471,6 +1530,7 @@
   _.extend(exports, {
     'AppView': AppView,
     'ImageView': ImageView,
+    'DataView': DataView,
     'SpecimenForm': SpecimenForm,
     'SpecimenModal': SpecimenModal,
     'SpecimenSearchPane': SpecimenSearchPane,
@@ -1518,7 +1578,7 @@
   (function() {
     (function() {
     
-      __out.push('\n<div class="app-tools-custom"></div>\n\n');
+      __out.push('\n<div class="app-tools-custom">\n    <a rel="visualize" class="btn btn-small" href="#">Data Visualization</a>\n</div>\n\n');
     
       __out.push('\n<div class="app-tools-common">\n    <div class="btn-group">\n        ');
     
@@ -2131,9 +2191,58 @@
         __out.push('</label>\n                    ');
       }
     
-      __out.push('\n                    <a href="#" class="btn btn-primary">Filter</a>\n                </div>\n            </span>\n        </th>\n        <th>Images</th>\n        <th>Last Modified</th>\n        <th>\n            <a class="btn btn-small" rel="create" title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n    <tr class="results-placeholder" style="display: hidden;"></tr>\n    <tr class="results-loading">\n        <td colspan="7">\n            <span>\n                <img src="/static/img/loading.gif">  Loading results...\n            </span>\n        </td>\n    </tr>\n</table>\n\n');
+      __out.push('\n                    <a href="#" class="btn btn-primary">Filter</a>\n                </div>\n            </span>\n        </th>\n        <th>Images</th>\n        <th>Last Modified</th>\n        <th>\n            <a class="btn btn-small" rel="create" title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n    \n    <tr class="results-loading">\n        <td colspan="7">\n            <span>\n                <img src="/static/img/loading.gif">  Loading results...\n            </span>\n        </td>\n    </tr>\n\n    ');
+    
+      __out.push('\n    <tr class="result-row" style="display: hidden;"></tr>\n\n</table>\n\n');
     
       __out.push('\n<div class="pagination"></div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/visualizations": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<div id=\'visualizations\'></div>\n');
     
     }).call(this);
     

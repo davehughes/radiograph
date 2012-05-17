@@ -1,5 +1,7 @@
 <% # Placeholder for pane-specific tools %>
-<div class="app-tools-custom"></div>
+<div class="app-tools-custom">
+    <a rel="visualize" class="btn btn-small" href="#">Data Visualization</a>
+</div>
 
 <% # Common application tools %>
 <div class="app-tools-common">

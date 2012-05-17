@@ -84,7 +84,8 @@ class SearchView(haystack.views.FacetedSearchView):
 class SearchForm(haystack.forms.FacetedModelSearchForm):
     page = formfields.IntegerField(required=False)
     results_per_page = formfields.IntegerField(initial=20, required=False)
-    sort = formfields.CharField(required=False)
+    sort_field = formfields.CharField(required=False)
+    sort_direction = formfields.CharField(required=False)
 
     facets = [{
         'field': 'sex', 
@@ -99,7 +100,8 @@ class SearchForm(haystack.forms.FacetedModelSearchForm):
     sortmap = {
         'sex': 'sex_label',
         'taxon': 'taxon_label_facet',
-        # 'last_modified': 'last_modified',
+        'last_modified': 'last_modified',
+        'relevance': 'score',
         'default': 'score'
     }
 
@@ -135,19 +137,22 @@ class SearchForm(haystack.forms.FacetedModelSearchForm):
             clauses = [u'%s:"%s"' % (field, sqs.query.clean(v)) for v in vals]
             sqs = sqs.narrow(' OR '.join(clauses))
 
-        sqs = sqs.order_by(self.sortmap[self.cleaned_data['sort']], 'score')
+        order_by = self.sortmap.get(self.cleaned_data['sort_field'], 'score')
+        if self.cleaned_data.get('sort_direction', 'asc') == 'desc':
+            order_by = '-' + order_by
+        sqs = sqs.order_by(order_by)
 
         return sqs
 
     def clean(self):
         cleaned_data = super(SearchForm, self).clean()
-        cleaned_data['page'] = cleaned_data.get('page', 1) or 1
-        cleaned_data['results_per_page'] = cleaned_data.get('results_per_page', 20) or 20
-        cleaned_data['q'] = cleaned_data.get('q', '')
-        sort = cleaned_data.get('sort', 'default')
-        if sort not in self.sortmap:
-            sort = 'default'
-        cleaned_data['sort'] = sort
+        cleaned_data.update({
+            'page': cleaned_data.get('page', 1) or 1,
+            'results_per_page': cleaned_data.get('results_per_page', 20) or 20,
+            'q': cleaned_data.get('q', '*:*'),
+            'sort_field': cleaned_data.get('sort_field', 'default'),
+            'sort_direction': cleaned_data.get('sort_direction', 'asc')
+            })
         return cleaned_data
 
 def create_user_struct(request):
@@ -369,11 +374,7 @@ def _specimens(request):
     '''
     Return paginated application/vnd.collection+json item list.
     '''
-    params = {'q': '*:*', 'results_per_page': 20, 'page': 1, 
-              'sort_field': None, 'sort_direction': 'asc'}
-    params.update(request.REQUEST)
-
-    form = SearchForm(params)
+    form = SearchForm(request.REQUEST)
     if form.is_valid():
         print 'form is valid!'
     sqs = form.search()

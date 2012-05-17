@@ -180,7 +180,7 @@ class SpecimenSearchPane extends View
         paginationView.on 'navigate', (page) => @searchMgr.set 'page', page
 
   renderResults: ->
-    @$('table tbody').empty()
+    @$('table tbody .result-row').remove()
     _.each @model.get('items'), (s) =>
       view = new SpecimenResult({model: s})
       @$('table tbody').append(view.render().$el)
@@ -230,7 +230,7 @@ class SpecimenSearchPane extends View
       .text $(e.currentTarget).text()
 
   setSortField: (e) ->
-    @searchMgr.set 'searchField', $(e.currentTarget).data('value')
+    @searchMgr.set 'sortField', $(e.currentTarget).data('value')
     $(e.currentTarget)
       .parents('.dropdown')
       .find('.dropdown-display')
@@ -243,6 +243,7 @@ class SpecimenSearchPane extends View
 class SpecimenResult extends View
   templateId: 'templates/specimen-list-item'
   tagName: 'tr'
+  className: 'result-row'
 
   events: ->
     'click [rel=edit]': 'showEditPane'
@@ -256,7 +257,6 @@ class SpecimenResult extends View
     e.stopPropagation()
     App.router.navigate "#{@model.url}/edit"
     App.view.pushPane new SpecimenForm(model: @model)
-    
 
   showDetailPane: (e) =>
     e.preventDefault()
@@ -321,6 +321,77 @@ class LoginFormView extends View
     else
       @$('.alert-error').html('').hide()
 
+class DataView extends Backbone.View
+
+  render: ->
+    super
+
+    w = 500
+    h = 500
+    
+    @svg = d3.select(@el)
+      .append('svg:svg')
+      .attr('width', w)
+      .attr('height', h)
+
+    @chart = @svg.append('rect')
+      .attr('x', 0.1 * @svg.attr('width'))
+      .attr('y', 0)
+      .attr('width', 0.9 * @svg.attr('width'))
+      .attr('height', 0.9 * @svg.attr('height'))
+      .style('fill', 'green')
+    
+    # Create and configure axes
+    x = d3.scale.linear()
+      .range([@chart.attr('x'), parseInt(@chart.attr('x')) + parseInt(@chart.attr('width'))])
+    y = d3.scale.linear()
+      .range([parseInt(@chart.attr('y')) + parseInt(@chart.attr('height')), @chart.attr('y')])
+    xAxis = d3.svg.axis().scale(x).orient('bottom')
+    yAxis = d3.svg.axis().scale(y).orient('left')
+
+    @svg.append('svg:g')
+      .call(xAxis)
+      .attr('transform', "translate(0, #{0.9 * @svg.attr('height')})")
+
+    @svg.append('svg:g')
+      .call(yAxis)
+      .attr('transform', "translate(#{0.1 * @svg.attr('width')}, 0)")
+
+    data = _.map d3.range(20), -> x: Math.random(), y: Math.random()
+    circles = @svg.selectAll('circle')
+      .data(data)
+
+
+    circles
+      .enter().append('svg:circle')
+        .attr('cx', (d) -> x(d.x))
+        .attr('cy', (d) -> y(d.y))
+        .attr('r', 3)
+        .style('stroke', 'black')
+        .style('fill', 'red')
+        # .on('click', (d) -> console.log d)
+
+    circles
+      .exit().remove()
+
+    @
+
+# property = (name, gs) ->
+#   if not _.isString(name) then gs = name
+#   (value) ->
+#     if value?
+#       if gs.set then gs.set(value) else throw 'Value has no setter'
+#       @
+#     else
+#       if gs.get then gs.get() else throw 'Value has no getter'
+
+# class D3Chart
+#   initialize: (@config) ->
+
+#   foo: property 'foo',
+#     get: -> 
+
+
 class AlertsView extends Backbone.View
   className: 'alerts'
   alertTemplate: _.template '''
@@ -340,6 +411,7 @@ class AppToolbar extends View
   events: ->
     'click [rel=login]': 'showLogin'
     'click [rel=logout]': 'logout'
+    'click [rel=visualize]': 'showVisualizations'
 
   initialize: ->
     App.on 'change:user', @render, @
@@ -367,6 +439,9 @@ class AppToolbar extends View
         App.user = new models.User()
         App.alerts.publish('success', 'You have been logged out successfully')
         App.trigger('change:user')
+
+  showVisualizations: ->
+    App.view.pushPane new DataView()
 
 class AppView extends Backbone.View
   templateId: 'templates/appview'
@@ -534,6 +609,7 @@ class FormPaginationView extends PaginationView
 _.extend exports,
   'AppView': AppView
   'ImageView': ImageView
+  'DataView': DataView
   'SpecimenForm': SpecimenForm
   'SpecimenModal': SpecimenModal
   'SpecimenSearchPane': SpecimenSearchPane
