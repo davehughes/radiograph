@@ -146,7 +146,6 @@ class Image(models.Model):
     deleted = models.BooleanField(default=False)
 
     def generate_derivatives(self, tmpdir=None, regenerate=False):
-        #source_image = PILImage.open(self.image_full) 
         tmpdir = tmpdir or tempfile.mkdtemp()
         
         derivatives = [

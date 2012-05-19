@@ -56,7 +56,9 @@ class SpecimenIndex(SearchIndex):
             'images': [{'href': reverse('image', args=[img.id]),
                         'aspect': img.aspect,
                         'name': os.path.basename(img.image_full.name),
-                        'url': reverse('image-file', args=[img.id, 'full'])}
+                        'url': reverse('image', args=[img.id]),
+                        'links': {x: reverse('image-file', args=[img.id, x])
+                                  for x in ['thumbnail', 'medium', 'full']}}
                        for img in obj.images.all()],
             'created': obj.created.isoformat(),
             'lastModified': obj.last_modified.isoformat()

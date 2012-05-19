@@ -32,15 +32,15 @@
   <tr>
     <th>Images</th>
     <td>
-      <%# if @images and @images.length > 0: %>
-        <%# for image in @images: %>
-        <a href="<%=# image.files.medium %>">
-            <img src="<%=# image.files.thumbnail %>"/>
+      <% if @images and @images.length > 0: %>
+        <% for image in @images: %>
+        <a href="<%= image.links.medium %>">
+            <img src="<%= image.links.thumbnail %>"/>
         </a>
-        <%# end %>
-      <%# else: %>
+        <% end %>
+      <% else: %>
         <span class="empty">No images attached.</span>
-      <%# end %>
+      <% end %>
     </td>
   </tr>
   <tr>

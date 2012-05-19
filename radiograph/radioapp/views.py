@@ -1,4 +1,5 @@
 import copy
+import csv
 import datetime
 import json
 import math
@@ -243,7 +244,7 @@ def _taxon_choices():
                          start=0, rows=1000, 
                          fl="django_id label",
                          sort="label_sort asc")
-    return [(doc['django_id'], doc['label']) for doc in result.docs]
+    return [(int(doc['django_id']), doc['label']) for doc in result.docs]
 
 def image(request, image_id):
     pass
@@ -264,10 +265,10 @@ def image_file(request, image_id, derivative='full'):
                                       ext)
         filepath = os.path.join(settings.MEDIA_ROOT, imgfile.path)
                                   
-        response = http.HttpResponse()
+        mime = mimetypes.guess_type(filepath)[0]
+        response = http.HttpResponse(mimetype=mime)
         response['X-Sendfile'] = filepath
-        response['Content-Length'] = imgfile.size
-        response['Content-Type'] = '%s; %s' % mimetypes.guess_type(filepath)
+        # response['Content-Length'] = imgfile.size
         
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.
@@ -276,33 +277,6 @@ def image_file(request, image_id, derivative='full'):
         if download: # generate appropriate filename and set disposition
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
-
-# def specimen(request, specimen_id):
-#     if request.method == 'GET':
-#         specimen = get_object_or_404(models.Specimen, id=specimen_id)
-#         ctx = RequestContext(request, {'specimen': specimen})
-#         return render_to_response('radioapp/specimen_detail.html',
-#                                   context_instance=ctx)
-#     elif request.method == 'POST':
-#         return save_specimen_changes(request, specimen_id)
-#     else:
-#         return http.HttpResponseNotAllowed(['GET', 'POST'])
-
-# @user_passes_test(lambda u: u.is_staff)
-# def save_specimen_changes(request, specimen_id):
-#     specimen = get_object_or_404(models.Specimen, id=specimen_id)
-#     specimen_form = forms.SpecimenForm(request.POST, instance=specimen)
-#     images_form = forms.ImageFormSet(request.POST, request.FILES, 
-#                                      instance=specimen,
-#                                      prefix='IMAGES_%s' % specimen_id)
-#     if specimen_form.is_valid() and images_form.is_valid():
-#         #specimen_form.save()
-
-#         # save images
-#         return http.HttpResponseRedirect(reverse('specimen-edit', args=[specimen_id]))
-#     else:
-#         import ipdb; ipdb.set_trace();
-#         raise Exception("Error was encountered")
 
 def template(request, mediatype):
     if mediatype == 'image':
@@ -368,15 +342,13 @@ def image_template(request):
 def specimen_template(request):
     return http.HttpResponse(json.dumps(SPECIMEN_TEMPLATE()), content_type='application/json')
 
-#@user_passes_test(lambda u: u.is_staff)
-
 def _specimens(request):
     '''
     Return paginated application/vnd.collection+json item list.
     '''
     form = SearchForm(request.REQUEST)
-    if form.is_valid():
-        print 'form is valid!'
+    if not form.is_valid():
+        raise Exception('Invalid search parameters: %s' % form.errors)
     sqs = form.search()
 
     current_page = form.cleaned_data['page']
@@ -526,4 +498,42 @@ def build_taxa_tree():
     taxa = (models.Taxon.objects.order_by('level')
             .values_list('id', 'parent_id', 'level'))
 
+def build_dataset_csv(request):
+    sqs = SearchForm(request.REQUEST).search()
 
+    response = http.HttpResponse(content_type='text/csv')
+    w = csv.writer(response)
+
+    # write header
+    w.writerow(('Specimen ID', 'Institution', 'Sex', 'Taxon', 'Comments', 'Settings',
+            'Skull Length', 'Cranial Width', 'Neurocranial Height', 'Facial Height',
+            'Palate Length', 'Palate Width', 'Lateral Image', 'Superior Image'))
+
+    # TODO: implement label functions
+    choices = {
+        'institution': dict(_institution_choices()),
+        'sex': dict(models.Specimen.SEX_CHOICES),
+        'taxon': dict(_taxon_choices())
+        }
+
+    for specimen in sqs:
+        s = json.loads(specimen.json_doc)
+        values = (
+            s['specimenId'],
+            choices['institution'].get(s['institution']),
+            choices['sex'].get(s['sex']),
+            choices['taxon'].get(s['taxon']),
+            s['comments'],
+            s['settings'],
+            s['skullLength'],
+            s['cranialWidth'],
+            s['neurocranialHeight'],
+            s['facialHeight'],
+            s['palateLength'],
+            s['palateWidth'],
+            None, # image lateral
+            None  # image superior
+        )
+        w.writerow(values)
+
+    return response

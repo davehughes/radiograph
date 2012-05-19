@@ -37,6 +37,10 @@ urlpatterns = patterns('',
     #     'radioapp.views.new_specimen',
     #     name='specimen-new'),
 
+    url(r'^specimens/data.csv',
+        'radioapp.views.build_dataset_csv',
+        name='specimen-dataset'),
+
     url(r'^specimens/(?P<specimen_id>[^/]+)$',
         'radioapp.views.specimen',
         name='specimen'),

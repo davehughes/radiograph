@@ -1781,6 +1781,7 @@
   }
   (function() {
     (function() {
+      var image, _i, _len, _ref;
     
       __out.push('<a rel="back" href="#" class="btn"><i class="icon-chevron-left"></i> Back to Search</a>\n<a rel="edit" href="#" class="btn">Edit</a>\n\n<h3>\n    ');
     
@@ -1820,21 +1821,21 @@
     
       __out.push('\n  <tr>\n    <th>Images</th>\n    <td>\n      ');
     
-      __out.push('\n        ');
-    
-      __out.push('\n        <a href="');
-    
-      __out.push(__sanitize);
-    
-      __out.push('">\n            <img src="');
-    
-      __out.push(__sanitize);
-    
-      __out.push('"/>\n        </a>\n        ');
-    
-      __out.push('\n      ');
-    
-      __out.push('\n        <span class="empty">No images attached.</span>\n      ');
+      if (this.images && this.images.length > 0) {
+        __out.push('\n        ');
+        _ref = this.images;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          image = _ref[_i];
+          __out.push('\n        <a href="');
+          __out.push(__sanitize(image.links.medium));
+          __out.push('">\n            <img src="');
+          __out.push(__sanitize(image.links.thumbnail));
+          __out.push('"/>\n        </a>\n        ');
+        }
+        __out.push('\n      ');
+      } else {
+        __out.push('\n        <span class="empty">No images attached.</span>\n      ');
+      }
     
       __out.push('\n    </td>\n  </tr>\n  <tr>\n    <th>Last Modified</th>\n    <td>');
     
