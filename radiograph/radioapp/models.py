@@ -151,8 +151,12 @@ class Image(models.Model):
         derivatives = [
             ('image_thumbnail', 
              ['-define', 'jpeg:size=300x300', 
-              '-thumbnail', '90x90>']),
-            ('image_medium', ['-resize', '1024x1024>'])
+              '-rotate', '90',
+              '-resize', '150x150>']),
+              # '-thumbnail', '150x150>']),
+            ('image_medium', 
+             ['-resize', '1024x1024>', 
+              '-rotate', '90'])
             ]
 
         for attr, args in derivatives:

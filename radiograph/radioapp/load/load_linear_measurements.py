@@ -41,14 +41,17 @@ def load_row_object(row):
         'palate_length',
         'palate_width'
         ]:
-        obj[k] = Decimal(obj[k])
+        val = obj[k]
+        if val.endswith('*'):
+            val = val[:-1]
+        obj[k] = Decimal(val)
 
     # convert sex
     if not obj.get('sex') in dict(models.Specimen.SEX_CHOICES):
         obj['sex'] = 'U' # unknown
 
     # set institution
-    obj['institution'] = 0
+    #obj['institution'] = 0
 
     # identify taxon
     taxon_label = obj['species']

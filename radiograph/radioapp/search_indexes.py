@@ -1,9 +1,9 @@
-import json
 import os
 
 from django.core.urlresolvers import reverse
 from haystack.indexes import *
 from haystack import site
+import simplejson as json
 
 from radioapp.models import Specimen, Image, Taxon
 
@@ -62,7 +62,7 @@ class SpecimenIndex(SearchIndex):
                        for img in obj.images.all()],
             'created': obj.created.isoformat(),
             'lastModified': obj.last_modified.isoformat()
-            })
+            }, use_decimal=True)
         return doc
 
     def index_queryset(self):
