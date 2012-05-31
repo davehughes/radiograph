@@ -373,17 +373,19 @@ caret = ->
   @view 'main': ->
     a name: 'about-us'
     h2 -> 'About Us:'
-    p ->
-      '<strong>Terry Ritzman: </strong>
-      Terry Ritzman is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of 
-      Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute 
-      of Human Origins</a>. His dissertation research (for which the radiographs on this 
-      database were collected) investigates the role of the brain in modulating facial 
-      positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.'
+    div ->
+      img src: 'http://placekitten.com/100/100'
+      p ->
+          '<strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of 
+          Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute 
+          of Human Origins</a>. His dissertation research (for which the radiographs on this 
+          database were collected) investigates the role of the brain in modulating facial 
+          positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.'
 
-    p ->
-      '<strong>Dave Hughes: </strong>
-      Dave Hughes has designed the web architecture for the database. He is
+    div ->
+      img src: 'http://placekitten.com/101/101/'
+      p ->
+      '<strong>Dave Hughes</strong> has designed the web architecture for the database. He is
       a software engineer in the Informatics and Cyberinfrastructure Services Department at
       Arizona State University.'
       
