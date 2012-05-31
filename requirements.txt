@@ -8,3 +8,8 @@ pysolr>=2.0
 python-magic
 djangorestframework==0.3.3
 simplejson
+gunicorn
+fabric
+cuisine
+cuisine-postgresql
+jinja2>=2.6

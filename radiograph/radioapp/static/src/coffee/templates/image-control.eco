@@ -1,3 +1,4 @@
+input type: hidden 
 <input type="hidden" value="<%= @id %>" name="id"/>
 <span class="replacementFile" style="display: none;"></span>
 
