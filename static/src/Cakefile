@@ -46,10 +46,10 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
   vendorFiles   = collectFiles(JS_SRC, '.js')
   jsFiles = [].concat(coffeeFiles, vendorFiles)
 
-  watch jsFiles, ->
-    compileCoffee
-      paths: [COFFEE_SRC, JS_SRC]
-      callback: (err, output) -> writeJS(output, RADIOAPP_JS)
+  # watch jsFiles, ->
+  #   compileCoffee
+  #     paths: [COFFEE_SRC, JS_SRC]
+  #     callback: (err, output) -> writeJS(output, RADIOAPP_JS)
 
   watch lessFiles, ->
     compileLess
@@ -60,9 +60,9 @@ build = (callback) ->
   compileLess 
     input: RADIOAPP_LESS
     callback: (code, output) -> writeJS(output, RADIOAPP_CSS)
-  compileCoffee
-    paths: [COFFEE_SRC, JS_SRC]
-    callback: (err, output) -> writeJS(output, RADIOAPP_JS)
+  # compileCoffee
+  #   paths: [COFFEE_SRC, JS_SRC]
+  #   callback: (err, output) -> writeJS(output, RADIOAPP_JS)
   callback?()
 
 compileLess = (opts) ->

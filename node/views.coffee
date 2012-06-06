@@ -1,4 +1,3 @@
-
 menuItem = (url, text, icon, file=false) ->
   li ->
     a href: @url ->
@@ -6,86 +5,12 @@ menuItem = (url, text, icon, file=false) ->
       span text 
       if file then input type: file
 
-icon = (name) -> i class: "icon-#{name}"
+icon = (name) -> i class: ".icon-#{name}"
 
 caret = ->
-  span '.caret', '&nbsp;'
+  span class: 'caret', '&nbsp;'
 
 @include = ->
-  @view 'image-control': -> 
-    input type: 'hidden', value: @id, name: 'id'
-    span '.replacementFile', style: 'display: none;'
-
-    select '.span2', name: 'aspect', ->
-      for [value, label] in [['L', 'Lateral'], ['S', 'Superior']]
-        option value: value, -> label
-
-    if @name
-      if not @replacementFile
-        span '.dropdown', ->
-          span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
-            'Existing file:'
-            a href: @url, '.download-file', -> @name
-            span '.caret', -> '&nbsp;'
-
-          ul '.dropdown-menu', ->
-            # menuItem @url, 'Download Existing File', 'icon-download'
-            li ->
-              a href: @url, '.download-file', ->
-                i '.icon-download',
-                span 'Download Existing File'
-            li ->
-              a href: '#', '.replace-file fileinput-button', ->
-                i '.icon-random',
-                span 'Replace File'
-                input type: 'file'
-      else
-        span '.dropdown', ->
-          span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
-            span 'Replace'
-            a href: @url, '.download-file', -> @name
-            span 'with'
-            a href: '#', '.fileinput-button', style: 'display: inline-block', ->
-              @replacementFile.name
-              input type: 'file'
-            span '.caret', -> '&nbsp;'
-          ul '.dropdown-menu', ->
-            li ->
-              a href: @url, '.download-file', ->
-                i '.icon-download'
-                span 'Download Existing File'
-            li ->
-              a href: '#', '.replace-file fileinput-button', ->
-                i '.icon-random'
-                span 'Replace File'
-                input type: 'file'
-            li ->
-              a href: '#', '.cancel-replace', ->
-                i '.icon-remove'
-                span 'Cancel Replacement'
-    else if @replacementFile
-      span '.dropdown', ->
-        span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
-          'Upload file:'
-          a '.fileinput-button', style: 'display: inline-block', ->
-            @replacementFile.name
-            input type: 'file'
-          span '.caret', -> '&nbsp;'
-
-          ul '.dropdown-menu', ->
-            li ->
-              a href: '#', '.replace-file fileinput-button', ->
-                i '.icon-random'
-                span 'Replace File'
-                input type: 'file'
-    else
-      a '.fileinput-button', ->
-        'Upload an Image'
-        i '.icon-upload'
-        input type: 'file'
-
-    a href: '#', rel: 'remove-image', ->
-      i '.icon-remove',
 
   @view 'login-form': ->
     form '.loginform.modal', method: 'post', ->
@@ -129,224 +54,98 @@ caret = ->
               i '.icon-user', -> 'Sign In'
 
   @view 'specimen-detail': ->
-    a '.btn', rel: 'back', href: '#', ->
-      i '.icon-chevron-left', -> 'Back to Search'
-    a '.btn', rel: 'edit', href: '#', -> 'Edit'
-    h3 ->
-        span "#{@specimenId} - "
-        span '.taxon', -> @taxon
+    div '.specimen-detail', ->
+      h3 ->
+          span '.taxon', -> "#{@taxon.label} - "
+          span @specimen_id
 
-    div '.specimen-field', ->
-      div '.header', -> 'Institution'
-      div '.value', -> @institution
-
-    div '.specimen-field', ->
-      div '.header', -> 'Specimen ID'
-      div '.value', -> @specimenId
-
-    div '.specimen-field', ->
-      div '.header', -> 'Sex'
-      div '.value', -> @sex
-
-    div '.specimen-field', ->
-      div '.header', -> 'Settings'
-      div '.value', -> @settings
-
-    div '.specimen-field', ->
-      div '.header', -> 'Comments'
-      div '.value', -> @comments
-
-    div '.specimen-field', ->
-      div '.header', -> 'Images'
-      div '.value', ->
-        if @images and @images.length > 0
+      if @images and @images.length > 0
+        div '.specimen-images', ->
           for image in @images
-            a href: image.links.medium, ->
-              img src: image.links.thumbnail
-        else
-          span '.empty', -> 'No images attached.'
+            a href: image.versions.medium, ->
+              img src: 'http://placekitten.com/300/300'
+              # img src: image.versions.thumbnail
+      else
+        div '.specimen-images.empty', -> 'No images attached'
 
-    div '.specimen-field', ->
-      div '.header', -> 'Last Modified'
-      div '.value', -> @lastModified
+      div '.specimen-field', ->
+        div '.header', -> 'Institution'
+        div '.value', -> 
+          a href: @institution.link, target: '_blank', -> @institution.name
 
-    div '.specimen-field', ->
-      div '.header', -> 'Created'
-      div '.value', -> @created
+      div '.specimen-field', ->
+        div '.header', -> 'Specimen ID'
+        div '.value', -> @specimen_id
 
-  @view 'specimen-edit': ->
-    form '.specimen-form.form-horizontal', 
-      method: 'post'
-      enctype: 'multipart/form-data'
-      action: @links.submit.url, ->
+      div '.specimen-field', ->
+        div '.header', -> 'Sex'
+        div '.value', -> @sex
 
-        div '.controls', ->
-          h2 -> if @existing 'Edit Specimen' else 'Enter New Specimen'
+      div '.specimen-field', ->
+        div '.header', -> 'Settings'
+        div '.value', -> @settings
 
-        div '.institution.control-group', ->
-          label '.control-label', for: 'institution', -> 'Institution'
-          div '.controls', ->
-            select name: 'institution', ->
-              option -> '---------'
-              for [value, label] in @institutionChoices
-                option value: value, -> label
+      div '.specimen-field', ->
+        div '.header', -> 'Comments'
+        div '.value', -> @comments
 
-        div '.specimen-id.control-group', ->
-          label '.control-label', for: 'specimenId', -> 'Specimen Id'
-          div '.controls', ->
-            input name: 'specimenId', type: 'text', value: @specimenId
-            
-        div '.taxon.control-group', ->
-          label '.control-label', for: 'taxon', -> 'Taxon'
-          div '.controls', ->
-            select name: 'taxon', ->
-              option -> '---------'
-              for [value, label] in @taxonChoices
-                option value: value, -> label
+      div '.specimen-field', ->
+        div '.header', -> 'Last Modified'
+        div '.value', -> @last_modified
 
-        div '.sex.control-group', ->
-          label '.control-label', for: 'sex', -> 'Sex'
-          div '.controls', ->
-            select name: 'sex', ->
-              option -> '---------'
-              for [value, label] in @sexChoices
-                option value: value, -> label
+      div '.specimen-field', ->
+        div '.header', -> 'Created'
+        div '.value', -> @created
 
-        div '.measurements.control-group', ->
-          label '.control-label', 'Measurements'
-          div '.controls', ->
-            table ->
-              tr ->
-                th -> 'Skull Length'
-                th -> 'Cranial Width'
-                th -> 'Neurofacial Height'
-                th -> 'Facial Height'
-                th -> 'Palate Length'
-                th -> 'Palate Width'
-              tr ->
-                td -> input name: 'skullLength', value: @skullLength, type: 'text'
-                td -> input name: 'cranialWidth', value: @cranialWidth, type: 'text'
-                td -> input name: 'neurocranialHeight', value: @neurocranialHeight, type: 'text'
-                td -> input name: 'facialHeight', value: @facialHeight, type: 'text'
-                td -> input name: 'palateLength', value: @palateLength, type: 'text'
-                td -> input name: 'palateWidth', value: @palateWidth, type: 'text'
-
-        div '.comments.control-group', ->
-          label '.control-label', for: 'comments', -> 'Comments'
-          div '.controls', ->
-            textarea name: 'comments', value: @comments
-
-        div '.settings.control-group', ->
-          label '.control-label', for: 'settings', -> 'Settings'
-          div '.controls', ->
-            textarea name: 'settings', value: @settings
-
-        div '.images.control-group', ->
-          label '.control-label', -> 'Images'
-          div '.controls.form-inline', ->
-            div '.image-controls'
-            a '.btn', rel: 'add-image', href: '#', ->
-              i '.icon-plus', -> 'Add Image'
-
-        div '.form-actions', ->
-          div '.submission-status.progress.progress-striped.active', style: 'display: none', ->
-            div '.bar'
-          a '.btn.btn-primary', rel: 'save', href: '#', -> 'Save'
-          a '.btn', rel: 'discard', href: '#', -> 'Discard'
 
   @view 'specimen-list-item': ->
-    td '.selection', ->
-      input '.item-selection', type: 'checkbox'
-    td '.specimen-id', -> @specimenId
-    td '.taxon', ->
-      a rel: 'detail', href: '#', -> @taxon
-    td '.sex', -> @sex
-    td '.images', ->
-      a href: '#', -> 'Lateral'
-      a href: '#', -> 'Superior'
-    td '.actions', ->
-      a '.btn', rel: 'edit', title: 'Edit Specimen', ->
-        i '.icon-edit'
+    div '.specimen-list-item', ->
+      div '.images', ->
+        for image in @images
+          a '.thumbnail', title: image.aspect, 
+            href: image.versions.medium, target: '_blank', ->
+              img src: 'http://placekitten.com/80/80'
 
-  @view 'specimen-list': ->
-    tr ->
-      td '.selection', ->
-        input '.item-selection', type: 'checkbox', value: @id
-      td '.taxon', -> @taxon
-      td '.sex', -> @sex
-      td '.images', ->
-        a href: '#', -> 'Lateral'
-        a href: '#', -> 'Superior'
-      td '.actions', ->
-        a '.btn', title: 'Edit Specimen', rel: 'edit', href: '#'
+      div '.specimen-data', ->
+        a rel: 'detail', href: @detailView, ->
+          h3 -> 
+            span @taxon.label
+            span " (#{ @specimen_id })"
+        span @sex
 
   @view 'specimen-table': ->
-    table '.table.table-condensed.table-striped', ->
-      col width: 40
-      col width: 70
-      col
-      col width: 80
-      col width: 140
-      col width: 120
-      col width: 25
+    h4 -> 'Taxa'
+    div '.yui-skin-sam', ->
+      div id: 'taxon-filter-tree', class: 'ygtv-checkbox'
 
-      tr '.header', ->
-        th ->
-          span '.dropdown', ->
-            a '.dropdown-toggle', 'data-toggle': 'dropdown', href: '#', ->
-              input '.item-selector', type: 'checkbox'
-              span '.caret'
+    h4 -> 'Sex'
+    div '.yui-skin-sam', ->
+      div id: 'sex-filter-tree', class: 'ygtv-checkbox'
 
-            ul '.dropdown-menu', ->
-              li ->
-                a '.item-selection-all', href: '#', ->
-                  i '.icon.ok', -> 'Select All'
-              li ->
-                a '.item-selection-none', href: '#', ->
-                  i '.icon-remove', -> 'Select None'
-              li ->
-                a '.item-selection-invert', href: '#', ->
-                  i '.icon-full', -> 'Invert Selection'
-        th -> 'ID'
-        th ->
-            a '.taxon.dropdown-toggle', 'data-toggle': 'dropdown', href: '#', ->
-              span -> 'Taxon'
-              span '.caret'
+    span '.sex.dropdown', ->
+      a '.dropdown-toggle', 'data-toggle': 'dropdown', href: '#', ->
+        span 'Sex'
+        span class: 'caret'
+      div '.dropdown-menu', ->
+        for [value, label_] in @sexChoices
+          input "#filter-sex-#{value}", type: 'checkbox', name: 'filter-sex', value: value
+          label for: 'filter-sex', -> label_
+        a '.btn.btn-primary', -> 'Filter'
 
-            ul '.dropdown-menu', ->
-              'TODO: put taxon filter tree here'
-        th ->
-          span '.sex.dropdown', ->
-            a '.dropdown-toggle', 'data-toggle': 'dropdown', href: '#', ->
-              span -> 'Sex'
-              span '.caret'
-            div '.dropdown-menu', ->
-              for [value, label] in @sexChoices
-                input "#filter-sex-#{value}", type: 'checkbox', name: 'filter-sex', value: @value
-                label for: 'filter-sex', -> label
-              a '.btn.btn-primary', -> 'Filter'
-        th -> 'Images'
-        th -> 'Last Modified'
-        th ->
-          a '.btn.btn-small', rel: 'create', title: 'Create New Specimen', ->
-            i '.icon-plus'
-      tr '.results-loading', ->
-        td colspan: 7, ->
-          span ->
-            img src: '/static/img/loading.gif', -> 'Loading results...'
-
-      tr '.result-row', style: 'display: hidden'
+    div '.specimen-results', ->
+      for specimen in @specimens
+        partial 'specimen-list-item', specimen
 
   @view 'specimen-search-form': ->
     div '.search-bar', ->
       input type: 'text', name: 'q', placeholder: 'Search specimens...'
-      i '.icon-search'
+      i class: 'icon-search'
     div '.search-params.pull-right', ->
       span '.dropdown', ->
         a '.dropdown-toggle', 'data-toggle': 'dropdown', ->
           span '.dropdown-display', ->
             @search.resultsPerPage
-          span '.caret'
+          span class: 'caret'
         ul '.dropdown-menu', ->
           li -> a rel: 'results-per-page', href: '#', -> 10
           li -> a rel: 'results-per-page', href: '#', -> 20
@@ -369,6 +168,11 @@ caret = ->
 
     # Pagination placeholder
     div '.pagination'
+
+  @view 'gallery': ->
+    for x in @_.range(20)
+      a '.image', href: '#', ->
+        img src: 'http://placekitten.com/100/100'
 
   @view 'main': ->
     a name: 'about-us'
@@ -471,3 +275,158 @@ caret = ->
          <li><a href="mailto:d@vidhughes.com">Dave Hughes (d@vidhughes.com)</a></li>
        </ul>'
 
+  # Edit views 
+  @view 'specimen-edit': ->
+    form '.specimen-form.form-horizontal', 
+      method: 'post'
+      enctype: 'multipart/form-data'
+      action: @links.submit, ->
+
+        div '.controls', ->
+          h2 -> if @new then 'Enter New Specimen' else 'Edit Specimen'
+
+        div '.institution.control-group', ->
+          label '.control-label', for: 'institution', -> 'Institution'
+          div '.controls', ->
+            select name: 'institution', ->
+              option -> '---------'
+              for [value, label] in @institutionChoices
+                option value: value, -> label
+
+        div '.specimen-id.control-group', ->
+          label '.control-label', for: 'specimenId', -> 'Specimen Id'
+          div '.controls', ->
+            input name: 'specimen_id', type: 'text', value: @specimen_id
+            
+        div '.taxon.control-group', ->
+          label '.control-label', for: 'taxon', -> 'Taxon'
+          div '.controls', ->
+            select name: 'taxon', ->
+              option -> '---------'
+              for [value, label] in @taxonChoices
+                option value: value, -> label
+
+        div '.sex.control-group', ->
+          label '.control-label', for: 'sex', -> 'Sex'
+          div '.controls', ->
+            select name: 'sex', ->
+              option -> '---------'
+              for [value, label] in @sexChoices
+                option value: value, -> label
+
+        div '.measurements.control-group', ->
+          label '.control-label', 'Measurements'
+          div '.controls', ->
+            table ->
+              tr ->
+                th -> 'Skull Length'
+                th -> 'Cranial Width'
+                th -> 'Neurofacial Height'
+                th -> 'Facial Height'
+                th -> 'Palate Length'
+                th -> 'Palate Width'
+              tr ->
+                td -> input name: 'skull_length', value: @skull_length, type: 'text'
+                td -> input name: 'cranial_width', value: @cranial_width, type: 'text'
+                td -> input name: 'neurocranial_height', value: @neurocranial_height, type: 'text'
+                td -> input name: 'facial_height', value: @facial_height, type: 'text'
+                td -> input name: 'palate_length', value: @palate_length, type: 'text'
+                td -> input name: 'palate_width', value: @palate_width, type: 'text'
+
+        div '.comments.control-group', ->
+          label '.control-label', for: 'comments', -> 'Comments'
+          div '.controls', ->
+            textarea name: 'comments', value: @comments
+
+        div '.settings.control-group', ->
+          label '.control-label', for: 'settings', -> 'Settings'
+          div '.controls', ->
+            textarea name: 'settings', value: @settings
+
+        div '.images.control-group', ->
+          label '.control-label', -> 'Images'
+          div '.controls.form-inline', ->
+            div '.image-controls',
+            a '.btn', rel: 'add-image', href: '#', ->
+              i class: 'icon-plus'
+              span 'Add Image'
+
+        div '.form-actions', ->
+          div '.submission-status.progress.progress-striped.active', style: 'display: none', ->
+            div '.bar'
+          a '.btn.btn-primary', rel: 'save', href: '#', -> 'Save'
+          a '.btn', rel: 'discard', href: '#', -> 'Discard'
+
+  @view 'image-control': -> 
+    input type: 'hidden', value: @id, name: 'id'
+    span '.replacementFile', style: 'display: none;'
+
+    select '.span2', name: 'aspect', ->
+      for [value, label] in [['L', 'Lateral'], ['S', 'Superior']]
+        option value: value, -> label
+
+    if @name
+      if not @replacementFile
+        span '.dropdown', ->
+          span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
+            'Existing file:'
+            a href: @url, '.download-file', -> @name
+            span '.caret', -> '&nbsp;'
+
+          ul '.dropdown-menu', ->
+            li ->
+              a href: @url, '.download-file', ->
+                i '.icon-download',
+                span 'Download Existing File'
+            li ->
+              a href: '#', '.replace-file fileinput-button', ->
+                i '.icon-random',
+                span 'Replace File'
+                input type: 'file'
+      else
+        span '.dropdown', ->
+          span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
+            span 'Replace'
+            a href: @url, '.download-file', -> @name
+            span 'with'
+            a href: '#', '.fileinput-button', style: 'display: inline-block', ->
+              @replacementFile.name
+              input type: 'file'
+            span '.caret', -> '&nbsp;'
+          ul '.dropdown-menu', ->
+            li ->
+              a href: @url, '.download-file', ->
+                i '.icon-download'
+                span 'Download Existing File'
+            li ->
+              a href: '#', '.replace-file fileinput-button', ->
+                i '.icon-random'
+                span 'Replace File'
+                input type: 'file'
+            li ->
+              a href: '#', '.cancel-replace', ->
+                i '.icon-remove'
+                span 'Cancel Replacement'
+    else if @replacementFile
+      span '.dropdown', ->
+        span '.dropdown-toggle', 'data-toggle': 'dropdown', ->
+          'Upload file:'
+          a '.fileinput-button', style: 'display: inline-block', ->
+            @replacementFile.name
+            input type: 'file'
+          span '.caret', -> '&nbsp;'
+
+          ul '.dropdown-menu', ->
+            li ->
+              a href: '#', '.replace-file fileinput-button', ->
+                i '.icon-random'
+                span 'Replace File'
+                input type: 'file'
+    else
+      a '.fileinput-button', ->
+        'Upload an Image'
+        i '.icon-upload'
+        input type: 'file'
+
+    a href: '#', rel: 'remove-image', ->
+      i '.icon-remove',

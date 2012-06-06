@@ -2,9 +2,16 @@ import types
 
 from django.conf import settings
 from djangorestframework import mixins, views
+from radioapp.api import resources
 import pysolr
 
 class ListModelMixin(mixins.ListModelMixin):
+    '''
+    Implementation of ListModelMixin that allows resources to declare related
+    model values that they require and select/prefetch them.  This is a minor
+    optimization, but seems to save ~15% of execution time.
+    '''
+
     def get(self, request, *args, **kwargs):
         queryset = super(ListModelMixin, self).get(request, *args, **kwargs)
 
@@ -31,25 +38,25 @@ class ListOrCreateModelView(ListModelMixin,
                             mixins.CreateModelMixin, 
                             views.ModelView):
     """
-    A view which provides default operations for list and create, against a model in the database.
+    A view which provides default operations for list and create, against a 
+    model in the database.
     """
     _suffix = 'List'
 
-class TaxaView(mixins.ListModelMixin):
+class SpecimenView(ListOrCreateModelView):
+    _suffix = 'List'
+    resource = resources.Specimen
 
-    def get(self):
-        solr = pysolr.Solr(settings.HAYSTACK_SOLR_URL)
-        result = solr.search(q="django_ct:radioapp.taxon", 
-                             start=0, rows=1000, 
-                             fl="django_id label",
-                             sort="label_sort asc")
-        return [(doc['django_id'], doc['label']) for doc in result.docs]
+    def get_query_kwargs(self, request, *args, **kwargs):
+        qargs = super(SpecimenView, self).get_query_kwargs(self, request, *args, **kwargs)
 
+        # Create taxa filters
+        taxa_list = request.GET.getlist('taxa')
+        if taxa_list:
+            qargs['taxon__in'] = taxa_list
 
-
-
-
-
-
-
-
+        # Create sex filters
+        sex_list = request.GET.getlist('sex')
+        if sex_list:
+            qargs['sex__in'] = sex_list
+        return qargs

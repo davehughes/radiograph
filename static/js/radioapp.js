@@ -50,8 +50,8 @@
   return this.require.define;
 }).call(this)({"radioapp/api": function(exports, require, module) {(function() {
   var Backbone, CollectionItemModel, CollectionModel, _,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = require('underscore')._;
 
@@ -62,7 +62,7 @@
     __extends(CollectionItemModel, _super);
 
     function CollectionItemModel() {
-      CollectionItemModel.__super__.constructor.apply(this, arguments);
+      return CollectionItemModel.__super__.constructor.apply(this, arguments);
     }
 
     CollectionItemModel.prototype.defaults = function() {
@@ -85,6 +85,7 @@
       capitalized name of the field to be transformed (e.g., to specify a function to
       transform the field 'foo', the class should provide a 'parseFoo' method).
     */
+
 
     CollectionItemModel.prototype.parse = function(input) {
       var fieldValues, mapField,
@@ -111,7 +112,7 @@
     __extends(CollectionModel, _super);
 
     function CollectionModel() {
-      CollectionModel.__super__.constructor.apply(this, arguments);
+      return CollectionModel.__super__.constructor.apply(this, arguments);
     }
 
     CollectionModel.prototype.itemModel = CollectionItemModel;
@@ -154,7 +155,9 @@
     };
 
     CollectionModel.prototype.fetchTemplate = function(callback) {
-      if (this.get('template')) callback(this.get('template'));
+      if (this.get('template')) {
+        callback(this.get('template'));
+      }
       if (this.getLink('template')) {
         if (!this._templateXHR) {
           this._templateXHR = $.ajax({
@@ -186,8 +189,8 @@
 }).call(this);
 }, "radioapp/app": function(exports, require, module) {(function() {
   var Backbone, RadioappRouter, api, createResourceCollection, createResources, models, resourceConfigs, views, _,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = require('underscore')._;
 
@@ -223,8 +226,12 @@
 
   createResourceCollection = function(url, collectionModel, itemModel) {
     var resource;
-    if (collectionModel == null) collectionModel = api.CollectionModel;
-    if (itemModel == null) itemModel = api.CollectionItemModel;
+    if (collectionModel == null) {
+      collectionModel = api.CollectionModel;
+    }
+    if (itemModel == null) {
+      itemModel = api.CollectionItemModel;
+    }
     resource = new collectionModel();
     resource.url = url;
     resource.itemModel = itemModel;
@@ -236,7 +243,7 @@
     __extends(RadioappRouter, _super);
 
     function RadioappRouter() {
-      RadioappRouter.__super__.constructor.apply(this, arguments);
+      return RadioappRouter.__super__.constructor.apply(this, arguments);
     }
 
     RadioappRouter.prototype.routes = {
@@ -297,8 +304,8 @@
 }).call(this);
 }, "radioapp/models": function(exports, require, module) {(function() {
   var Backbone, Image, ImageCollection, SearchManager, Specimen, SpecimenCollection, User, api, util, _,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = require('underscore')._;
 
@@ -313,7 +320,7 @@
     __extends(Specimen, _super);
 
     function Specimen() {
-      Specimen.__super__.constructor.apply(this, arguments);
+      return Specimen.__super__.constructor.apply(this, arguments);
     }
 
     Specimen.prototype.urlRoot = '/specimens';
@@ -357,7 +364,7 @@
     __extends(SpecimenCollection, _super);
 
     function SpecimenCollection() {
-      SpecimenCollection.__super__.constructor.apply(this, arguments);
+      return SpecimenCollection.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenCollection.prototype.itemModel = Specimen;
@@ -415,7 +422,7 @@
     __extends(Image, _super);
 
     function Image() {
-      Image.__super__.constructor.apply(this, arguments);
+      return Image.__super__.constructor.apply(this, arguments);
     }
 
     Image.prototype.defaults = function() {
@@ -443,7 +450,7 @@
     __extends(ImageCollection, _super);
 
     function ImageCollection() {
-      ImageCollection.__super__.constructor.apply(this, arguments);
+      return ImageCollection.__super__.constructor.apply(this, arguments);
     }
 
     ImageCollection.prototype.model = Image;
@@ -457,7 +464,7 @@
     __extends(User, _super);
 
     function User() {
-      User.__super__.constructor.apply(this, arguments);
+      return User.__super__.constructor.apply(this, arguments);
     }
 
     User.prototype.defaults = function() {
@@ -483,7 +490,7 @@
     __extends(SearchManager, _super);
 
     function SearchManager() {
-      SearchManager.__super__.constructor.apply(this, arguments);
+      return SearchManager.__super__.constructor.apply(this, arguments);
     }
 
     SearchManager.prototype.defaults = function() {
@@ -534,8 +541,8 @@
 }).call(this);
 }, "radioapp/util": function(exports, require, module) {(function() {
   var Alerts, Backbone, _,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = require('underscore')._;
 
@@ -546,7 +553,7 @@
     __extends(Alerts, _super);
 
     function Alerts() {
-      Alerts.__super__.constructor.apply(this, arguments);
+      return Alerts.__super__.constructor.apply(this, arguments);
     }
 
     Alerts.prototype.Types = {
@@ -557,7 +564,9 @@
     };
 
     Alerts.prototype.publish = function(type, body) {
-      if (type == null) type = Alerts.Types.INFO;
+      if (type == null) {
+        type = Alerts.Types.INFO;
+      }
       return this.trigger('published', {
         type: type,
         body: body
@@ -575,10 +584,10 @@
 }).call(this);
 }, "radioapp/views": function(exports, require, module) {(function() {
   var AlertsView, AppToolbar, AppView, Backbone, DataView, FormPaginationView, ImageView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = Array.prototype.slice;
+    __slice = [].slice;
 
   _ = require('underscore')._;
 
@@ -597,14 +606,14 @@
     __extends(View, _super);
 
     function View() {
-      View.__super__.constructor.apply(this, arguments);
+      return View.__super__.constructor.apply(this, arguments);
     }
 
     View.prototype.templateId = null;
 
     View.prototype.viewContext = function() {
-      var _ref, _ref2;
-      return (_ref = (_ref2 = this.model) != null ? _ref2.toJSON() : void 0) != null ? _ref : {};
+      var _ref, _ref1;
+      return (_ref = (_ref1 = this.model) != null ? _ref1.toJSON() : void 0) != null ? _ref : {};
     };
 
     View.prototype.render = function() {
@@ -639,8 +648,9 @@
 
     function SpecimenForm() {
       this.getSpecimenData = __bind(this.getSpecimenData, this);
+
       this.addImage = __bind(this.addImage, this);
-      SpecimenForm.__super__.constructor.apply(this, arguments);
+      return SpecimenForm.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenForm.prototype.templateId = 'templates/specimen-edit';
@@ -798,7 +808,7 @@
     __extends(SpecimenModal, _super);
 
     function SpecimenModal() {
-      SpecimenModal.__super__.constructor.apply(this, arguments);
+      return SpecimenModal.__super__.constructor.apply(this, arguments);
     }
 
     className = 'modal specimen-modal';
@@ -826,8 +836,9 @@
 
     function SpecimenSearchPane() {
       this.loadSearch = __bind(this.loadSearch, this);
+
       this.showCreateItemPane = __bind(this.showCreateItemPane, this);
-      SpecimenSearchPane.__super__.constructor.apply(this, arguments);
+      return SpecimenSearchPane.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenSearchPane.prototype.templateId = 'templates/specimen-search-form';
@@ -838,7 +849,9 @@
         'click [rel=create]': 'showCreateItemPane',
         'click .icon-search': 'setQuery',
         'keydown [name=q]': function(e) {
-          if (e.keyCode === 13) return _this.setQuery();
+          if (e.keyCode === 13) {
+            return _this.setQuery();
+          }
         },
         'click [rel=results-per-page]': 'setResultsPerPage',
         'click [rel=sort-field]': 'setSortField',
@@ -887,7 +900,9 @@
     };
 
     SpecimenSearchPane.prototype.updateAuthz = function(user) {
-      if (user == null) user = App.user;
+      if (user == null) {
+        user = App.user;
+      }
       if (user.get('isStaff')) {
         return this.$('[rel=edit],[rel=create]').show();
       } else {
@@ -961,8 +976,9 @@
 
     function SpecimenResult() {
       this.showDetailPane = __bind(this.showDetailPane, this);
+
       this.showEditPane = __bind(this.showEditPane, this);
-      SpecimenResult.__super__.constructor.apply(this, arguments);
+      return SpecimenResult.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenResult.prototype.templateId = 'templates/specimen-list-item';
@@ -1010,7 +1026,7 @@
 
     function SpecimenDetailPane() {
       this.showEditPane = __bind(this.showEditPane, this);
-      SpecimenDetailPane.__super__.constructor.apply(this, arguments);
+      return SpecimenDetailPane.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenDetailPane.prototype.templateId = 'templates/specimen-detail';
@@ -1047,9 +1063,11 @@
 
     function LoginFormView() {
       this.displayError = __bind(this.displayError, this);
+
       this.clearError = __bind(this.clearError, this);
+
       this.submit = __bind(this.submit, this);
-      LoginFormView.__super__.constructor.apply(this, arguments);
+      return LoginFormView.__super__.constructor.apply(this, arguments);
     }
 
     LoginFormView.prototype.templateId = 'templates/login';
@@ -1127,7 +1145,7 @@
     __extends(DataView, _super);
 
     function DataView() {
-      DataView.__super__.constructor.apply(this, arguments);
+      return DataView.__super__.constructor.apply(this, arguments);
     }
 
     DataView.prototype.render = function() {
@@ -1169,7 +1187,7 @@
 
     function AlertsView() {
       this.displayAlert = __bind(this.displayAlert, this);
-      AlertsView.__super__.constructor.apply(this, arguments);
+      return AlertsView.__super__.constructor.apply(this, arguments);
     }
 
     AlertsView.prototype.className = 'alerts';
@@ -1194,7 +1212,7 @@
 
     function AppToolbar() {
       this.logout = __bind(this.logout, this);
-      AppToolbar.__super__.constructor.apply(this, arguments);
+      return AppToolbar.__super__.constructor.apply(this, arguments);
     }
 
     AppToolbar.prototype.templateId = 'templates/app-toolbar';
@@ -1263,7 +1281,7 @@
     __extends(AppView, _super);
 
     function AppView() {
-      AppView.__super__.constructor.apply(this, arguments);
+      return AppView.__super__.constructor.apply(this, arguments);
     }
 
     AppView.prototype.templateId = 'templates/appview';
@@ -1284,7 +1302,9 @@
       this.$el.html(this.template());
       this.$('.app-toolbar').replaceWith(this.toolbar.render().$el);
       this.$('.alerts').replaceWith(this.alertsView.render().$el);
-      if (this.pane) this.$('.app-content').append(this.pane.render().$el);
+      if (this.pane) {
+        this.$('.app-content').append(this.pane.render().$el);
+      }
       return this;
     };
 
@@ -1306,7 +1326,9 @@
       lastPane = this.panes.pop();
       this.$('.app-content').children().detach();
       this.pane = _.last(this.panes);
-      if (this.pane) this.$('.app-content').append(this.pane.render().$el);
+      if (this.pane) {
+        this.$('.app-content').append(this.pane.render().$el);
+      }
       this.trigger('change:pane', {
         "new": this.pane,
         old: lastPane
@@ -1323,7 +1345,7 @@
     __extends(SpecimenEditPane, _super);
 
     function SpecimenEditPane() {
-      SpecimenEditPane.__super__.constructor.apply(this, arguments);
+      return SpecimenEditPane.__super__.constructor.apply(this, arguments);
     }
 
     SpecimenEditPane.prototype.templateId = 'templates/specimen-edit';
@@ -1338,9 +1360,11 @@
 
     function ImageView() {
       this.cancelReplacement = __bind(this.cancelReplacement, this);
+
       this.replaceFile = __bind(this.replaceFile, this);
+
       this.render = __bind(this.render, this);
-      ImageView.__super__.constructor.apply(this, arguments);
+      return ImageView.__super__.constructor.apply(this, arguments);
     }
 
     ImageView.prototype.templateId = 'templates/image-control';
@@ -1400,8 +1424,9 @@
 
     function PaginationView() {
       this.buildPageElement = __bind(this.buildPageElement, this);
+
       this.buildPageElements = __bind(this.buildPageElements, this);
-      PaginationView.__super__.constructor.apply(this, arguments);
+      return PaginationView.__super__.constructor.apply(this, arguments);
     }
 
     PaginationView.prototype.className = 'pagination';
@@ -1451,9 +1476,15 @@
 
     PaginationView.prototype.paginate = function(currentPage, totalPages, adjacent) {
       var chunkend, chunkstart, createPageNav, createPaginationStruct, ellipsisPost, ellipsisPre, pages;
-      if (adjacent == null) adjacent = 2;
-      if (adjacent == null) adjacent = 2;
-      if (totalPages <= 1) return [];
+      if (adjacent == null) {
+        adjacent = 2;
+      }
+      if (adjacent == null) {
+        adjacent = 2;
+      }
+      if (totalPages <= 1) {
+        return [];
+      }
       createPaginationStruct = function(pageNumber, display, isCurrent) {
         return {
           pageNumber: pageNumber,
@@ -1511,7 +1542,7 @@
 
     function FormPaginationView() {
       this.buildPageElement = __bind(this.buildPageElement, this);
-      FormPaginationView.__super__.constructor.apply(this, arguments);
+      return FormPaginationView.__super__.constructor.apply(this, arguments);
     }
 
     FormPaginationView.prototype.buildPageElement = function(page) {
@@ -1538,719 +1569,7 @@
   });
 
 }).call(this);
-}, "templates/app-toolbar": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-    
-      __out.push('\n<div class="app-tools-custom">\n    <a rel="visualize" class="btn btn-small" href="#">Data Visualization</a>\n</div>\n\n');
-    
-      __out.push('\n<div class="app-tools-common">\n    <div class="btn-group">\n        ');
-    
-      if (this.user.loggedIn) {
-        __out.push('\n        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown">\n            <i class="icon-user"></i>\n            ');
-        __out.push(__sanitize(this.user.firstName));
-        __out.push('\n            <span class="caret"></span>\n        </a>\n        <ul class="dropdown-menu">\n            <li>\n            <a rel="logout" href="javascript:void(0);">\n                <i class="icon-off"></i>Log Out\n            </a>\n            </li>\n        </ul>\n        ');
-      } else {
-        __out.push('\n        <a class="btn btn-small" rel="login" href="javascript:void(0);">\n            <i class="icon-user"></i>Sign In\n        </a>\n        ');
-      }
-    
-      __out.push('\n    </div>\n</div>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/image-control": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      var label, value, _i, _len, _ref, _ref2;
-    
-      __out.push('<input type="hidden" value="');
-    
-      __out.push(__sanitize(this.id));
-    
-      __out.push('" name="id"/>\n<span class="replacementFile" style="display: none;"></span>\n\n<select class="span2" name="aspect">\n');
-    
-      _ref = App.choices.aspect;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
-        __out.push('\n  <option value="');
-        __out.push(__sanitize(value));
-        __out.push('" ');
-        if (value === this.aspect) __out.push('selected="selected"');
-        __out.push('>');
-        __out.push(__sanitize(label));
-        __out.push('</option>\n');
-      }
-    
-      __out.push('\n</select>\n  \n');
-    
-      if (this.name) {
-        __out.push('\n');
-        if (!this.replacementFile) {
-          __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Existing file:\n        <a href="');
-          __out.push(__sanitize(this.url));
-          __out.push('" class="download-file">\n          ');
-          __out.push(__sanitize(this.name));
-          __out.push('\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu">\n        <li>\n          <a href="');
-          __out.push(__sanitize(this.url));
-          __out.push('" class="download-file">\n            <i class="icon-download"></i>\n            Download Existing File\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file"/>\n          </a>\n        </li>\n      </ul>\n   </span>\n');
-        } else {
-          __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Replace\n    <a href="');
-          __out.push(__sanitize(this.url));
-          __out.push('" class="download-file">\n      ');
-          __out.push(__sanitize(this.name));
-          __out.push('\n    </a>  \n    with\n    <a class="fileinput-button" style="display:inline-block">\n      ');
-          __out.push(__sanitize(this.replacementFile.name));
-          __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu">\n    <li>\n      <a href="');
-          __out.push(__sanitize(this.url));
-          __out.push('" class="download-file">\n        <i class="icon-download"></i>\n        Download Existing File\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="cancel-replace">\n        <i class="icon-remove"></i>\n        Cancel Replacement\n      </a>\n    </li>\n  </ul>\n</span>\n');
-        }
-        __out.push('\n');
-      } else if (this.replacementFile) {
-        __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Upload file:\n    <a class="fileinput-button" style="display:inline-block">\n      ');
-        __out.push(__sanitize(this.replacementFile.name));
-        __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu"> \n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n  </ul>\n</span>\n');
-      } else {
-        __out.push('\n<a class="fileinput-button">\n  Upload an Image\n  <i class="icon-upload"></i>\n  <input type="file"/>\n</a>\n');
-      }
-    
-      __out.push('\n\n<a href="#" rel="remove-image">\n  <i class="icon-remove"></i>\n</a>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/login": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-    
-      __out.push('<form method="post" class="login-form modal">\n\n    <div class="modal-header">\n        <h3>Radiograph Database - Sign In</h3>\n    </div>\n\n    <div class="modal-body form form-horizontal">\n        <div class="alert alert-error" style="display: none;"></div>\n\n        <div class="control-group">\n            <label class="control-label" for="username">Username:</label>\n            <div class="controls">\n                <input type="text" name="username"/>\n            </div>\n        </div>\n        <div class="control-group">\n            <label class="control-label" for="password">Password:</label>\n            <div class="controls">\n                <input type="password" name="password"/>\n            </div>\n        </div>\n    </div>\n\n    <div class="modal-footer form-actions">\n        <button type="submit" class="btn btn-primary">Sign In</button>\n        <a href="#" class="btn discard">Nevermind</a>\n    </div>\n\n</form>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/specimen-detail": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      var image, _i, _len, _ref;
-    
-      __out.push('<a rel="back" href="#" class="btn"><i class="icon-chevron-left"></i> Back to Search</a>\n<a rel="edit" href="#" class="btn">Edit</a>\n\n<h3>\n    ');
-    
-      __out.push(__sanitize(this.specimenId));
-    
-      __out.push(' -\n    <span class="taxon">');
-    
-      __out.push(__sanitize(App.choiceMap.taxon[this.taxon]));
-    
-      __out.push('</span>\n</h3>\n<table>\n  <tr>\n    <th>Institution</th>\n    <td>');
-    
-      __out.push(__sanitize(App.choiceMap.institution[this.institution]));
-    
-      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Specimen ID</th>\n    <td>');
-    
-      __out.push(__sanitize(this.specimenId));
-    
-      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Sex</th>\n    <td>');
-    
-      __out.push(__sanitize(App.choiceMap.sex[this.sex]));
-    
-      __out.push('</td>\n  </tr>\n  ');
-    
-      if (this.settings) {
-        __out.push('\n  <tr>\n    <th>Settings</th><td>');
-        __out.push(__sanitize(this.settings));
-        __out.push('</td>\n  </tr>\n  ');
-      }
-    
-      __out.push('\n  ');
-    
-      if (this.comments) {
-        __out.push('\n  <tr>\n    <th>Comments</th>\n    <td>');
-        __out.push(__sanitize(this.comments));
-        __out.push('</td>\n  </tr>\n  ');
-      }
-    
-      __out.push('\n  <tr>\n    <th>Images</th>\n    <td>\n      ');
-    
-      if (this.images && this.images.length > 0) {
-        __out.push('\n        ');
-        _ref = this.images;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          image = _ref[_i];
-          __out.push('\n        <a href="');
-          __out.push(__sanitize(image.links.medium));
-          __out.push('">\n            <img src="');
-          __out.push(__sanitize(image.links.thumbnail));
-          __out.push('"/>\n        </a>\n        ');
-        }
-        __out.push('\n      ');
-      } else {
-        __out.push('\n        <span class="empty">No images attached.</span>\n      ');
-      }
-    
-      __out.push('\n    </td>\n  </tr>\n  <tr>\n    <th>Last Modified</th>\n    <td>');
-    
-      __out.push(__sanitize(this.lastModified));
-    
-      __out.push('</td>\n  </tr>\n  <tr>\n    <th>Created</th>\n    <td>');
-    
-      __out.push(__sanitize(this.created));
-    
-      __out.push('</td>\n  </tr>\n</table>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/specimen-edit": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      var label, value, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
-    
-      __out.push('<form class="form-horizontal specimen-form" method="post"\n    action="');
-    
-      __out.push('" enctype="multipart/form-data">\n\n    <div class="controls">\n        ');
-    
-      if (this.existing) {
-        __out.push('\n        <h2>Edit Specimen</h2>\n        ');
-      } else {
-        __out.push('\n        <h2>Enter New Specimen</h2>\n        ');
-      }
-    
-      __out.push('\n    </div>\n    \n    ');
-    
-      __out.push('\n    <div class="control-group institution">\n        <label class="control-label" for="institution">Institution</label>\n        <div class="controls">\n            <select name="institution">\n                <option>---------</option>\n                ');
-    
-      _ref = App.choices.institution;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
-        __out.push('\n                    <option value="');
-        __out.push(__sanitize(value));
-        __out.push('"\n                        ');
-        if (value === this.institution) __out.push('selected="selected"');
-        __out.push('>\n                        ');
-        __out.push(__sanitize(label));
-        __out.push('\n                    </option>\n                ');
-      }
-    
-      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group specimen-id">\n        <label class="control-label" for="specimenId">Specimen ID</label>\n        <div class="controls">\n            <input type="text" name="specimenId" value="');
-    
-      __out.push(__sanitize(this.specimenId));
-    
-      __out.push('"/>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group taxon">\n        <label class="control-label" for="taxon">Taxon</label>\n        <div class="controls">\n            <select name="taxon">\n                <option>---------</option>\n                ');
-    
-      _ref3 = App.choices.taxon;
-      for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
-        _ref4 = _ref3[_j], value = _ref4[0], label = _ref4[1];
-        __out.push('\n                    <option value="');
-        __out.push(__sanitize(value));
-        __out.push('" \n                        ');
-        if (value === this.taxon) __out.push('selected="selected"');
-        __out.push('>\n                        ');
-        __out.push(__sanitize(label));
-        __out.push('\n                    </option>\n                ');
-      }
-    
-      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group sex">\n        <label class="control-label" for="sex">Sex</label>\n        <div class="controls">\n            <select name="sex">\n                <option>---------</option>\n                ');
-    
-      _ref5 = App.choices.sex;
-      for (_k = 0, _len3 = _ref5.length; _k < _len3; _k++) {
-        _ref6 = _ref5[_k], value = _ref6[0], label = _ref6[1];
-        __out.push('\n                    <option value="');
-        __out.push(__sanitize(value));
-        __out.push('"\n                        ');
-        if (value === this.sex) __out.push('selected="selected"');
-        __out.push('>\n                        ');
-        __out.push(__sanitize(label));
-        __out.push('\n                    </option>\n                ');
-      }
-    
-      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group measurements">\n        <label class="control-label">Measurements</label>\n        <div class="controls">\n            <table class="specimen-measurements">\n                <tr>\n                    <th>Skull Length</th>\n                    <th>Cranial Width</th>\n                    <th>Neurocranial Height</th>\n                    <th>Facial Height</th>\n                    <th>Palate Length</th>\n                    <th>Palate Width</th>\n                </tr>\n                <tr>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.skullLength));
-    
-      __out.push('" name="skullLength"/></td>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.cranialWidth));
-    
-      __out.push('" name="cranialWidth"/></td>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.neurocranialHeight));
-    
-      __out.push('" name="neurocranialHeight"/></td>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.facialHeight));
-    
-      __out.push('" name="facialHeight"/></td>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.palateLength));
-    
-      __out.push('" name="palateLength"/></td>\n                    <td><input type="text" value="');
-    
-      __out.push(__sanitize(this.palateWidth));
-    
-      __out.push('" name="palateWidth"/></td>\n                </tr>\n            </table>\n        </div>\n    </div>\n\n\n    ');
-    
-      __out.push('\n    <div class="control-group comments">\n        <label class="control-label" for="comments">Comments</label>\n        <div class="controls">\n            <textarea name="comments">');
-    
-      __out.push(__sanitize(this.comments));
-    
-      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group settings">\n        <label class="control-label" for="settings">Settings</label>\n        <div class="controls">\n            <textarea name="settings">');
-    
-      __out.push(__sanitize(this.settings));
-    
-      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
-    
-      __out.push('\n    <div class="control-group images">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline">\n            ');
-    
-      __out.push('\n            <div class="image-controls"></div>\n            <a href="#" class="btn" rel="add-image">\n                <i class="icon-plus"></i>\n                Add Image\n            </a>\n        </div>\n    </div>\n\n    <div class="form-actions">\n        <div class="submission-status progress progress-striped active" style="display: none;">\n            <div class="bar"></div>\n        </div>\n        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>\n        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>\n    </div>\n\n</form>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/specimen-list-item": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-    
-      __out.push('<td class="selection">\n    <input type="checkbox" class="item-selection"\n        value="');
-    
-      this.id;
-    
-      __out.push('"/>\n</td>\n<td class="specimen-id">\n    ');
-    
-      __out.push(__sanitize(this.specimenId));
-    
-      __out.push('\n</td>\n<td class="taxon">\n    <a rel="detail" href="#">\n        ');
-    
-      __out.push(__sanitize(App.choiceMap.taxon[this.taxon]));
-    
-      __out.push('\n    </a>\n</td>\n<td class="sex">');
-    
-      __out.push(__sanitize(App.choiceMap.sex[this.sex]));
-    
-      __out.push('</td>\n<td class="images">\n    <a href="#">Lateral</a> | \n    <a href="#">Superior</a>\n</td>\n<td class="last-modified">\n    ');
-    
-      __out.push(__sanitize(this.lastModified));
-    
-      __out.push('\n</td>\n<td class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit"><i class="icon-edit"></i></a>\n</td>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/specimen-list": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-    
-      __out.push('<tr>\n    <td class="selection">\n        <input type="checkbox" class="item-selection"\n            value="');
-    
-      __out.push(__sanitize(this.href));
-    
-      __out.push('"/>\n    </td>\n    <td class="taxon">');
-    
-      __out.push('</td>\n    <td class="sex">');
-    
-      __out.push('</td>\n    <td class="images">\n        <a href="#">Lateral</a>\n        <a href="#">Superior</a>\n    </td>\n    <td class="actions">\n        <a class="btn" title="Edit Specimen" rel="edit" href="javascript:void(0)">\n            <i class="icon-edit"></i> \n        </a>\n    </td>\n</tr>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/specimen-search-form": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      var label, value, _i, _len, _ref, _ref2;
-    
-      __out.push('<div class="search-bar">\n    <div class="specimen-query">\n        <input type="text" name="q" placeholder="Search specimens..."/>\n        <i class="icon-search"></i>\n    </div>\n\n    <div class="search-params pull-right">\n        <span class="dropdown">\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="dropdown-display">\n                    ');
-    
-      __out.push('\n                    20\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#" rel="results-per-page">10</a></li>\n                <li><a href="#" rel="results-per-page">20</a></li>\n                <li><a href="#" rel="results-per-page">50</a></li>\n                <li><a href="#" rel="results-per-page">100</a></li>\n            </ul>\n        </span> \n        results per page, sorted by\n        <span class="dropdown">\n            <input type="hidden" name="sort-field"/>\n            <a class="dropdown-toggle" data-toggle="dropdown">\n                <span class="dropdown-display">\n                    ');
-    
-      __out.push('\n                    Relevance\n                </span>\n                <span class="caret"></span>\n            </a>\n            \n            <ul class="dropdown-menu">\n                <li><a href="#" rel="sort-field" data-value="relevance">Relevance</a></li>\n                <li><a href="#" rel="sort-field" data-value="taxon">Taxon</a></li>\n                <li><a href="#" rel="sort-field" data-value="sex">Sex</a></li>\n                <li><a href="#" rel="sort-field" data-value="modified_date">Modified Date</a></li>\n            </ul>\n        </span>\n        <span class="sort-direction-toggle" title="Ascending">\n            <a href="#" rel="sort-direction" data-value="asc">Ascending &darr;</a> \n            <a href="#" rel="sort-direction" data-value="desc">Descending &uarr;</a> \n        </span>\n    </div>\n</div>\n\n');
-    
-      __out.push('\n<div class="pagination"></div>\n\n');
-    
-      __out.push('\n<table class="table table-condensed table-striped">\n    <col width="40"/>\n    <col width="70"/>\n    <col/>\n    <col width="80"/>\n    <col width="140"/>\n    <col width="120"/>\n    <col width="25"/>\n    <tr class="header">\n        <th>\n            <span class="dropdown">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    <input type="checkbox" class="item-selector"/>\n                    <span class="caret"></span>\n                </a>\n                <ul class="dropdown-menu">\n                    <li>\n                        <a href="#" class="item-selection-all">\n                            <i class="icon-ok"></i>\n                            Select All\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-none">\n                            <i class="icon-remove"></i>\n                            Select None\n                        </a>\n                    </li>\n                    <li>\n                        <a href="#" class="item-selection-invert">\n                            <i class="icon-resize-full"></i>\n                            Invert Selection\n                        </a>\n                    </li>\n                </ul>\n            </span>\n        </th>\n        <th>ID</th>\n        <th>\n            <span class="dropdown taxon">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Taxon\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    TODO: put Taxon filter tree here\n                </div>\n            </span>\n        </th>\n        <th>\n            <span class="dropdown sex">\n                <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n                    Sex\n                    <span class="caret"></span>\n                </a>\n                <div class="dropdown-menu">\n                    ');
-    
-      _ref = App.choices.sex;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref2 = _ref[_i], value = _ref2[0], label = _ref2[1];
-        __out.push('\n                            <input type="checkbox" id="filter-sex-');
-        __out.push('"\n                                   name="filter-sex" value="');
-        __out.push(__sanitize(value));
-        __out.push('"/>\n                            <label for="filter-sex-');
-        __out.push(__sanitize(value));
-        __out.push('">');
-        __out.push(__sanitize(label));
-        __out.push('</label>\n                    ');
-      }
-    
-      __out.push('\n                    <a href="#" class="btn btn-primary">Filter</a>\n                </div>\n            </span>\n        </th>\n        <th>Images</th>\n        <th>Last Modified</th>\n        <th>\n            <a class="btn btn-small" rel="create" title="Create New Specimen">\n                <i class="icon-plus"></i>\n            </a>\n        </th>\n    </tr>\n    \n    <tr class="results-loading">\n        <td colspan="7">\n            <span>\n                <img src="/static/img/loading.gif">  Loading results...\n            </span>\n        </td>\n    </tr>\n\n    ');
-    
-      __out.push('\n    <tr class="result-row" style="display: hidden;"></tr>\n\n</table>\n\n');
-    
-      __out.push('\n<div class="pagination"></div>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "templates/visualizations": function(exports, require, module) {module.exports = function(__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-    
-      __out.push('<div id=\'visualizations\'></div>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-}}, "backbone": function(exports, require, module) {//     Backbone.js 0.9.1
+}, "backbone": function(exports, require, module) {//     Backbone.js 0.9.1
 
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.

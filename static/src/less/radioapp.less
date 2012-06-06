@@ -35,9 +35,20 @@
     }
 }
 
-table.specimen-results {
-    th, td {
-        vertical-align: middle;
+.specimen-results {
+    .thumbnail {
+        /* float: left; */
+        margin-right: 5px;
+        display: inline-block;
+        width: 80px;
+    }
+}
+
+
+#taxon-filter-tree {
+    .ygtvlabel {
+        margin-left: 6px;
+        background-color: transparent;
     }
 }
 
@@ -206,5 +217,28 @@ table {
 
     input[type=checkbox] {
         margin-left: 4px;
+    }
+}
+
+// Specimen detail
+.specimen-detail {
+    h1,h2,h3,h4,h5,h6 { margin-left: 160px; }
+    .specimen-images {
+        margin-left: 140px;
+        img {
+            padding: 10px 20px;
+        }
+    }
+}
+
+.specimen-field {
+    clear: both;
+    .header {
+        float: left;
+        width: 140px;
+        text-align: right;
+        margin-right: 20px;
+        font-weight: bold;
+        margin-bottom: 8px;
     }
 }

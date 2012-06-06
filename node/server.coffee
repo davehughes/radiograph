@@ -3,33 +3,139 @@ fs = require('fs')
 async = require('async')
 zipstream = require('zipstream')
 zappa = require('zappa')
+http = require('http')
+url = require('url')
+
+api_request = (opts) ->
+  defaults = 
+    host: 'api.primate-radiograph.com'
+    headers:
+      accept: 'application/json'
+
+  headers = _.extend(defaults.headers, opts.headers ? {})
+  params = _.extend(defaults, opts, headers: headers)
+  return params
+
+rewriteApiUrl = (theurl) ->
+  url.parse(theurl).path
 
 # start zappa application
 zipper = zappa.app ->
 
+  @helper api_proxy: (callback) ->
+    http.get api_request(path: @request.path), (res) =>
+      body = ''
+      res.on 'data', (data) => body += data
+      res.on 'end', => 
+        callback(JSON.parse(body))
+
   @get '/': ->
-    @render 'main'
+    # @render 'main'
+    @render 'gallery',
+      '_': _
 
   @get '/specimens': ->          # view specimen list
-    helpers =
-      icon: (name) -> i class: "icon-#{name}"
-    @render 'image-control':
-      name: 'foo.jpg'
-      hardcode: helpers
+    @api_proxy (specimens) =>
+      _.each specimens, (s) ->
+        s.detailView = rewriteApiUrl(s.href)
+
+      @render 'specimen-table',
+        specimens: specimens
+        sexChoices: [['F', 'Female'], ['M', 'Male'], ['U', 'Unknown/Unspecified']]
+        scripts: [
+          'http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event',
+          'http://yui.yahooapis.com/2.9.0/build/treeview/treeview-min'
+          '/specimen-filters'
+        ]
+        stylesheets: [
+          'http://yui.yahooapis.com/2.9.0/build/treeview/assets/skins/sam/treeview'
+        ]
 
   @post '/specimens': ->         # new specimen
+    @response.end()
+
+  @get '/specimens/new': ->      # create specimen form
+    console.log 'in new'
+    specimen =
+      new: true
+      links:
+        submit: '/specimens'
+        discard: '/specimens'
+      institutionChoices: []
+      sexChoices: []
+      taxonChoices: []
+    console.log 'specimen: ' + JSON.stringify specimen
+    @render 'specimen-edit', specimen
+
+  # Load and transform taxon filter tree for YUI
+  @get '/taxa/filter-tree.json': ->
+    http.get api_request(path: "/taxa/filter-tree"), (res) =>
+      body = ''
+      res.on 'data', (data) => body += data
+      res.on 'end', =>
+        tree = JSON.parse(body)
+        transform_node = (node) ->
+          node.label = "#{node.name} (#{node.count})"
+          delete node.name
+          node.data = id: node.id
+          delete node.id
+          delete node.href
+        traverse = (nodes) ->
+            for node in nodes
+                transform_node(node)
+                traverse(node.children)
+        traverse(tree)
+
+        @response.writeHead 200, 'content-type': 'application/json'
+        @response.write JSON.stringify(tree)
+        @response.end()
+
+  @coffee '/specimen-filters.js': ->
+    $ ->
+      $.ajax
+        type: 'GET'
+        url: '/taxa/filter-tree.json'
+        success: (treeData) ->
+          tree = new YAHOO.widget.TreeView 'taxon-filter-tree', treeData
+          tree.subscribe 'clickEvent', tree.onEventToggleHighlight
+          tree.setNodesProperty 'propagateHighlightUp', true
+          tree.setNodesProperty 'propagateHighlightDown', true
+          tree.render()
+
+          $('.tree-button').click ->
+            hilit = tree.getNodesByProperty 'highlightState', 1
+            console.log "#{hilit.length} nodes selected"
+
+      sexTree = new YAHOO.widget.TreeView 'sex-filter-tree',
+        [{label: 'Male'}, {label: 'Female'}, {label: 'Unknown'}]
+      sexTree.subscribe 'clickEvent', sexTree.onEventToggleHighlight
+      sexTree.render()
+
 
   @get '/specimens/:id': ->      # specimen detail
-    # @render 'index',
-    #   name: "Specimen #{ @params.id }"
- 
-  @get '/specimens/new': ->      # create specimen form
+    @api_proxy (specimen) =>
+      @render 'specimen-detail', specimen
+
+  @get '/specimens/:id/edit': -> # edit specimen form
+    http.get api_request(path: "/specimens/#{@params.id}"), (res) =>
+      body = ''
+      res.on 'data', (data) => body += data
+      res.on 'end', =>
+        specimen = JSON.parse(body)
+        opts = 
+          new: false
+          links:
+            submit: rewriteApiUrl(specimen.href)
+            discard: rewriteApiUrl(specimen.href)
+          institutionChoices: []
+          sexChoices: []
+          taxonChoices: []
+        @render 'specimen-edit', _.extend(opts, specimen)
 
   @post '/specimens/:id': ->     # update specimen
 
-  @get '/specimens/:id/edit': -> # edit specimen form
-
   @get '/images/:id': ->
+    @response.end()
       
   @get '/images/:id/:derivative': ->
 
@@ -43,25 +149,26 @@ zipper = zappa.app ->
     doctype 5
     html ->
       head ->
-        title @title
-      body ->
-        @body
+        title @title if @title
+        script src: '/js/radioapp.js'
+        script src: 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'
+        if @scripts
+          for s in @scripts
+            script src: s + '.js'
+        script(src: @script + '.js') if @script
+
+        link rel: 'stylesheet', href: '/css/radioapp.css'
+        if @stylesheets
+          for s in @stylesheets
+            link rel: 'stylesheet', href: s + '.css'
+        if @stylesheet
+          link(rel: 'stylesheet', href: @stylesheet + '.css')
+        style @style if @style
+      body @body
 
   @helper icon: (name) -> 'foo' #i class: "icon-#{name}"
 
 zipper.app.listen 8002
-
-# template helpers
-helpers = 
-  menuItem: (url, text, icon, file=false) ->
-    li ->
-      a href: @url ->
-        i class: icon
-        span text 
-        if file then input type: file
-  
-  icon: (name) -> i class: "icon-#{name}"
-  caret: -> span '.caret', '&nbsp;'
 
 data =
   labels: 
