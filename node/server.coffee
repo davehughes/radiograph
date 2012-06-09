@@ -23,7 +23,7 @@ rewriteApiUrl = (theurl) ->
 zipper = zappa.app ->
 
   @helper api_proxy: (callback) ->
-    http.get api_request(path: @request.path), (res) =>
+    http.get api_request(path: @request.url), (res) =>
       body = ''
       res.on 'data', (data) => body += data
       res.on 'end', => 
@@ -41,7 +41,6 @@ zipper = zappa.app ->
 
       @render 'specimen-table',
         specimens: specimens
-        sexChoices: [['F', 'Female'], ['M', 'Male'], ['U', 'Unknown/Unspecified']]
         scripts: [
           'http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event',
           'http://yui.yahooapis.com/2.9.0/build/treeview/treeview-min'
@@ -144,6 +143,7 @@ zipper = zappa.app ->
     streamZip @response, files, @response.end
     
   @include './views'
+  @include './visualization'
 
   @view layout: ->
     doctype 5

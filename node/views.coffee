@@ -1,15 +1,3 @@
-menuItem = (url, text, icon, file=false) ->
-  li ->
-    a href: @url ->
-      i class: icon
-      span text 
-      if file then input type: file
-
-icon = (name) -> i class: ".icon-#{name}"
-
-caret = ->
-  span class: 'caret', '&nbsp;'
-
 @include = ->
 
   @view 'login-form': ->
@@ -54,49 +42,44 @@ caret = ->
               i '.icon-user', -> 'Sign In'
 
   @view 'specimen-detail': ->
-    div '.specimen-detail', ->
-      h3 ->
-          span '.taxon', -> "#{@taxon.label} - "
-          span @specimen_id
+    div '.specimen-detail.modal', ->
+      div '.modal-header', ->
+        h3 ->
+            span '.taxon', -> "#{@taxon.label} - "
+            span @specimen_id
 
-      if @images and @images.length > 0
-        div '.specimen-images', ->
-          for image in @images
-            a href: image.versions.medium, ->
-              img src: 'http://placekitten.com/300/300'
-              # img src: image.versions.thumbnail
-      else
-        div '.specimen-images.empty', -> 'No images attached'
+      div '.modal-body', ->
+        if @images and @images.length > 0
+          div '.specimen-images', ->
+            for image in @images
+              a href: image.versions.medium, ->
+                img src: 'http://placekitten.com/300/300'
+                # img src: image.versions.thumbnail
+        else
+          div '.specimen-images.empty', -> 'No images attached'
 
-      div '.specimen-field', ->
-        div '.header', -> 'Institution'
-        div '.value', -> 
-          a href: @institution.link, target: '_blank', -> @institution.name
+        div '.specimen-field', ->
+          div '.header', -> 'Institution'
+          div '.value', -> 
+            a href: @institution.link, target: '_blank', -> @institution.name
 
-      div '.specimen-field', ->
-        div '.header', -> 'Specimen ID'
-        div '.value', -> @specimen_id
+        div '.specimen-field', ->
+          div '.header', -> 'Specimen ID'
+          div '.value', -> @specimen_id
 
-      div '.specimen-field', ->
-        div '.header', -> 'Sex'
-        div '.value', -> @sex
+        div '.specimen-field', ->
+          div '.header', -> 'Sex'
+          div '.value', -> @sex
 
-      div '.specimen-field', ->
-        div '.header', -> 'Settings'
-        div '.value', -> @settings
+        div '.specimen-field', ->
+          div '.header', -> 'Settings'
+          div '.value', -> @settings
 
-      div '.specimen-field', ->
-        div '.header', -> 'Comments'
-        div '.value', -> @comments
-
-      div '.specimen-field', ->
-        div '.header', -> 'Last Modified'
-        div '.value', -> @last_modified
-
-      div '.specimen-field', ->
-        div '.header', -> 'Created'
-        div '.value', -> @created
-
+        div '.specimen-field', ->
+          div '.header', -> 'Comments'
+          div '.value', -> @comments
+      div '.modal-footer', ->
+        a '.btn', -> 'Put something here'
 
   @view 'specimen-list-item': ->
     div '.specimen-list-item', ->
@@ -114,27 +97,23 @@ caret = ->
         span @sex
 
   @view 'specimen-table': ->
-    h4 -> 'Taxa'
-    div '.yui-skin-sam', ->
-      div id: 'taxon-filter-tree', class: 'ygtv-checkbox'
+    div '.row', ->
+      div '.span12', style: 'display: table-cell; text-align: center; vertical-align: middle;', ->
+        h1 -> 'The Header'
+      div '.span3', ->
+        div '.filter-section', ->
+          h4 -> 'Taxa'
+          div '.yui-skin-sam', ->
+            div id: 'taxon-filter-tree', class: 'ygtv-checkbox'
 
-    h4 -> 'Sex'
-    div '.yui-skin-sam', ->
-      div id: 'sex-filter-tree', class: 'ygtv-checkbox'
-
-    span '.sex.dropdown', ->
-      a '.dropdown-toggle', 'data-toggle': 'dropdown', href: '#', ->
-        span 'Sex'
-        span class: 'caret'
-      div '.dropdown-menu', ->
-        for [value, label_] in @sexChoices
-          input "#filter-sex-#{value}", type: 'checkbox', name: 'filter-sex', value: value
-          label for: 'filter-sex', -> label_
-        a '.btn.btn-primary', -> 'Filter'
-
-    div '.specimen-results', ->
-      for specimen in @specimens
-        partial 'specimen-list-item', specimen
+        div '.filter-section', ->
+          h4 -> 'Sex'
+          div '.yui-skin-sam', ->
+            div id: 'sex-filter-tree', class: 'ygtv-checkbox'
+      div '.span9', ->
+        div '.specimen-results', ->
+          for specimen in @specimens
+            partial 'specimen-list-item', specimen
 
   @view 'specimen-search-form': ->
     div '.search-bar', ->

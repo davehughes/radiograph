@@ -25,7 +25,6 @@ urlpatterns = patterns('',
     # Specimens
     url(r'^specimens$',
         views.SpecimenView.as_view(),
-        # ListOrCreateModelView.as_view(resource=resources.Specimen),
         name='specimens'),
     url(r'^specimens/data.csv',
         'radioapp.views.build_dataset_csv',
