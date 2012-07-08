@@ -168,7 +168,7 @@ zipper = zappa.app ->
 
   @helper icon: (name) -> 'foo' #i class: "icon-#{name}"
 
-zipper.app.listen 8002
+zipper.app.listen 8000
 
 data =
   labels: 
