@@ -4620,5 +4620,12 @@ table {
   font-weight: bold;
   margin-bottom: 8px;
 }
+.voronoi-polygons polygon {
+  fill: transparent;
+  stroke: transparent;
+}
+.voronoi-polygons polygon:hover {
+  fill: red;
+}
  
 
