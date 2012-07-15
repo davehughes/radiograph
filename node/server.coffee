@@ -2,12 +2,12 @@ _ = require('underscore')._
 fs = require('fs')
 async = require('async')
 zipstream = require('zipstream')
-zappa = require('zappa')
+zappa = require('zappajs')
 http = require('http')
 url = require('url')
 
 api_request = (opts) ->
-  defaults = 
+  defaults =
     host: 'api.primate-radiograph.com'
     headers:
       accept: 'application/json'
@@ -20,29 +20,33 @@ rewriteApiUrl = (theurl) ->
   url.parse(theurl).path
 
 # start zappa application
-zipper = zappa.app ->
+options =
+  port: 8000
+
+zipper = zappa.run options, ->
 
   @helper api_proxy: (callback) ->
     http.get api_request(path: @request.url), (res) =>
       body = ''
       res.on 'data', (data) => body += data
-      res.on 'end', => 
+      res.on 'end', =>
         callback(JSON.parse(body))
 
   @get '/': ->
-    # @render 'main'
-    @render 'gallery',
-      '_': _
+    @render 'main'
+    # @render 'gallery',
+    #   '_': _
 
   @get '/specimens': ->          # view specimen list
     @api_proxy (specimens) =>
-      _.each specimens, (s) ->
+      _.each specimens.results, (s) ->
         s.detailView = rewriteApiUrl(s.href)
 
       @render 'specimen-table',
-        specimens: specimens
+        meta: specimens
+        specimens: specimens.results
         scripts: [
-          'http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event',
+          'http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event'
           'http://yui.yahooapis.com/2.9.0/build/treeview/treeview-min'
           '/specimen-filters'
         ]
@@ -101,7 +105,7 @@ zipper = zappa.app ->
           tree.setNodesProperty 'propagateHighlightDown', true
           tree.render()
 
-          $('.tree-button').click ->
+          $('.taxon-filter-apply').click ->
             hilit = tree.getNodesByProperty 'highlightState', 1
             console.log "#{hilit.length} nodes selected"
 
@@ -109,6 +113,10 @@ zipper = zappa.app ->
         [{label: 'Male'}, {label: 'Female'}, {label: 'Unknown'}]
       sexTree.subscribe 'clickEvent', sexTree.onEventToggleHighlight
       sexTree.render()
+
+      $('.sex-filter-apply').click ->
+        hilit = sexTree.getNodesByProperty 'highlightState', 1
+        console.log "#{hilit.length} nodes selected"
 
 
   @get '/specimens/:id': ->      # specimen detail
@@ -121,7 +129,7 @@ zipper = zappa.app ->
       res.on 'data', (data) => body += data
       res.on 'end', =>
         specimen = JSON.parse(body)
-        opts = 
+        opts =
           new: false
           links:
             submit: rewriteApiUrl(specimen.href)
@@ -135,13 +143,13 @@ zipper = zappa.app ->
 
   @get '/images/:id': ->
     @response.end()
-      
+
   @get '/images/:id/:derivative': ->
 
   @get '/specimens/data': ->
     @response.writeHead 200
     streamZip @response, files, @response.end
-    
+
   @include './views'
   @include './visualization'
 
@@ -158,6 +166,7 @@ zipper = zappa.app ->
         script(src: @script + '.js') if @script
 
         link rel: 'stylesheet', href: '/css/radioapp.css'
+        # link rel: 'stylesheet', href: '/css/nv.d3.css'
         if @stylesheets
           for s in @stylesheets
             link rel: 'stylesheet', href: s + '.css'
@@ -166,12 +175,10 @@ zipper = zappa.app ->
         style @style if @style
       body @body
 
-  @helper icon: (name) -> 'foo' #i class: "icon-#{name}"
-
-zipper.app.listen 8000
+  @helper icon: (name) -> 'foo' #i class: "icon-#{name}",
 
 data =
-  labels: 
+  labels:
     specimenId: 'Specimen ID'
     taxon: 'Taxon'
     sex: 'sex'

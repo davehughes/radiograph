@@ -1,10 +1,25 @@
 @include = ->
-  @get '/visualization': ->
+  @get '/visualization', ->
     @render 'plots',
-      scripts: ['/js/d3', '/js/underscore', '/plots']
+      scripts: [
+        '/js/underscore'
+        '/js/d3'
+        # '/js/nv.d3.min'
+        '/js/fisheye.d3'
+        '/js/nv.d3'
+        '/n3plots'
+      ]
+      stylesheets: [
+        '/css/nv.d3'
+      ]
 
   @view 'plots': ->
-    div id: 'scatterplot'
+    div id: 'multiscatter', ->
+      svg style: 'height: 500px; width: 500px;'
+
+    div id: 'scatterplot', ->
+      svg style: 'height: 500px; width: 500px;'
+
     span 'X Axis: ', ->
       select id: 'x-axis', ->
         option -> '1'
@@ -26,13 +41,87 @@
 
     div id: 'distribution-plot'
 
+    table ->
+      tr ->
+        th -> 'Skull Length'
+      tr ->
+        th -> 'Cranial Width'
+      tr ->
+        th -> 'Neurocranial Height'
+      tr ->
+        th -> 'Facial Height'
+      tr ->
+        th -> 'Palate Length'
+      tr ->
+        th -> 'Palate Width'
+      tr ->
+        th ->
+        th -> 'Skull Length'
+        th -> 'Cranial Width'
+        th -> 'Neurocranial Height'
+        th -> 'Facial Height'
+        th -> 'Palate Length'
+        th -> 'Palate Width'
+
+
+  @coffee '/n3plots.js': -> $ ->
+    nv.addGraph ->
+      chart = nv.models.scatterChart()
+        .color(d3.scale.category10().range())
+        .showControls(false)
+        .showLegend(false)
+        .showDistX(false)
+        .showDistY(false)
+
+      chart.xAxis.tickFormat(d3.format('.02f'))
+      chart.yAxis.tickFormat(d3.format('.02f'))
+
+      d3.select('#scatterplot svg')
+        .datum(randomData(4, 40))
+        .transition()
+          .duration(500)
+          .call(chart)
+
+      nv.utils.windowResize(chart.update)
+      return chart
+
+    randomData = (groups, points) ->
+      shapes = ['circle', 'square', 'diamond', 'cross', 'triangle-up', 'triangle-down']
+      random = d3.random.normal()
+
+      _.map _.range(groups), (idx) ->
+        key: "Group #{idx}"
+        values: _.map(_.range(points), ->
+          x: random()
+          y: random()
+          size: 10
+          shape: shapes[idx % 6]
+        )
+
+  @coffee '/multiscatter.js': -> $ ->
+    vars = [
+      { key: 'skull_length', label: 'Skull Length' }
+      { key: 'cranial_width', label: 'Cranial Width' }
+      { key: 'neurocranial_height', label: 'Neurocranial Height' }
+      { key: 'facial_height', label: 'Facial Height' }
+      { key: 'palate_length', label: 'Palate Length' }
+      { key: 'palate_width', label: 'Palate Width' }
+    ]
+
+    x = d3.scale.ordinal()
+    x.domain(_.pluck(vars, 'label'))
+    y = d3.scale.ordinal()
+    x.domain(_.pluck(vars, 'label'))
+
+    chart = d3.select('#multiscatter svg')
+
   @coffee '/plots.js': -> $ ->
     data = _.map d3.range(500), -> _.map d3.range(5), Math.random
 
     scatterplot = ->
         w = 500
         h = 500
-        
+
         svg = d3.select('#scatterplot')
           .append('svg:svg')
           .attr('width', w)
@@ -44,7 +133,7 @@
           .attr('width', 0.9 * svg.attr('width'))
           .attr('height', 0.9 * svg.attr('height'))
           .style('fill', 'white')
-        
+
         # Create and configure axes
         x = d3.scale.linear()
         y = d3.scale.linear()
@@ -62,7 +151,7 @@
         yAxisG = svg.append('svg:g')
           .call(yAxis)
           .attr('transform', "translate(#{0.1 * svg.attr('width')}, 0)")
-        
+
         # Add grid lines
         gridLines = svg.append('svg:g')
           .attr('class', 'grid-lines')
@@ -142,7 +231,7 @@
             .on('mousemove', (d) ->
               console.log 'mousemove'
             )
-              
+
 
         distance = ([x1, y1], [x2, y2]) ->
           xdiff = x2 - x1
@@ -184,7 +273,7 @@
         updateVars()
 
     distributionPlot = ->
-        
+
         # Process and bucket data
         varkey = 0
         numBuckets = 20
@@ -193,16 +282,16 @@
         scale.domain([0, 1]).range([0, 1])
         bucketSize = scale(1.0 / numBuckets)
 
-        _.each d3.range(numBuckets), (idx) -> 
+        _.each d3.range(numBuckets), (idx) ->
           buckets[idx] = 0
-        
-        _.each data, (d) -> 
+
+        _.each data, (d) ->
           idx = Math.floor(scale(d[varkey]) / bucketSize)
           buckets[idx] += 1
-            
+
         w = 500
         h = 500
-        
+
         svg = d3.select('#distribution-plot')
           .append('svg:svg')
           .attr('width', w)
@@ -214,7 +303,7 @@
           .attr('width', 0.9 * svg.attr('width'))
           .attr('height', 0.9 * svg.attr('height'))
           .style('fill', 'green')
-        
+
         # Create and configure axes
         x = d3.scale.linear()
         y = d3.scale.linear()
@@ -234,7 +323,7 @@
         yAxisG = svg.append('svg:g')
           .call(yAxis)
           .attr('transform', "translate(#{0.1 * svg.attr('width')}, 0)")
-        
+
         # Add grid lines
         gridLines = svg.append('svg:g')
           .attr('class', 'grid-lines')
@@ -274,8 +363,8 @@
           .attr('x', (d, i) -> i * barWidth)
           .attr('y', 0)
           .attr('width', barWidth)
-          .attr('height', (d) -> 
-            console.log "#{d} -> #{y(d)}" 
+          .attr('height', (d) ->
+            console.log "#{d} -> #{y(d)}"
             y(d))
           .attr('transform', 'scale(1, -1)') # flip vertically
           .style('stroke', 'black')
@@ -292,4 +381,4 @@
 
     scatterplot()
     distributionPlot()
-      
+

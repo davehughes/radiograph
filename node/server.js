@@ -1,5 +1,5 @@
 (function() {
-  var api_request, async, data, files, fs, http, rewriteApiUrl, streamZip, url, zappa, zipper, zipstream, _;
+  var api_request, async, data, files, fs, http, options, rewriteApiUrl, streamZip, url, zappa, zipper, zipstream, _;
 
   _ = require('underscore')._;
 
@@ -9,7 +9,7 @@
 
   zipstream = require('zipstream');
 
-  zappa = require('zappa');
+  zappa = require('zappajs');
 
   http = require('http');
 
@@ -34,7 +34,11 @@
     return url.parse(theurl).path;
   };
 
-  zipper = zappa.app(function() {
+  options = {
+    port: 8000
+  };
+
+  zipper = zappa.run(options, function() {
     this.helper({
       api_proxy: function(callback) {
         var _this = this;
@@ -54,20 +58,19 @@
     });
     this.get({
       '/': function() {
-        return this.render('gallery', {
-          '_': _
-        });
+        return this.render('main');
       }
     });
     this.get({
       '/specimens': function() {
         var _this = this;
         return this.api_proxy(function(specimens) {
-          _.each(specimens, function(s) {
+          _.each(specimens.results, function(s) {
             return s.detailView = rewriteApiUrl(s.href);
           });
           return _this.render('specimen-table', {
-            specimens: specimens,
+            meta: specimens,
+            specimens: specimens.results,
             scripts: ['http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event', 'http://yui.yahooapis.com/2.9.0/build/treeview/treeview-min', '/specimen-filters'],
             stylesheets: ['http://yui.yahooapis.com/2.9.0/build/treeview/assets/skins/sam/treeview']
           });
@@ -154,7 +157,7 @@
               tree.setNodesProperty('propagateHighlightUp', true);
               tree.setNodesProperty('propagateHighlightDown', true);
               tree.render();
-              return $('.tree-button').click(function() {
+              return $('.taxon-filter-apply').click(function() {
                 var hilit;
                 hilit = tree.getNodesByProperty('highlightState', 1);
                 return console.log("" + hilit.length + " nodes selected");
@@ -171,7 +174,12 @@
             }
           ]);
           sexTree.subscribe('clickEvent', sexTree.onEventToggleHighlight);
-          return sexTree.render();
+          sexTree.render();
+          return $('.sex-filter-apply').click(function() {
+            var hilit;
+            hilit = sexTree.getNodesByProperty('highlightState', 1);
+            return console.log("" + hilit.length + " nodes selected");
+          });
         });
       }
     });
@@ -290,8 +298,6 @@
       }
     });
   });
-
-  zipper.app.listen(8000);
 
   data = {
     labels: {

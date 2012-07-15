@@ -21,6 +21,21 @@
         button '.btn.btn-primary', type: 'submit', -> 'Sign In'
         a '.btn.discard', href: '#', -> 'Nevermind'
 
+  @view 'view-chooser': ->
+    div '.view-chooser', ->
+      div '.btn-group', ->
+        a '.btn', ->
+          i '.icon-align-justify', title: 'Compact List'
+        a '.btn', ->
+          i '.icon-th-list', title: 'List'
+        a '.btn', ->
+          i '.icon-th-large', title: 'Gallery'
+        a '.btn', ->
+          i '.icon-signal', title: 'Scatterplots'
+
+  @view 'main-header': ->
+    h1 'The Header'
+
   @view 'app-toolbar': ->
     div '.app-toolbar', ->
       div '.app-tools-custom', ->
@@ -60,7 +75,7 @@
 
         div '.specimen-field', ->
           div '.header', -> 'Institution'
-          div '.value', -> 
+          div '.value', ->
             a href: @institution.link, target: '_blank', -> @institution.name
 
         div '.specimen-field', ->
@@ -85,13 +100,13 @@
     div '.specimen-list-item', ->
       div '.images', ->
         for image in @images
-          a '.thumbnail', title: image.aspect, 
+          a '.thumbnail', title: image.aspect,
             href: image.versions.medium, target: '_blank', ->
               img src: 'http://placekitten.com/80/80'
 
       div '.specimen-data', ->
         a rel: 'detail', href: @detailView, ->
-          h3 -> 
+          h3 ->
             span @taxon.label
             span " (#{ @specimen_id })"
         span @sex
@@ -105,14 +120,17 @@
           h4 -> 'Taxa'
           div '.yui-skin-sam', ->
             div id: 'taxon-filter-tree', class: 'ygtv-checkbox'
+            a '.taxon-filter-apply.btn', -> 'Update Filter'
 
         div '.filter-section', ->
           h4 -> 'Sex'
           div '.yui-skin-sam', ->
             div id: 'sex-filter-tree', class: 'ygtv-checkbox'
+            a '.sex-filter-apply.btn', -> 'Update Filter'
+
       div '.span9', ->
         div '.specimen-results', ->
-          for specimen in @specimens
+          for specimen in @specimens or []
             partial 'specimen-list-item', specimen
 
   @view 'specimen-search-form': ->
@@ -149,32 +167,34 @@
     div '.pagination'
 
   @view 'gallery': ->
+    partial 'main-header'
     for x in @_.range(20)
       a '.image', href: '#', ->
         img src: 'http://placekitten.com/100/100'
 
   @view 'main': ->
+    partial 'main-header'
     a name: 'about-us'
-    h2 -> 'About Us:'
+    h2 -> 'About Us'
     div ->
       img src: 'http://placekitten.com/100/100'
       p ->
-          '<strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of 
-          Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute 
-          of Human Origins</a>. His dissertation research (for which the radiographs on this 
-          database were collected) investigates the role of the brain in modulating facial 
-          positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.'
+        '<strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of
+        Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute
+        of Human Origins</a>. His dissertation research (for which the radiographs on this
+        database were collected) investigates the role of the brain in modulating facial
+        positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.'
 
     div ->
       img src: 'http://placekitten.com/101/101/'
       p ->
-      '<strong>Dave Hughes</strong> has designed the web architecture for the database. He is
-      a software engineer in the Informatics and Cyberinfrastructure Services Department at
-      Arizona State University.'
-      
+        '<strong>Dave Hughes</strong> has designed the web architecture for the database. He is
+        a software engineer in the Informatics and Cyberinfrastructure Services Department at
+        Arizona State University.'
+
 
     a name: 'about-the-database'
-    h2 -> 'About the Database:'
+    h2 -> 'About the Database'
     p ->
      'The database comprises radiographs of anthropoid primate species. Images in the
      database are searchable and browseable and downloads of the complete sample (or
@@ -194,7 +214,7 @@
      recommend converting the files to a smaller format, e.g., jpeg).'
 
     a name: 'materials'
-    h2 -> 'Materials:'
+    h2 -> 'Materials'
     p ->
       'All specimens in this database come from the National Museum of Natural History
        (Smithsonian Institute), and the original USNM accession numbers are included in the
@@ -211,7 +231,7 @@
        database.'
 
     a name: 'methods'
-    h2 -> 'Methods:'
+    h2 -> 'Methods'
     p ->
       'Two radiographs of each specimen were produced: a superior and a lateral view. For
        the superior view, specimens were oriented into the Frankfurt Horizontal plane. For
@@ -228,7 +248,7 @@
        including all of these measurements are available on request.'
 
     a name: 'funding'
-    h2 -> 'Funding:'
+    h2 -> 'Funding'
     p ->
       'Funds for this database were provided by a Doctoral Dissertation Improvement Grant
        by the National Science Foundation awarded to Terry Ritzman. In addition, support was
@@ -244,7 +264,7 @@
        graciously provided supplies used in creating the radiographs.'
 
     a name: 'contact-us'
-    h2 -> 'Contact Us:'
+    h2 -> 'Contact Us'
     p ->
       'We are dedicated to improving this website. If you have any suggestions for how the
        database can be improved (or if you would like to contribute material to the database),
@@ -254,9 +274,9 @@
          <li><a href="mailto:d@vidhughes.com">Dave Hughes (d@vidhughes.com)</a></li>
        </ul>'
 
-  # Edit views 
+  # Edit views
   @view 'specimen-edit': ->
-    form '.specimen-form.form-horizontal', 
+    form '.specimen-form.form-horizontal',
       method: 'post'
       enctype: 'multipart/form-data'
       action: @links.submit, ->
@@ -276,7 +296,7 @@
           label '.control-label', for: 'specimenId', -> 'Specimen Id'
           div '.controls', ->
             input name: 'specimen_id', type: 'text', value: @specimen_id
-            
+
         div '.taxon.control-group', ->
           label '.control-label', for: 'taxon', -> 'Taxon'
           div '.controls', ->
@@ -336,7 +356,7 @@
           a '.btn.btn-primary', rel: 'save', href: '#', -> 'Save'
           a '.btn', rel: 'discard', href: '#', -> 'Discard'
 
-  @view 'image-control': -> 
+  @view 'image-control': ->
     input type: 'hidden', value: @id, name: 'id'
     span '.replacementFile', style: 'display: none;'
 

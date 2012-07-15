@@ -43,7 +43,7 @@ class ListOrCreateModelView(ListModelMixin,
     """
     _suffix = 'List'
 
-class SpecimenView(ListOrCreateModelView):
+class SpecimenView(mixins.PaginatorMixin, ListOrCreateModelView):
     _suffix = 'List'
     resource = resources.Specimen
 

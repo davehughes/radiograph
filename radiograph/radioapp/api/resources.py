@@ -1,5 +1,5 @@
 from collections import defaultdict
-import json
+import simplejson as json
 
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -12,7 +12,7 @@ from radioapp import models
 class Institution(resources.ModelResource):
     model = models.Institution
     fields = ('href', 'name', 'link', 'logo')
-    
+
     def href(self, o):
         return reverse('institution', args=[o.id])
 
@@ -67,6 +67,29 @@ class Taxon(resources.ModelResource):
 
         return label_map
 
+
+    data = cache.get('specimen_dataset_full')
+    if not data:
+        properties = [
+          'id',
+          'skull_length',
+          'cranial_width',
+          'neurocranial_height',
+          'facial_height',
+          'palate_length',
+          'palate_width'
+          ]
+
+        dataobj = {
+            'header': properties,
+            'rows': list(models.Specimen.objects.values_list(*properties))
+            }
+        data = json.dumps(dataobj, use_decimal=True)
+        cache.set('specimen_dataset_full', data)
+
+    return HttpResponse(data, content_type='application/json')
+
+
 def taxon_filter_tree(request):
     tree = cache.get('taxon_filter_tree')
     if not tree:
@@ -76,16 +99,17 @@ def taxon_filter_tree(request):
 
     return HttpResponse(json.dumps(tree), content_type='application/json')
 
+
 def _taxon_filter_tree(root, include_root=False, levels=None, hide_empty=True):
     '''
     Returns a nested tree structure of the taxa descended from `root`,
     including only the `levels` provided.  If `include_root` is False
-    (the default), the representation begins with `root`'s children. 
+    (the default), the representation begins with `root`'s children.
     Descendant counts are included, and nodes without any descendants are
     suppressed if `hide_empty` is True.
     '''
 
-    specimen_counts = {id: count for id, count in 
+    specimen_counts = {id: count for id, count in
                        (models.Taxon.objects
                         .annotate(specimen_count=Count('specimens'))
                         .filter(specimen_count__gt=0)
@@ -104,7 +128,7 @@ def _taxon_filter_tree(root, include_root=False, levels=None, hide_empty=True):
 
     taxa = models.Taxon.objects.order_by('-level')
     taxon_map = {t.id: create_node(t) for t in taxa}
-    
+
     for taxon in taxa:
         if not taxon.parent_id:
             continue
@@ -122,6 +146,7 @@ def _taxon_filter_tree(root, include_root=False, levels=None, hide_empty=True):
 
     tree = taxon_map[root.id]
     return [tree] if include_root else tree['children']
+
 
 class Image(resources.ModelResource):
     model = models.Image
@@ -152,7 +177,7 @@ class Specimen(resources.ModelResource):
     select_related = ('institution', 'created_by', 'last_modified_by')
     fields = (
         'href',
-        # 'created', 
+        # 'created',
         # 'last_modified',
         # 'created_by',
         # 'last_modified_by',

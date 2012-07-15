@@ -1,0 +1,10 @@
+{
+"name": "primate-radiograph",
+"version": "0.5.0",
+"dependencies": {
+    "zappajs": "0.3.10"
+    },
+"devDependencies": {
+    }
+}
+

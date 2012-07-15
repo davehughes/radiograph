@@ -1,7 +1,7 @@
 import copy
 import csv
 import datetime
-import json
+import simplejson as json
 import math
 import mimetypes
 import os
@@ -65,13 +65,14 @@ def build_dataset_csv(request):
 
     return response
 
+
 def image_file(request, image_id, derivative='full'):
     if request.method == 'GET':
         image = get_object_or_404(models.Image, id=image_id)
         imgfile = getattr(image, 'image_%s' % derivative)
         if not imgfile:
-            raise http.Http404()        
-        
+            raise http.Http404()
+
         taxon = ' '.join([t.name for t in image.specimen.taxon.hierarchy if t.level >= 7])
         _, ext = os.path.splitext(imgfile.path)
         filename = '%s-%s-%s-%s%s' % (taxon,
@@ -80,15 +81,15 @@ def image_file(request, image_id, derivative='full'):
                                       derivative,
                                       ext)
         filepath = os.path.join(settings.MEDIA_ROOT, imgfile.path)
-                                  
+
         mime = mimetypes.guess_type(filepath)[0]
         response = http.HttpResponse(mimetype=mime)
         response['X-Sendfile'] = filepath            # for mod-xsendfile
         response['X-Accel-Redirect'] = '/private-media/%s' % imgfile.path  # for nginx
-        
+
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.
-        download = request.GET.get('download', 'false').lower().startswith('t') 
+        download = request.GET.get('download', 'false').lower().startswith('t')
         download = download or derivative == 'full'
         if download: # generate appropriate filename and set disposition
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
@@ -149,14 +150,14 @@ def create_or_update_specimen(request, specimen_id=None):
         if image_data.get('replacement_file'):
             image.image_full = request.FILES.get(image_data['replacement_file'])
 
-        image.save() 
+        image.save()
         images_seen.append(image.id)
 
     # delete unreferenced images
     for img in specimen.images.exclude(id__in=images_seen):
         img.deleted = True
         img.save()
-    
+
     # (re)index specimen
     specimen_index.update_object(specimen)
     return specimen

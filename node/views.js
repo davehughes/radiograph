@@ -53,6 +53,39 @@
       }
     });
     this.view({
+      'view-chooser': function() {
+        return div('.view-chooser', function() {
+          return div('.btn-group', function() {
+            a('.btn', function() {
+              return i('.icon-align-justify', {
+                title: 'Compact List'
+              });
+            });
+            a('.btn', function() {
+              return i('.icon-th-list', {
+                title: 'List'
+              });
+            });
+            a('.btn', function() {
+              return i('.icon-th-large', {
+                title: 'Gallery'
+              });
+            });
+            return a('.btn', function() {
+              return i('.icon-signal', {
+                title: 'Scatterplots'
+              });
+            });
+          });
+        });
+      }
+    });
+    this.view({
+      'main-header': function() {
+        return h1('The Header');
+      }
+    });
+    this.view({
       'app-toolbar': function() {
         return div('.app-toolbar', function() {
           div('.app-tools-custom', function() {
@@ -240,9 +273,12 @@
                 return 'Taxa';
               });
               return div('.yui-skin-sam', function() {
-                return div({
+                div({
                   id: 'taxon-filter-tree',
                   "class": 'ygtv-checkbox'
+                });
+                return a('.taxon-filter-apply.btn', function() {
+                  return 'Update Filter';
                 });
               });
             });
@@ -251,9 +287,12 @@
                 return 'Sex';
               });
               return div('.yui-skin-sam', function() {
-                return div({
+                div({
                   id: 'sex-filter-tree',
                   "class": 'ygtv-checkbox'
+                });
+                return a('.sex-filter-apply.btn', function() {
+                  return 'Update Filter';
                 });
               });
             });
@@ -261,7 +300,7 @@
           return div('.span9', function() {
             return div('.specimen-results', function() {
               var specimen, _i, _len, _ref, _results;
-              _ref = this.specimens;
+              _ref = this.specimens || [];
               _results = [];
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 specimen = _ref[_i];
@@ -399,6 +438,7 @@
     this.view({
       'gallery': function() {
         var x, _i, _len, _ref, _results;
+        partial('main-header');
         _ref = this._.range(20);
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -416,38 +456,40 @@
     });
     this.view({
       'main': function() {
+        partial('main-header');
         a({
           name: 'about-us'
         });
         h2(function() {
-          return 'About Us:';
+          return 'About Us';
         });
         div(function() {
           img({
             src: 'http://placekitten.com/100/100'
           });
           return p(function() {
-            return '<strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of \
-          Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute \
-          of Human Origins</a>. His dissertation research (for which the radiographs on this \
-          database were collected) investigates the role of the brain in modulating facial \
-          positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.';
+            return '<strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of\
+        Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute\
+        of Human Origins</a>. His dissertation research (for which the radiographs on this\
+        database were collected) investigates the role of the brain in modulating facial\
+        positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.';
           });
         });
         div(function() {
           img({
             src: 'http://placekitten.com/101/101/'
           });
-          p(function() {});
-          return '<strong>Dave Hughes</strong> has designed the web architecture for the database. He is\
-      a software engineer in the Informatics and Cyberinfrastructure Services Department at\
-      Arizona State University.';
+          return p(function() {
+            return '<strong>Dave Hughes</strong> has designed the web architecture for the database. He is\
+        a software engineer in the Informatics and Cyberinfrastructure Services Department at\
+        Arizona State University.';
+          });
         });
         a({
           name: 'about-the-database'
         });
         h2(function() {
-          return 'About the Database:';
+          return 'About the Database';
         });
         p(function() {
           return 'The database comprises radiographs of anthropoid primate species. Images in the\
@@ -471,7 +513,7 @@
           name: 'materials'
         });
         h2(function() {
-          return 'Materials:';
+          return 'Materials';
         });
         p(function() {
           return 'All specimens in this database come from the National Museum of Natural History\
@@ -492,7 +534,7 @@
           name: 'methods'
         });
         h2(function() {
-          return 'Methods:';
+          return 'Methods';
         });
         p(function() {
           return 'Two radiographs of each specimen were produced: a superior and a lateral view. For\
@@ -513,7 +555,7 @@
           name: 'funding'
         });
         h2(function() {
-          return 'Funding:';
+          return 'Funding';
         });
         p(function() {
           return 'Funds for this database were provided by a Doctoral Dissertation Improvement Grant\
@@ -533,7 +575,7 @@
           name: 'contact-us'
         });
         h2(function() {
-          return 'Contact Us:';
+          return 'Contact Us';
         });
         return p(function() {
           return 'We are dedicated to improving this website. If you have any suggestions for how the\

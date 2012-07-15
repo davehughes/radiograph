@@ -13,3 +13,4 @@ fabric
 cuisine
 cuisine-postgresql
 jinja2>=2.6
+python-memcached
