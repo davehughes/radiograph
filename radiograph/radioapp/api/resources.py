@@ -67,7 +67,7 @@ class Taxon(resources.ModelResource):
 
         return label_map
 
-
+def specimen_dataset(request):
     data = cache.get('specimen_dataset_full')
     if not data:
         properties = [
