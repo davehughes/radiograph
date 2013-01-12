@@ -1,0 +1,30 @@
+<!DOCTYPE html5>
+<html>
+  <head>
+    <meta charset="utf8"/>
+    <title><% if @page?.title: %><%= @page.title %> | <% end %>primate-radiograph.com</title>
+    <% block "styles" %>
+      <link rel="stylesheet" type="text/css" href="/static/css/radioapp.css"/>
+      <style>
+          body { 
+              background-image: url('/static/img/climpek.png');
+          }
+      </style>
+    <% endblock %>
+
+    <% block "scripts" %>
+      <%- @script 'jquery' %>
+      <%- @script 'underscore' %>
+      <%- @script 'backbone' %>
+      <%- @script 'bootstrap' %>
+      <%- @script 'application' %>
+      <%- @script 'modernizr' %>
+    <% endblock %>
+
+    <% block "models" %><% endblock %>
+
+  </head>
+  <body>
+      <% block 'body' %><% endblock %>
+  </body>
+</html>

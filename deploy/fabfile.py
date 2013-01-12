@@ -1,20 +1,14 @@
+import os
+
 from fabric.api import *
 from fabric.contrib import files
 from cuisine import *
-from cuisine_postgresql import *
+# from cuisine_postgresql import *
+from fabutils import config, postgresql, files, deploy, environments as env
+from fabutils import config as _
 
-def radiograph_install():
-    settings = {
-        'home': '/home/radiograph/app',
-        'user': 'radiograph',
-        'db': {
-            'name': 'radiograph'
-            'user': 'radiograph',
-            'password': 'radiograph',
-            'host': 'localhost',
-            'port': '5432'
-            }
-    }
+
+def radiograph_install(ref='master'):
 
     # install python stuff, we'll need it
     package_ensure('python2.7')
@@ -24,8 +18,14 @@ def radiograph_install():
     sudo('pip install virtualenv')
 
     # get source
-    user_ensure('radiograph', home='/home/radiograph')
-    sudo('git clone git://github.com/davehughes/radiograph.git %s' % settings['home'], user='radiograph')
+    user_ensure('radiograph', home=_['app.home'])
+    with cd(_['app.home']):
+        source = deploy.GitDeployment(_['git.url'], ref)
+        source.deploy()
+
+        reqs = os.path.join(source.target, 'requirements.txt')
+        venv = deploy.VirtualenvDeployment(reqs, source.version)
+        venv.deploy()
 
     # create a virtualenv and install the requirements
     with cd(settings['home']):
@@ -36,9 +36,47 @@ def radiograph_install():
             sudo('pip install -e .')
 
     # configure and connect to database
-    postgresql_role_ensure(settings['db']['name'], settings['db']['password'])
-    postgresql_database_ensure(settings['db']['name'], owner='radiograph', encoding='utf8')
+    postgresql.role_ensure(_['app.database.name'],
+                           _['app.database.password'])
+    postgresql.database_ensure(_['app.database.name'],
+                               owner=_['app.database.user'],
+                               encoding='utf8')
 
     # install as supervisord service
     # files.upload_template('conf/gunicorn.conf.py',
+    files.template(source, dest)
 
+
+@task
+@config
+def common():
+    config = {
+        'git': {
+            'url': 'git://github.com/davehughes/radiograph.git'
+            },
+        'app': {
+            'user': 'radiograph',
+            'home': '/home/radiograph',
+            'root': '/home/radiograph/app',
+            'static_root': '/home/radiograph/static',
+            'media_root': '/home/radiograph/media',
+            'server': {
+                'name': 'www.primate-radiograph.com',
+                'location': 'http://localhost:8000'
+                },
+            'database': {
+                'name': 'radiograph',
+                'user': 'radiograph',
+                'password': 'radiograph',
+                'host': 'localhost',
+                'port': '5432'
+                }
+            },
+        'api': {
+            'server': {
+                'name': 'api.primate-radiograph.com',
+                'location': '/tmp/radiograph-api.sock'
+                }
+            }
+        }
+    return config

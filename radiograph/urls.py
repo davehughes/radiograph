@@ -1,77 +1,87 @@
 from django.conf.urls.defaults import *
 
-from django.contrib import admin
-from radioapp.api import resources, views
-from djangorestframework.views import InstanceModelView
-from radioapp.api.views import ListOrCreateModelView
-admin.autodiscover()
+# from rest_framework.views import InstanceModelView
+from rest_framework import generics
+from rest_framework.urlpatterns import format_suffix_patterns
+from radiograph.api import resources, views as apiviews
+from radiograph import views, models
+# from radiograph.api.views import ListOrCreateModelView
 
-urlpatterns = patterns('',
-
-    # Admin and accounts
-    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    (r'^admin/', include(admin.site.urls)),
-
-    # url(r'^accounts/login/$',
-    #     'radioapp.views.login',
-    #     {'template_name': 'radioapp/login.html'},
-    #     name='login'),
-
-    # url(r'^accounts/logout/$',
-    #     'radioapp.views.logout',
-    #     {'next_page': '/'},
-    #     name='logout'),
+api_patterns = patterns('radiograph.api.views',
 
     # Specimens
     url(r'^specimens$',
-        views.SpecimenView.as_view(),
-        name='specimens'),
-    url(r'^specimens/data',
-        'radioapp.api.resources.specimen_dataset',
-        name='specimen-dataset'),
-    url(r'^specimens/data.csv',
-        'radioapp.views.build_dataset_csv',
-        name='specimen-dataset-csv'),
+        apiviews.SpecimenList.as_view(),
+        name='specimen-list'),
     url(r'^specimens/(?P<pk>[0-9]+)$',
-        InstanceModelView.as_view(resource=resources.Specimen),
-        name='specimen'),
+        apiviews.SpecimenDetail.as_view(),
+        name='specimen-detail'),
+    # url(r'^specimens/data',
+    #     'radiograph.api.resources.specimen_dataset',
+    #     name='specimen-dataset'),
+    # url(r'^specimens/data.csv',
+    #     'radiograph.views.build_dataset_csv',
+    #     name='specimen-dataset-csv'),
 
     # Images
     url(r'^images$',
-        ListOrCreateModelView.as_view(resource=resources.Image),
-        name='images'),
+        apiviews.ImageList.as_view(),
+        name='image-list'),
     url(r'^images/(?P<pk>[^/]+)$',
-        InstanceModelView.as_view(resource=resources.Image),
-        name='image'),
-
-    url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
-        'radioapp.views.image_file',
-        name='image-file'),
+        apiviews.ImageDetail.as_view(),
+        name='image-detail'),
+    # url(r'^images/(?P<image_id>[^/]+)/(?P<derivative>[^/]+)$',
+    #     'radiograph.views.image_file',
+    #     name='image-file'),
 
     # Institutions
     url(r'^institutions$',
-        ListOrCreateModelView.as_view(resource=resources.Institution),
-        name='institutions'),
+        generics.ListCreateAPIView.as_view(model=models.Institution),
+        name='institution-list'),
     url(r'^institutions/(?P<pk>[0-9]+)$',
-        InstanceModelView.as_view(resource=resources.Institution),
-        name='institution'),
+        generics.RetrieveUpdateDestroyAPIView.as_view(model=models.Institution),
+        name='institution-detail'),
 
-    # Users
-    url(r'^users$',
-        ListOrCreateModelView.as_view(resource=resources.User),
-        name='users'),
-    url(r'^users/(?P<username>[^/]+)$',
-        InstanceModelView.as_view(resource=resources.User),
-        name='user'),
+    # # Users
+    # url(r'^users$',
+    #     ListOrCreateModelView.as_view(resource=resources.User),
+    #     name='users'),
+    # url(r'^users/(?P<username>[^/]+)$',
+    #     InstanceModelView.as_view(resource=resources.User),
+    #     name='user'),
 
     # Taxa
     url(r'^taxa$',
-        ListOrCreateModelView.as_view(resource=resources.Taxon),
-        name='taxa'),
-    url(r'^taxa/filter-tree$',
-        'radioapp.api.resources.taxon_filter_tree',
-        name='taxon-filter-tree'),
+        generics.ListCreateAPIView.as_view(model=models.Taxon),
+        name='taxon-list'),
+    # url(r'^taxa/filter-tree$',
+    #     'radiograph.api.resources.taxon_filter_tree',
+    #     name='taxon-filter-tree'),
     url(r'^taxa/(?P<pk>[^/]+)$',
-        InstanceModelView.as_view(resource=resources.Taxon),
-        name='taxon'),
+        generics.RetrieveAPIView.as_view(model=models.Taxon),
+        name='taxon-detail'),
+
+    # url(r'^accounts/login/$',
+    #     'radiograph.views.login',
+    #     {'template_name': 'radiograph/login.html'},
+    #     name='login'),
+
+    # url(r'^accounts/logout/$',
+    #     'radiograph.views.logout',
+    #     {'next_page': '/'},
+    #     name='logout'),
+
+    # API root
+    url(r'', 'api_root', name='root'),
+)
+api_patterns = format_suffix_patterns(api_patterns)
+
+urlpatterns = patterns('',
+    url(r'^api/', include(api_patterns, namespace='api')),
+
+    # Primary views
+    url(r'^specimens$', 'radiograph.views.specimens', name='specimen-list'),
+    url(r'^specimens/(?P<specimen_id>[0-9]+)$',
+        'radiograph.views.specimen',
+        name='specimen-detail')
 )

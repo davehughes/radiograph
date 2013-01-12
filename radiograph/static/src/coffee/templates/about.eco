@@ -1,0 +1,120 @@
+<a name='about-us'></a>
+<h2>About Us</h2>
+
+<div>
+  <img src='http://placekitten.com/100/100'/>
+  <p>
+    <strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of
+    Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute
+    of Human Origins</a>. His dissertation research (for which the radiographs on this
+    database were collected) investigates the role of the brain in modulating facial
+    positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.
+  </p>
+</div>
+
+<div>
+  <img src='http://placekitten.com/101/101/'/>
+  <p>
+    <strong>Dave Hughes</strong> has designed the web architecture for the database. He is
+    a software engineer in the Informatics and Cyberinfrastructure Services Department at
+    Arizona State University.
+  </p>
+</div>
+
+
+<div class="about-section">
+<a name='about-the-database'></a>
+<h2>About the Database</h2>
+<p>
+  The database comprises radiographs of anthropoid primate species. Images in the
+  database are searchable and browseable and downloads of the complete sample (or
+  sub-sets thereof) are completely free. The database is designed to be used by scientists
+  in anthropology (or other related fields) as well as teachers at any educational level.
+  This database represents the efforts of its creators to further data-sharing in academic
+  pursuits. In addition, the database will help preserve invaluable museum specimens by
+  reducing the need for further radiography (and potential damage) of these specimens.
+ 
+  The database is organized by taxonomic group, mainly by species. Users can search by
+  species and some higher taxonomic groups and can further limit searches by sex.
+ 
+  Images from the database can be easily imported into programs designed to take
+  measurements from photos (e.g., ImageJ) or software designed to perform three-
+  dimensional geometric morphometric analyses (e.g., TPSDig). Moreover, these images
+  can be included in PowerPoint or Keynote presentations (for this application, we
+  recommend converting the files to a smaller format, e.g., jpeg).
+</p>
+</div>
+
+<div class="about-section">
+<a name='materials'></a>
+<h2>Materials</h2>
+<p>
+  All specimens in this database come from <a href="http://www.mnh.si.edu/"> the National
+  Museum of Natural History (Smithsonian Institute)</a>, and the original USNM accession numbers are included in the
+  information about each specimen. The x-rays were also produced using the digital
+  x-ray facilities in the <a href="http://vertebrates.si.edu/">Department of Vertebrate
+  Zoology</a> at the National Museum of Natural History. Permission to make these
+  radiographs freely available on this database was provided by the 
+  <a href="http://vertebrates.si.edu/mammals/index.html">Division of Mammals</a>
+  (Department of Vertebrate Zoology) at the National Museum of Natural History.
+  
+  XX anthropoid primate species were radiographed. Approximately 20 specimens per
+  species are available, but numbers vary. Only adult (based on emergence of the third
+  molar), non-pathological individuals were included. Whenever possible, equal numbers
+  of males and females were included; all information on sex distribution is provided in the
+  database.
+</p>
+</div>
+
+<div class="about-section">
+<a name='methods'></a>
+<h2>Methods</h2>
+<p>
+  Two radiographs of each specimen were produced: a superior and a lateral view. For
+  the superior view, specimens were oriented into the Frankfurt Horizontal plane. For
+  
+  lateral radiographs, specimens were positioned with the mid-sagittal plane oriented
+  parallel to the x-ray source. All radiographs were produced digitally and were post-
+  processed using Adobe Illustrator and Photoshop.
+  
+  <strong>**The scale bar in each radiograph is 40 mm. long**</strong>
+  
+  In addition to the radiographs, a battery of linear measurements, which were collected
+  with calipers directly from the specimens, are available on the website. These data are
+  available as part of the information on each individual specimens, and spreadsheets
+  including all of these measurements are available on request.
+</p>
+</div>
+
+<div class="about-section">
+<a name='funding'></a>
+<h2>Funding</h2>
+<p>
+  Funds for this database were provided by a Doctoral Dissertation Improvement Grant
+  by the National Science Foundation awarded to Terry Ritzman. In addition, support was
+  provided by the Harmon Memorial Endowment through the Institute of Human Origins at
+  Arizona State University.
+  
+  The completion of this database would not have been possible without the support of
+  the Institute of Human Origins (particularly Drs. Gary Schwartz and Bill Kimbel, Lindsay
+  Mullen, and Julie Russ). The museum specialists (specifically, Sandra Raredon and
+  Darrin Lunde) as well as Dr. Richard Vari in the Division of Fishes at the National
+  Museum of Natural History also crucial help while the radiographs were being produced.
+  Finally, Judy Chupasko (Museum of Comparative Zoology, Harvard University)
+  graciously provided supplies used in creating the radiographs.
+</p>
+</div>
+
+<div class="about-section">
+<a name='contact-us'></a>
+<h2>Contact Us</h2>
+<p>
+  We are dedicated to improving this website. If you have any suggestions for how the
+  database can be improved (or if you would like to contribute material to the database),
+  do not hesitate to contact us:
+  <ul>
+   <li><a href="mailto:tritzman@asu.edu">Terry Ritzman (tritzman@asu.edu)</a></li>
+   <li><a href="mailto:d@vidhughes.com">Dave Hughes (d@vidhughes.com)</a></li>
+  </ul>
+</p>
+</div>
