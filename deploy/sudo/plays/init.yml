@@ -1,0 +1,4 @@
+---
+- name: create basic sudoers file
+  template: src=sudo/files/sudoers.j2 dest=/etc/sudoers force=true
+  sudo: true

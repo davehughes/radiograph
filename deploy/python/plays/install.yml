@@ -1,0 +1,31 @@
+---
+- name: install python
+  sudo: true
+  yum: name=python27 state=present
+
+- name: install pip
+  sudo: true
+  easy_install: name=pip
+
+- name: install distribute
+  pip: name=distribute
+  sudo: true
+
+- name: upgrade pip
+  command: pip install -U git+git://github.com/pypa/pip@5d02b5207a305543ad6ef19d6e6596ffa45b99e5#egg=pip
+  sudo: true
+
+- name: install virtualenv
+  sudo: true
+  pip: name=virtualenv state=present
+
+- name: install wheel
+  sudo: true
+  pip: name=wheel state=present
+
+- name: install python development headers
+  yum: name=${item} state=present
+  sudo: true
+  with_items:
+  - python26-devel
+  - python27-devel

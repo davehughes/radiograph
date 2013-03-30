@@ -1,0 +1,18 @@
+---
+- name: ensure ssl directory
+  file: name=${ssl_directory}
+        state=directory
+  sudo: true
+
+- name: create self-signed certificate
+  shell: openssl req
+            -new
+            -newkey rsa:4096
+            -days 365
+            -nodes
+            -x509
+            -subj "/C=US/ST=CA/L=San Francisco/O=FundersClub/CN=${name}"
+            -keyout ${ssl_directory}/${name}.key
+            -out ${ssl_directory}/${name}.pem
+         creates=${ssl_directory}/${name}.pem
+  sudo: true

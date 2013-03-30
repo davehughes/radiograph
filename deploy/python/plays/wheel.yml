@@ -1,0 +1,39 @@
+---
+- name: create a virtualenv for running wheel
+  shell: cd /tmp && virtualenv --python=python2.7 ~${user}/env
+  sudo: true
+  sudo_user: ${user}
+
+- name: ensure that wheel and its dependencies are installed
+  pip: name=$item
+       state=present
+       virtualenv=~${user}/env
+  sudo: true
+  sudo_user: ${user}
+  with_items:
+  - distribute
+  - wheel
+
+- name: ensure that a wheel-aware version of pip is installed (currently v1.4.dev)
+  shell: cd /tmp &&
+         ~${user}/env/bin/pip install
+         --exists-action w
+         -e git+git://github.com/pypa/pip.git@5d02b5207a305543ad6ef19d6e6596ffa45b99e5#egg=pip
+  sudo: true
+  sudo_user: ${user}
+
+- name: create directory for housing wheels
+  file: name=${wheel_directory}
+        state=directory
+        owner=${user}
+        group=${group}
+  sudo: true
+
+- name: build the listed requirements files into wheels
+  shell: cd /tmp &&
+         ~${user}/env/bin/pip wheel
+         --wheel-dir=${wheel_directory}
+         -r ${item}
+  sudo: true
+  sudo_user: ${user}
+  with_items: ${requirements}

@@ -1,0 +1,21 @@
+---
+# Create a pg_hba.conf fragment with the provided auth_rules, which will be
+# assembled to create the full pg_hba.conf file.
+#   
+# Sample auth_rules list:
+# vars:
+#   auth_rules:
+#    - type: local
+#      database: all
+#      user: all
+#      address: 127.0.0.1
+#      auth_method: trust
+#      auth_option: 
+#
+
+- name: create auth rules
+  with_items: $auth_rules
+  template: src=$template_root/postgresql/auth_rules.j2 dest=$data_dir/pg_hba.conf.d/$name owner=postgres
+  notify:
+  - assemble postgres auth file
+

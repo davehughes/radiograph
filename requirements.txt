@@ -1,6 +1,5 @@
 beautifulsoup>=3.2
-django>=1.4
-django-haystack>=1.2.5
+django==1.5.1
 django-choices>=1.1.9
 South>=0.7.3
 proxytypes>=0.9
@@ -9,10 +8,6 @@ pysolr>=2.0
 python-magic
 djangorestframework>=2.0
 simplejson
-gunicorn
-fabric
-cuisine
-#cuisine-postgresql
 jinja2>=2.6
 python-memcached
 django-filter>=0.5.4
