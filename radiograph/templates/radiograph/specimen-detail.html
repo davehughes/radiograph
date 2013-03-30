@@ -1,0 +1,36 @@
+<div class="specimen-detail">
+  <h1>
+    <%= @taxon?.label or "Falstaxon nofindius" %>
+    <small>
+      <%= @institution?.label or "Fakington Community College" %> - 
+      <%= @specimenId or "ABC123" %>
+    </small>
+  </h1>
+  
+  <div class="specimen-image-detail">
+    <a href="<%= images?.lateral?.full or 'http://placekitten.com/800/800' %>">
+      <img src="<%= images?.lateral?.medium or 'http://placekitten.com/400/400' %>"/>
+    </a>
+    <h4>Lateral View</h4>
+  </div>
+  
+  <div class="specimen-image-detail">
+    <a href="<%= images?.superior?.full or 'http://placekitten.com/800/800' %>">
+      <img src="<%= images?.superior?.medium or 'http://placekitten.com/400/400' %>"/>
+    </a>
+    <h4>Superior View</h4>
+  </div>
+  
+  <dl class="specimen-metadata">
+    <% if @settings or true: %><di><dt>Settings</dt><dd><%= @settings or '1.21 GW' %></dd></di><% end %>
+    <% if @comments or true: %><di><dt>Comments</dt><dd><%= @comments or 'This was a hard skull to photograph' %></dd></di><% end %>
+    <% if @institution or true: %>
+    <di><dt>Institution</dt><dd><%= @institution?.label or "Fakington Community College" %></dd></di>
+    <% end %>
+    <% if @specimenId or true: %>
+    <di><dt>Specimen ID</dt><dd><%= @specimenId or "ABC123" %></dd></di>
+    <% end %>
+    <!--di><dt>Last Modified</dt><dd><%= @lastModified %></dd></di-->
+    <!--di><dt>Created</dt><dd><%= @created %></dd></di-->
+  </dl>
+</div>

@@ -1,0 +1,218 @@
+{% extends "radiograph/base.html" %}
+{% load url from future %}
+
+{% block content %}
+
+<div id="results-target"></div>
+
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <a class="btn btn-small" href="#">
+            <i class="icon-download"></i>
+            Download
+        </a>
+        <a class="btn btn-small show-modal" href="#">
+            Show Modal
+        </a>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="pagination-toolbar">
+                <span class="pagination">
+                    {% include "radiograph/partials/pagination.html" with page=search_form.results_page %}
+                </span>
+
+                {# Results per page selector #}
+                Showing 
+                <span class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="results-per-page">20</span>
+                        <span class="caret"></span>
+                    </a>
+                    
+                    <ul class="dropdown-menu">
+                        <li><a href="#">10</a></li>
+                        <li><a href="#">20</a></li>
+                        <li><a href="#">50</a></li>
+                        <li><a href="#">100</a></li>
+                    </ul>
+                </span> results per page
+
+                {# Taxon Sort/Filter #}
+                <span class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Taxon
+                        <span class="caret"></span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <h1>Surprise!!!</h1>
+                    </div>
+                    <!--ul class="dropdown-menu">
+                        <li>Sort</li>
+                        <li>Filter</li>
+                    </ul-->
+                </span>
+
+                {# Sex Sort/Filter #}
+                <span class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Sex
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#">
+                                <input id="filter-sex-male" type="checkbox"/>
+                                <label for="filter-sex-male">Male</label>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <input id="filter-sex-female" type="checkbox"/>
+                                <label for="filter-sex-female">Female</label>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <input id="filter-sex-unknown" type="checkbox"/>
+                                <label for="filter-sex-unknown">Unknown/Unspecified</label>
+                            </a>
+                        </li>
+                    </ul>
+                </span>
+
+                {# View Selector #}
+                <div class="btn-group">
+                    <a href="#" class="btn btn-small" title="Compact">
+                        <i class="icon-align-justify"></i>
+                    </a>
+                    <a href="#" class="btn btn-small" title="Standard">
+                        <i class="icon-th-list"></i>
+                    </a>
+                    <a href="#" class="btn btn-small" title="Tiled">
+                        <i class="icon-th"></i>
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="search-results-header">
+                 <span class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                         <input type="checkbox" class="item-selector"/>
+                         <span class="caret"></span>
+                     </a>
+                     <ul class="dropdown-menu">
+                         <li>
+                             <a href="#" class="item-selection-all">
+                                 <i class="icon-ok"></i>
+                                 Select All
+                             </a>
+                         </li>
+                         <li>
+                             <a href="#" class="item-selection-none">
+                                 <i class="icon-remove"></i>
+                                 Select None
+                             </a>
+                         </li>
+                         <li>
+                             <a href="#" class="item-selection-invert">
+                                 <i class="icon-resize-full"></i>
+                                 Invert Selection
+                             </a>
+                         </li>
+                     </ul>
+                 </span>
+            </div>
+            <div class="search-results">
+                {% for specimen in search_form.results_page.object_list %}
+                  {% with search_form.view.value|default:search_form.view.field.initial as result_view %}
+                    {% with "radiograph/specimen-result-"|add:result_view|add:".html" as result_template %}
+                    {% include result_template %}
+                    {% endwith %}
+                  {% endwith %}
+                {% endfor %}
+            </div>
+
+            <div class="pagination">
+                {% include "radiograph/partials/pagination.html" with page=search_form.results_page %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tree"></div>
+
+{% endblock %}
+
+{% block header_resources %}
+{{ block.super }}
+{# <link type="text/css" rel="stylesheet" href="/static/yui/build/treeview/assets/skins/sam/treeview.css"/> #}
+<link type="text/css" rel="stylesheet" href="static/css/radiograph.css"/>
+<style type="text/css">
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+
+<script type="text/javascript">
+    $(function() {
+        var itemSelector = $('input.item-selector');
+        var itemSelections = $('input.item-selection');
+        var toggleItemSelection = function() {
+            return itemSelector.is(':checked') ? selectAll() : selectNone();
+        };
+        var selectAll = function() {
+            itemSelections.add(itemSelector).attr('checked', 'checked');
+        };
+        var selectNone = function() {
+            itemSelections.add(itemSelector).removeAttr('checked');
+        };
+        var invertSelection = function() {
+            itemSelections.each(function(idx, i) {
+                i = $(i);
+                if(i.is(':checked'))
+                    i.removeAttr('checked');
+                else
+                    i.attr('checked', 'checked');
+            });
+        };
+        $('input.item-selector').click(function(e) {
+            e.stopPropagation();
+            toggleItemSelection();
+        });
+
+        $('.item-selection-all').click(function(e) { 
+            selectAll();
+            });
+        $('.item-selection-none').click(function(e) { 
+            selectNone();
+            });
+        $('.item-selection-invert').click(function(e) { 
+            invertSelection();
+            });
+
+        $('.specimen-result.results-compact .specimen-images a').tooltip({html: true});
+    });
+</script>
+
+<!--script type="text/javascript" 
+    src="/static/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+</script>
+
+<script type="text/javascript"
+        src="/static/yui/build/treeview/treeview-min.js"></script>
+
+<script type="text/javascript">
+    var tv = new YAHOO.widget.TreeView("tree");
+    var root = tv.getRoot();
+    var child1 = new YAHOO.widget.TextNode("Node 1", root, false);
+    var child2 = new YAHOO.widget.TextNode("Node 2", root, false);
+    tv.draw();
+</script-->
+{% endblock %}
+

@@ -21,11 +21,27 @@ from django.views.decorators.http import require_http_methods
 import pysolr
 from radiograph import forms, models, util
 
+#---------------------{ Context processors }-----------------------------------
+def main_menu(request):
+    return {
+        'mainmenu': [
+            {'label': 'About', 'link': reverse('index')},
+            {'label': 'Specimens', 'link': reverse('specimen-list')},
+            ]
+    }
+
+
+def index(request):
+    return render(request, 'radiograph/about.html', {
+            'specimen_count': models.Specimen.objects.count()
+        })
 
 
 def specimens(request):
-    pass
-
+    # TODO: read initial values from user's session
+    return render(request, 'radiograph/specimen-list.html', {
+            'search_form': forms.SpecimenSearchForm(request.GET)
+        })
 
 def specimen(request, specimen_id):
     specimen = get_object_or_404(models.Specimen, id=specimen_id)

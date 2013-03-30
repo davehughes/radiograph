@@ -3,7 +3,7 @@ from django.conf.urls.defaults import *
 # from rest_framework.views import InstanceModelView
 from rest_framework import generics
 from rest_framework.urlpatterns import format_suffix_patterns
-from radiograph.api import resources, views as apiviews
+from radiograph.api import views as apiviews
 from radiograph import views, models
 # from radiograph.api.views import ListOrCreateModelView
 
@@ -80,8 +80,12 @@ urlpatterns = patterns('',
     url(r'^api/', include(api_patterns, namespace='api')),
 
     # Primary views
+    url(r'^$', 'radiograph.views.index', name='index'),
     url(r'^specimens$', 'radiograph.views.specimens', name='specimen-list'),
     url(r'^specimens/(?P<specimen_id>[0-9]+)$',
         'radiograph.views.specimen',
-        name='specimen-detail')
+        name='specimen-detail'),
+    url(r'^images/(?P<image_id>[0-9]+)/(?P<derivative>[^/]+)$',
+        'radiograph.views.image_file',
+        name='image'),
 )

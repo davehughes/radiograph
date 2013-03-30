@@ -16,9 +16,9 @@ JS_SRC        = path.join(__dirname, 'js')
 LESS_SRC      = path.join(__dirname, 'less')
 JS_OUT        = path.join(__dirname, '../js')
 CSS_OUT       = path.join(__dirname, '../css')
-RADIOAPP_LESS     = path.join(LESS_SRC, 'radioapp.less')
-RADIOAPP_CSS      = path.join(CSS_OUT, 'radioapp.css')
-RADIOAPP_JS       = path.join(JS_OUT, 'radioapp.js')
+RADIOAPP_LESS     = path.join(LESS_SRC, 'radiograph.less')
+RADIOAPP_CSS      = path.join(CSS_OUT, 'radiograph.css')
+RADIOAPP_JS       = path.join(JS_OUT, 'radiograph.js')
 
 option '-u', '--uglify', 'Apply uglify-js compression to compiled JS output'
 
@@ -46,10 +46,10 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
   vendorFiles   = collectFiles(JS_SRC, '.js')
   jsFiles = [].concat(coffeeFiles, vendorFiles)
 
-  # watch jsFiles, ->
-  #   compileCoffee
-  #     paths: [COFFEE_SRC, JS_SRC]
-  #     callback: (err, output) -> writeJS(output, RADIOAPP_JS)
+  watch jsFiles, ->
+    compileCoffee
+      paths: [COFFEE_SRC, JS_SRC]
+      callback: (err, output) -> writeJS(output, RADIOAPP_JS)
 
   watch lessFiles, ->
     compileLess
@@ -57,12 +57,13 @@ task 'watch', 'Watch source files and build changes.', (opts) ->
       callback: (code, output) -> writeJS(output, RADIOAPP_CSS)
 
 build = (callback) ->
+  console.log 'building from ' + RADIOAPP_LESS + ' to ' + RADIOAPP_CSS
   compileLess 
     input: RADIOAPP_LESS
     callback: (code, output) -> writeJS(output, RADIOAPP_CSS)
-  # compileCoffee
-  #   paths: [COFFEE_SRC, JS_SRC]
-  #   callback: (err, output) -> writeJS(output, RADIOAPP_JS)
+  compileCoffee
+    paths: [COFFEE_SRC, JS_SRC]
+    callback: (err, output) -> writeJS(output, RADIOAPP_JS)
   callback?()
 
 compileLess = (opts) ->

@@ -1,0 +1,26 @@
+<div class="specimen-result"
+     style="clear: both;">
+
+<ul class="specimen-result-images media-grid">
+  {% for image in specimen.images.all %}
+  <li>
+  <a href="{% url image image.id 'medium' %}"
+    style="text-decoration: none" title="{{ image.get_aspect_display }}">
+     <!--img class="thumbnail" src="{% url image image.id 'thumbnail' %}"/-->
+     <img class="thumbnail" src="//placekitten.com/100/100"/>
+  </a>
+  </li>
+  {% endfor %}
+</ul>
+
+  <h4>
+    <span style="font-style: italic">
+      {{ specimen.taxon.label }}
+    </span>
+    - {{ specimen.specimen_id }}
+  </h4>
+  <div class="specimen-sex">{{ specimen.sex }}</div>
+  <div class="specimen-settings">{{ specimen.settings|default:"Unspecified/Unknown" }}</div>
+  <div class="specimen-comments">{{ specimen.comments }}</div>
+
+</div>

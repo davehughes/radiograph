@@ -1,7 +1,7 @@
 _ = require('underscore')._
 Backbone = require('backbone')
-api = require('radioapp/api') 
-util = require('radioapp/util')
+api = require('radiograph/api') 
+util = require('radiograph/util')
 
 class Specimen extends api.CollectionItemModel
   urlRoot: '/specimens'

@@ -4,7 +4,7 @@
     <meta charset="utf8"/>
     <title><% if @page?.title: %><%= @page.title %> | <% end %>primate-radiograph.com</title>
     <% block "styles" %>
-      <link rel="stylesheet" type="text/css" href="/static/css/radioapp.css"/>
+      <link rel="stylesheet" type="text/css" href="/static/css/radiograph.css"/>
       <style>
           body { 
               background-image: url('/static/img/climpek.png');

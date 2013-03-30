@@ -1,8 +1,8 @@
 _ = require('underscore')._
 Backbone = require 'backbone'
-views = require 'radioapp/views'
-models = require 'radioapp/models'
-api = require 'radioapp/api'
+views = require 'radiograph/views'
+models = require 'radiograph/models'
+api = require 'radiograph/api'
 
 createResources = (resourceMap) ->
   defaultConfig = 

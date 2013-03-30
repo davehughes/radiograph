@@ -48,7 +48,7 @@
     };
   }
   return this.require.define;
-}).call(this)({"radioapp/api": function(exports, require, module) {(function() {
+}).call(this)({"radiograph/api": function(exports, require, module) {(function() {
   var Backbone, CollectionItemModel, CollectionModel, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -187,7 +187,7 @@
   });
 
 }).call(this);
-}, "radioapp/app": function(exports, require, module) {(function() {
+}, "radiograph/app": function(exports, require, module) {(function() {
   var Backbone, RadioappRouter, api, createResourceCollection, createResources, models, resourceConfigs, views, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -196,11 +196,11 @@
 
   Backbone = require('backbone');
 
-  views = require('radioapp/views');
+  views = require('radiograph/views');
 
-  models = require('radioapp/models');
+  models = require('radiograph/models');
 
-  api = require('radioapp/api');
+  api = require('radiograph/api');
 
   createResources = function(resourceMap) {
     var cfg, defaultConfig, output, rName, rUrl, _ref;
@@ -302,7 +302,7 @@
   });
 
 }).call(this);
-}, "radioapp/models": function(exports, require, module) {(function() {
+}, "radiograph/models": function(exports, require, module) {(function() {
   var Backbone, Image, ImageCollection, SearchManager, Specimen, SpecimenCollection, User, api, util, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -311,9 +311,9 @@
 
   Backbone = require('backbone');
 
-  api = require('radioapp/api');
+  api = require('radiograph/api');
 
-  util = require('radioapp/util');
+  util = require('radiograph/util');
 
   Specimen = (function(_super) {
 
@@ -539,7 +539,7 @@
   });
 
 }).call(this);
-}, "radioapp/util": function(exports, require, module) {(function() {
+}, "radiograph/util": function(exports, require, module) {(function() {
   var Alerts, Backbone, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -582,7 +582,7 @@
   });
 
 }).call(this);
-}, "radioapp/views": function(exports, require, module) {(function() {
+}, "radiograph/views": function(exports, require, module) {(function() {
   var AlertsView, AppToolbar, AppView, Backbone, DataView, FormPaginationView, ImageView, LoginFormView, PaginationView, SpecimenDetailPane, SpecimenEditPane, SpecimenForm, SpecimenModal, SpecimenResult, SpecimenSearchPane, View, models, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -593,7 +593,7 @@
 
   Backbone = require('backbone');
 
-  models = require('radioapp/models');
+  models = require('radiograph/models');
 
   require('bootstrap');
 
@@ -1569,7 +1569,1120 @@
   });
 
 }).call(this);
-}, "backbone": function(exports, require, module) {//     Backbone.js 0.9.1
+}, "templates/about": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<a name=\'about-us\'></a>\n<h2>About Us</h2>\n\n<div>\n  <img src=\'http://placekitten.com/100/100\'/>\n  <p>\n    <strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of\n    Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute\n    of Human Origins</a>. His dissertation research (for which the radiographs on this\n    database were collected) investigates the role of the brain in modulating facial\n    positioning in anthropoid primates and has implications for Late Pleistocene hominin evolution.\n  </p>\n</div>\n\n<div>\n  <img src=\'http://placekitten.com/101/101/\'/>\n  <p>\n    <strong>Dave Hughes</strong> has designed the web architecture for the database. He is\n    a software engineer in the Informatics and Cyberinfrastructure Services Department at\n    Arizona State University.\n  </p>\n</div>\n\n\n<div class="about-section">\n<a name=\'about-the-database\'></a>\n<h2>About the Database</h2>\n<p>\n  The database comprises radiographs of anthropoid primate species. Images in the\n  database are searchable and browseable and downloads of the complete sample (or\n  sub-sets thereof) are completely free. The database is designed to be used by scientists\n  in anthropology (or other related fields) as well as teachers at any educational level.\n  This database represents the efforts of its creators to further data-sharing in academic\n  pursuits. In addition, the database will help preserve invaluable museum specimens by\n  reducing the need for further radiography (and potential damage) of these specimens.\n \n  The database is organized by taxonomic group, mainly by species. Users can search by\n  species and some higher taxonomic groups and can further limit searches by sex.\n \n  Images from the database can be easily imported into programs designed to take\n  measurements from photos (e.g., ImageJ) or software designed to perform three-\n  dimensional geometric morphometric analyses (e.g., TPSDig). Moreover, these images\n  can be included in PowerPoint or Keynote presentations (for this application, we\n  recommend converting the files to a smaller format, e.g., jpeg).\n</p>\n</div>\n\n<div class="about-section">\n<a name=\'materials\'></a>\n<h2>Materials</h2>\n<p>\n  All specimens in this database come from <a href="http://www.mnh.si.edu/"> the National\n  Museum of Natural History (Smithsonian Institute)</a>, and the original USNM accession numbers are included in the\n  information about each specimen. The x-rays were also produced using the digital\n  x-ray facilities in the <a href="http://vertebrates.si.edu/">Department of Vertebrate\n  Zoology</a> at the National Museum of Natural History. Permission to make these\n  radiographs freely available on this database was provided by the \n  <a href="http://vertebrates.si.edu/mammals/index.html">Division of Mammals</a>\n  (Department of Vertebrate Zoology) at the National Museum of Natural History.\n  \n  XX anthropoid primate species were radiographed. Approximately 20 specimens per\n  species are available, but numbers vary. Only adult (based on emergence of the third\n  molar), non-pathological individuals were included. Whenever possible, equal numbers\n  of males and females were included; all information on sex distribution is provided in the\n  database.\n</p>\n</div>\n\n<div class="about-section">\n<a name=\'methods\'></a>\n<h2>Methods</h2>\n<p>\n  Two radiographs of each specimen were produced: a superior and a lateral view. For\n  the superior view, specimens were oriented into the Frankfurt Horizontal plane. For\n  \n  lateral radiographs, specimens were positioned with the mid-sagittal plane oriented\n  parallel to the x-ray source. All radiographs were produced digitally and were post-\n  processed using Adobe Illustrator and Photoshop.\n  \n  <strong>**The scale bar in each radiograph is 40 mm. long**</strong>\n  \n  In addition to the radiographs, a battery of linear measurements, which were collected\n  with calipers directly from the specimens, are available on the website. These data are\n  available as part of the information on each individual specimens, and spreadsheets\n  including all of these measurements are available on request.\n</p>\n</div>\n\n<div class="about-section">\n<a name=\'funding\'></a>\n<h2>Funding</h2>\n<p>\n  Funds for this database were provided by a Doctoral Dissertation Improvement Grant\n  by the National Science Foundation awarded to Terry Ritzman. In addition, support was\n  provided by the Harmon Memorial Endowment through the Institute of Human Origins at\n  Arizona State University.\n  \n  The completion of this database would not have been possible without the support of\n  the Institute of Human Origins (particularly Drs. Gary Schwartz and Bill Kimbel, Lindsay\n  Mullen, and Julie Russ). The museum specialists (specifically, Sandra Raredon and\n  Darrin Lunde) as well as Dr. Richard Vari in the Division of Fishes at the National\n  Museum of Natural History also crucial help while the radiographs were being produced.\n  Finally, Judy Chupasko (Museum of Comparative Zoology, Harvard University)\n  graciously provided supplies used in creating the radiographs.\n</p>\n</div>\n\n<div class="about-section">\n<a name=\'contact-us\'></a>\n<h2>Contact Us</h2>\n<p>\n  We are dedicated to improving this website. If you have any suggestions for how the\n  database can be improved (or if you would like to contribute material to the database),\n  do not hesitate to contact us:\n  <ul>\n   <li><a href="mailto:tritzman@asu.edu">Terry Ritzman (tritzman@asu.edu)</a></li>\n   <li><a href="mailto:d@vidhughes.com">Dave Hughes (d@vidhughes.com)</a></li>\n  </ul>\n</p>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/app-toolbar": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('\n<div class="app-tools-custom">\n    <a rel="visualize" class="btn btn-small" href="#">Data Visualization</a>\n</div>\n\n');
+    
+      __out.push('\n<div class="app-tools-common">\n    <div class="btn-group">\n        ');
+    
+      if (this.user.loggedIn) {
+        __out.push('\n        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown">\n            <i class="icon-user"></i>\n            ');
+        __out.push(__sanitize(this.user.firstName));
+        __out.push('\n            <span class="caret"></span>\n        </a>\n        <ul class="dropdown-menu">\n            <li>\n            <a rel="logout" href="javascript:void(0);">\n                <i class="icon-off"></i>Log Out\n            </a>\n            </li>\n        </ul>\n        ');
+      } else {
+        __out.push('\n        <a class="btn btn-small" rel="login" href="javascript:void(0);">\n            <i class="icon-user"></i>Sign In\n        </a>\n        ');
+      }
+    
+      __out.push('\n    </div>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/image-control": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      var label, value, _i, _len, _ref, _ref1;
+    
+      __out.push('input type: hidden \n<input type="hidden" value="');
+    
+      __out.push(__sanitize(this.id));
+    
+      __out.push('" name="id"/>\n<span class="replacementFile" style="display: none;"></span>\n\n<select class="span2" name="aspect">\n');
+    
+      _ref = this.choices.aspect;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref1 = _ref[_i], value = _ref1[0], label = _ref1[1];
+        __out.push('\n  <option value="');
+        __out.push(__sanitize(value));
+        __out.push('" ');
+        if (value === this.aspect) {
+          __out.push('selected="selected"');
+        }
+        __out.push('>');
+        __out.push(__sanitize(label));
+        __out.push('</option>\n');
+      }
+    
+      __out.push('\n</select>\n  \n');
+    
+      if (this.name) {
+        __out.push('\n');
+        if (!this.replacementFile) {
+          __out.push('\n    <span class="dropdown">\n      <span class="dropdown-toggle" data-toggle="dropdown">\n        Existing file:\n        <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n          ');
+          __out.push(__sanitize(this.name));
+          __out.push('\n        </a>\n        <span class="caret">&nbsp;</span>\n      </span>\n      <ul class="dropdown-menu">\n        <li>\n          <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n            <i class="icon-download"></i>\n            Download Existing File\n          </a>\n        </li>\n        <li>\n          <a href="javascript:void(0)" class="replace-file fileinput-button">\n            <i class="icon-random"></i>\n            Replace File\n            <input type="file"/>\n          </a>\n        </li>\n      </ul>\n   </span>\n');
+        } else {
+          __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Replace\n    <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n      ');
+          __out.push(__sanitize(this.name));
+          __out.push('\n    </a>  \n    with\n    <a class="fileinput-button" style="display:inline-block">\n      ');
+          __out.push(__sanitize(this.replacementFile.name));
+          __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu">\n    <li>\n      <a href="');
+          __out.push(__sanitize(this.url));
+          __out.push('" class="download-file">\n        <i class="icon-download"></i>\n        Download Existing File\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n    <li>\n      <a href="javascript:void(0)" class="cancel-replace">\n        <i class="icon-remove"></i>\n        Cancel Replacement\n      </a>\n    </li>\n  </ul>\n</span>\n');
+        }
+        __out.push('\n');
+      } else if (this.replacementFile) {
+        __out.push('\n<span class="dropdown">\n  <span class="dropdown-toggle" data-toggle="dropdown">\n    Upload file:\n    <a class="fileinput-button" style="display:inline-block">\n      ');
+        __out.push(__sanitize(this.replacementFile.name));
+        __out.push('\n      <input type="file"/>\n    </a>\n    <span class="caret">&nbsp;</span>\n  </span>\n  <ul class="dropdown-menu"> \n    <li>\n      <a href="javascript:void(0)" class="replace-file fileinput-button">\n        <i class="icon-random"></i>\n        Replace File\n        <input type="file"/>\n      </a>\n    </li>\n  </ul>\n</span>\n');
+      } else {
+        __out.push('\n<a class="fileinput-button">\n  Upload an Image\n  <i class="icon-upload"></i>\n  <input type="file"/>\n</a>\n');
+      }
+    
+      __out.push('\n\n<a href="#" rel="remove-image">\n  <i class="icon-remove"></i>\n</a>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/index": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      var _this = this;
+    
+      parent('layout');
+    
+      __out.push('\n\n');
+    
+      block('scripts');
+    
+      __out.push('\n  ');
+    
+      __out.push(__sanitize(block["super"]));
+    
+      __out.push('\n  ');
+    
+      __out.push(this.coffeescript(function() {
+        return __capture(function() {
+          return __out.push('\n    $ ->\n      window.views = require \'views\'\n      window.models = require \'models\'\n  ');
+        });
+      }));
+    
+      __out.push('\n');
+    
+      endblock;
+    
+    
+      __out.push('\n\n');
+    
+      block('models');
+    
+      __out.push('\n  ');
+    
+      __out.push(this.coffeescript(function() {
+        return __capture(function() {
+          __out.push('\n    $ ->\n      images = new models.ImageList(');
+          __out.push(__sanitize(_this.json(_this.images)));
+          return __out.push(')\n      resultsView = new views.ResultsView\n        model: images\n      resultsView.render().$el.appendTo($(\'body\'));\n\n\n    slideSwitch = ->\n      slideLeft = $(\'.slides\').css(\'left\')\n      console.log "slideLeft: #{slideLeft}"\n      if slideLeft == \'auto\'\n        $(\'.slides\').css(\'left\', \'-100%\')\n\n  ');
+        });
+      }));
+    
+      __out.push('\n');
+    
+      endblock;
+    
+    
+      __out.push('\n\n');
+    
+      block('body');
+    
+      __out.push('\n  ');
+    
+      __out.push(this.views.SpecimenSearchForm());
+    
+      __out.push('\n  ');
+    
+      __out.push(this.views.ResultsView());
+    
+      __out.push('\n');
+    
+      endblock;
+    
+    
+      __out.push('\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/layout": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      var _ref;
+    
+      __out.push('<!DOCTYPE html5>\n<html>\n  <head>\n    <meta charset="utf8"/>\n    <title>');
+    
+      if ((_ref = this.page) != null ? _ref.title : void 0) {
+        __out.push(__sanitize(this.page.title));
+        __out.push(' | ');
+      }
+    
+      __out.push('primate-radiograph.com</title>\n    ');
+    
+      block("styles");
+    
+      __out.push('\n      <link rel="stylesheet" type="text/css" href="/static/css/radiograph.css"/>\n      <style>\n          body { \n              background-image: url(\'/static/img/climpek.png\');\n          }\n      </style>\n    ');
+    
+      endblock;
+    
+    
+      __out.push('\n\n    ');
+    
+      block("scripts");
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('jquery'));
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('underscore'));
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('backbone'));
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('bootstrap'));
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('application'));
+    
+      __out.push('\n      ');
+    
+      __out.push(this.script('modernizr'));
+    
+      __out.push('\n    ');
+    
+      endblock;
+    
+    
+      __out.push('\n\n    ');
+    
+      block("models");
+    
+      endblock;
+    
+    
+      __out.push('\n\n  </head>\n  <body>\n      ');
+    
+      block('body');
+    
+      endblock;
+    
+    
+      __out.push('\n  </body>\n</html>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/login": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<form method="post" class="login-form modal">\n\n    <div class="modal-header">\n        <h3>Radiograph Database - Sign In</h3>\n    </div>\n\n    <div class="modal-body form form-horizontal">\n        <div class="alert alert-error" style="display: none;"></div>\n\n        <div class="control-group">\n            <label class="control-label" for="username">Username:</label>\n            <div class="controls">\n                <input type="text" name="username"/>\n            </div>\n        </div>\n        <div class="control-group">\n            <label class="control-label" for="password">Password:</label>\n            <div class="controls">\n                <input type="password" name="password"/>\n            </div>\n        </div>\n    </div>\n\n    <div class="modal-footer form-actions">\n        <button type="submit" class="btn btn-primary">Sign In</button>\n        <a href="#" class="btn discard">Nevermind</a>\n    </div>\n\n</form>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/results-view": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<div class="results-view">\n  <div class="results-loading">Loading...</div>\n  <div class="results-records"></div>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-detail": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+    
+      __out.push('<div class="specimen-detail">\n  <h1>\n    ');
+    
+      __out.push(__sanitize(((_ref = this.taxon) != null ? _ref.label : void 0) || "Falstaxon nofindius"));
+    
+      __out.push('\n    <small>\n      ');
+    
+      __out.push(__sanitize(((_ref1 = this.institution) != null ? _ref1.label : void 0) || "Fakington Community College"));
+    
+      __out.push(' - \n      ');
+    
+      __out.push(__sanitize(this.specimenId || "ABC123"));
+    
+      __out.push('\n    </small>\n  </h1>\n  \n  <div class="specimen-image-detail">\n    <a href="');
+    
+      __out.push(__sanitize((typeof images !== "undefined" && images !== null ? (_ref2 = images.lateral) != null ? _ref2.full : void 0 : void 0) || 'http://placekitten.com/800/800'));
+    
+      __out.push('">\n      <img src="');
+    
+      __out.push(__sanitize((typeof images !== "undefined" && images !== null ? (_ref3 = images.lateral) != null ? _ref3.medium : void 0 : void 0) || 'http://placekitten.com/400/400'));
+    
+      __out.push('"/>\n    </a>\n    <h4>Lateral View</h4>\n  </div>\n  \n  <div class="specimen-image-detail">\n    <a href="');
+    
+      __out.push(__sanitize((typeof images !== "undefined" && images !== null ? (_ref4 = images.superior) != null ? _ref4.full : void 0 : void 0) || 'http://placekitten.com/800/800'));
+    
+      __out.push('">\n      <img src="');
+    
+      __out.push(__sanitize((typeof images !== "undefined" && images !== null ? (_ref5 = images.superior) != null ? _ref5.medium : void 0 : void 0) || 'http://placekitten.com/400/400'));
+    
+      __out.push('"/>\n    </a>\n    <h4>Superior View</h4>\n  </div>\n  \n  <dl class="specimen-metadata">\n    ');
+    
+      if (this.settings || true) {
+        __out.push('<di><dt>Settings</dt><dd>');
+        __out.push(__sanitize(this.settings || '1.21 GW'));
+        __out.push('</dd></di>');
+      }
+    
+      __out.push('\n    ');
+    
+      if (this.comments || true) {
+        __out.push('<di><dt>Comments</dt><dd>');
+        __out.push(__sanitize(this.comments || 'This was a hard skull to photograph'));
+        __out.push('</dd></di>');
+      }
+    
+      __out.push('\n    ');
+    
+      if (this.institution || true) {
+        __out.push('\n    <di><dt>Institution</dt><dd>');
+        __out.push(__sanitize(((_ref6 = this.institution) != null ? _ref6.label : void 0) || "Fakington Community College"));
+        __out.push('</dd></di>\n    ');
+      }
+    
+      __out.push('\n    ');
+    
+      if (this.specimenId || true) {
+        __out.push('\n    <di><dt>Specimen ID</dt><dd>');
+        __out.push(__sanitize(this.specimenId || "ABC123"));
+        __out.push('</dd></di>\n    ');
+      }
+    
+      __out.push('\n    <!--di><dt>Last Modified</dt><dd>');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('</dd></di-->\n    <!--di><dt>Created</dt><dd>');
+    
+      __out.push(__sanitize(this.created));
+    
+      __out.push('</dd></di-->\n  </dl>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-edit": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      var label, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    
+      __out.push('<form class="form-horizontal specimen-form" method="post"\n    action="');
+    
+      __out.push('" enctype="multipart/form-data">\n\n    <div class="controls">\n        ');
+    
+      if (this.existing) {
+        __out.push('\n        <h2>Edit Specimen</h2>\n        ');
+      } else {
+        __out.push('\n        <h2>Enter New Specimen</h2>\n        ');
+      }
+    
+      __out.push('\n    </div>\n    \n    ');
+    
+      __out.push('\n    <div class="control-group institution">\n        <label class="control-label" for="institution">Institution</label>\n        <div class="controls">\n            <select name="institution">\n                <option>---------</option>\n                ');
+    
+      _ref = this.choices.institution;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref1 = _ref[_i], value = _ref1[0], label = _ref1[1];
+        __out.push('\n                    <option value="');
+        __out.push(__sanitize(value));
+        __out.push('"\n                        ');
+        if (value === this.institution) {
+          __out.push('selected="selected"');
+        }
+        __out.push('>\n                        ');
+        __out.push(__sanitize(label));
+        __out.push('\n                    </option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group specimen-id">\n        <label class="control-label" for="specimenId">Specimen ID</label>\n        <div class="controls">\n            <input type="text" name="specimenId" value="');
+    
+      __out.push(__sanitize(this.specimenId));
+    
+      __out.push('"/>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group taxon">\n        <label class="control-label" for="taxon">Taxon</label>\n        <div class="controls">\n            <select name="taxon">\n                <option>---------</option>\n                ');
+    
+      _ref2 = this.choices.taxon;
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        _ref3 = _ref2[_j], value = _ref3[0], label = _ref3[1];
+        __out.push('\n                    <option value="');
+        __out.push(__sanitize(value));
+        __out.push('" \n                        ');
+        if (value === this.taxon) {
+          __out.push('selected="selected"');
+        }
+        __out.push('>\n                        ');
+        __out.push(__sanitize(label));
+        __out.push('\n                    </option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group sex">\n        <label class="control-label" for="sex">Sex</label>\n        <div class="controls">\n            <select name="sex">\n                <option>---------</option>\n                ');
+    
+      _ref4 = this.choices.sex;
+      for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
+        _ref5 = _ref4[_k], value = _ref5[0], label = _ref5[1];
+        __out.push('\n                    <option value="');
+        __out.push(__sanitize(value));
+        __out.push('"\n                        ');
+        if (value === this.sex) {
+          __out.push('selected="selected"');
+        }
+        __out.push('>\n                        ');
+        __out.push(__sanitize(label));
+        __out.push('\n                    </option>\n                ');
+      }
+    
+      __out.push('\n            </select>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group measurements">\n        <label class="control-label">Measurements</label>\n        <div class="controls">\n            <table class="specimen-measurements">\n                <tr>\n                    <th>Skull Length</th>\n                    <th>Cranial Width</th>\n                    <th>Neurocranial Height</th>\n                    <th>Facial Height</th>\n                    <th>Palate Length</th>\n                    <th>Palate Width</th>\n                </tr>\n                <tr>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.skullLength));
+    
+      __out.push('" name="skullLength"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.cranialWidth));
+    
+      __out.push('" name="cranialWidth"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.neurocranialHeight));
+    
+      __out.push('" name="neurocranialHeight"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.facialHeight));
+    
+      __out.push('" name="facialHeight"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.palateLength));
+    
+      __out.push('" name="palateLength"/></td>\n                    <td><input type="text" value="');
+    
+      __out.push(__sanitize(this.palateWidth));
+    
+      __out.push('" name="palateWidth"/></td>\n                </tr>\n            </table>\n        </div>\n    </div>\n\n\n    ');
+    
+      __out.push('\n    <div class="control-group comments">\n        <label class="control-label" for="comments">Comments</label>\n        <div class="controls">\n            <textarea name="comments">');
+    
+      __out.push(__sanitize(this.comments));
+    
+      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group settings">\n        <label class="control-label" for="settings">Settings</label>\n        <div class="controls">\n            <textarea name="settings">');
+    
+      __out.push(__sanitize(this.settings));
+    
+      __out.push('</textarea>\n        </div>\n    </div>\n\n    ');
+    
+      __out.push('\n    <div class="control-group images">\n        <label class="control-label">Images</label>\n        <div class="controls form-inline">\n            ');
+    
+      __out.push('\n            <div class="image-controls"></div>\n            <a href="#" class="btn" rel="add-image">\n                <i class="icon-plus"></i>\n                Add Image\n            </a>\n        </div>\n    </div>\n\n    <div class="form-actions">\n        <div class="submission-status progress progress-striped active" style="display: none;">\n            <div class="bar"></div>\n        </div>\n        <a rel="save" class="btn btn-primary" href="javascript:void(0)">Save</a>\n        <a rel="discard" class="btn" href="javascript:void(0)">Discard</a>\n    </div>\n\n</form>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-list-item": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<td class="selection">\n    <input type="checkbox" class="item-selection"\n        value="');
+    
+      this.id;
+    
+      __out.push('"/>\n</td>\n<td class="specimen-id">\n    ');
+    
+      __out.push(__sanitize(this.specimenId));
+    
+      __out.push('\n</td>\n<td class="taxon">\n    <a rel="detail" href="#">\n        ');
+    
+      __out.push(__sanitize(this.choices.taxon[this.taxon]));
+    
+      __out.push('\n    </a>\n</td>\n<td class="sex">');
+    
+      __out.push(__sanitize(this.choices.sex[this.sex]));
+    
+      __out.push('</td>\n<td class="images">\n    <a href="#">Lateral</a> | \n    <a href="#">Superior</a>\n</td>\n<td class="last-modified">\n    ');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('\n</td>\n<td class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit"><i class="icon-edit"></i></a>\n</td>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-list": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<tr>\n    <td class="selection">\n        <input type="checkbox" class="item-selection"\n            value="');
+    
+      __out.push(__sanitize(this.href));
+    
+      __out.push('"/>\n    </td>\n    <td class="taxon">');
+    
+      __out.push('</td>\n    <td class="sex">');
+    
+      __out.push('</td>\n    <td class="images">\n        <a href="#">Lateral</a>\n        <a href="#">Superior</a>\n    </td>\n    <td class="actions">\n        <a class="btn" title="Edit Specimen" rel="edit" href="javascript:void(0)">\n            <i class="icon-edit"></i> \n        </a>\n    </td>\n</tr>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-row": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<div class="selection">\n  <input type="checkbox" class="item-selection" value="');
+    
+      this.id;
+    
+      __out.push('"/>\n</div>\n<div class="images">\n  <img class="specimen-image lateral" src=\'http://placekitten.com/140/140\' title="Lateral View"/>\n  <img class="specimen-image superior" src=\'http://placekitten.com/140/140\' title="Superior View"/>\n</div>\n<div class="specimen-id">\n  ');
+    
+      __out.push(__sanitize(this.specimenId));
+    
+      __out.push('\n</div>\n<div class="taxon">\n  <a rel="detail" href="#">\n    ');
+    
+      __out.push('\n    ');
+    
+      __out.push(__sanitize("Falstaxon nonexistius"));
+    
+      __out.push('\n  </a>\n</div>\n<div class="sex">\n  ');
+    
+      __out.push('\n  ');
+    
+      __out.push(__sanitize('Male'));
+    
+      __out.push('\n</div>\n<div class="last-modified">\n  ');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('\n</div>\n<div class="actions">\n  <!--a class="btn" title="Edit Specimen" rel="edit"><i class="icon-edit"></i></a-->\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-search-form": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<div class="search-bar">\n  <div class="specimen-query">\n    <input type="text" name="q" placeholder="Search specimens..."/>\n    <i class="icon-search"></i>\n  </div>\n\n  <div class="search-params pull-right">\n    <span class="dropdown">\n      <a class="dropdown-toggle" data-toggle="dropdown">\n        <span class="dropdown-display">\n          ');
+    
+      __out.push('\n          20\n        </span>\n        <span class="caret"></span>\n      </a>\n      \n      <ul class="dropdown-menu">\n        <li><a href="#" rel="results-per-page">10</a></li>\n        <li><a href="#" rel="results-per-page">20</a></li>\n        <li><a href="#" rel="results-per-page">50</a></li>\n        <li><a href="#" rel="results-per-page">100</a></li>\n      </ul>\n    </span> \n    results per page, sorted by\n    <span class="dropdown">\n      <input type="hidden" name="sort-field"/>\n      <a class="dropdown-toggle" data-toggle="dropdown">\n        <span class="dropdown-display">\n          ');
+    
+      __out.push('\n          Relevance\n        </span>\n        <span class="caret"></span>\n      </a>\n      \n      <ul class="dropdown-menu">\n        <li><a href="#" rel="sort-field" data-value="relevance">Relevance</a></li>\n        <li><a href="#" rel="sort-field" data-value="taxon">Taxon</a></li>\n        <li><a href="#" rel="sort-field" data-value="sex">Sex</a></li>\n        <li><a href="#" rel="sort-field" data-value="modified_date">Modified Date</a></li>\n      </ul>\n    </span>\n    <span class="sort-direction-toggle" title="Ascending">\n      <a href="#" rel="sort-direction" data-value="asc">Ascending &darr;</a> \n      <a href="#" rel="sort-direction" data-value="desc">Descending &uarr;</a> \n    </span>\n  </div>\n\n  <div class="btn-toolbar pull-right">\n    <div class="btn-group">\n      <a href="#" rel="results-filter" class="btn dropdown-toggle">\n        <i class="icon-filter"></i>\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        <a href="#" rel="results-filter">Taxa</a>\n        <a href="#" rel="results-filter">Sex</a>\n        <a href="#" rel="results-filter">Institution</a>\n      </ul>\n    </div>\n\n    <div class="btn-group">\n      <a href="#" rel="results-view" data-value="list" class="btn">\n        <i class="icon-align-justify"></i>\n      </a>\n      <a href="#" rel="results-view" data-value="tile-both" class="btn">\n        <i class="icon-th-large"></i>\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        <a href="#" rel="results-view" data-value="tile-lateral">Lateral</a>\n        <a href="#" rel="results-view" data-value="tile-superior">Superior</a>\n        <a href="#" rel="results-view" data-value="tile-both">Both</a>\n      </ul>\n    </div>\n  </div>\n  \n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "templates/specimen-tile": function(exports, require, module) {module.exports = function(__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+    
+      __out.push('<div class="specimen-result tile">\n  <div class="taxon">\n    <a rel="detail" href="#">\n      ');
+    
+      __out.push('\n      ');
+    
+      __out.push(__sanitize("Falstaxon nonexistius"));
+    
+      __out.push('\n    </a>\n  </div>\n  <input type="checkbox" class="item-selection" value="');
+    
+      this.id;
+    
+      __out.push('"/>\n  <div class="images">\n    <img class="specimen-image lateral" src=\'http://placekitten.com/140/140\' title="Lateral View"/>\n    <img class="specimen-image superior" src=\'http://placekitten.com/140/140\' title="Superior View"/>\n  </div>\n  <div class="specimen-id">\n    ');
+    
+      __out.push(__sanitize(this.specimenId));
+    
+      __out.push('\n  </div>\n  <div class="institution">\n    ');
+    
+      __out.push(__sanitize("Harvard University"));
+    
+      __out.push('\n  </div>\n  <div class="sex">\n    ');
+    
+      __out.push('\n    ');
+    
+      __out.push(__sanitize('Male'));
+    
+      __out.push('\n  </div>\n  <div class="last-modified">\n    ');
+    
+      __out.push(__sanitize(this.lastModified));
+    
+      __out.push('\n  </div>\n  <div class="actions">\n    <a class="btn" title="Edit Specimen" rel="edit"><i class="icon-edit"></i></a>\n    <a class="btn" title="View Detail" rel="detail"><i class="icon-zoom-in"></i></a>\n  </div>\n</div>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+}}, "backbone": function(exports, require, module) {//     Backbone.js 0.9.1
 
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.

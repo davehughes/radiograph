@@ -18,15 +18,15 @@ LOG = logging.getLogger(__name__)
 # Animalia -> Chordata -> Mammalia -> Primates
 
 class TaxonomyLevels(Choices):
-    Kingdom     = C(0, 'Kingdom'),
-    Phylum      = C(1, 'Phylum'),
-    Class       = C(2, 'Class'),
-    Order       = C(3, 'Order'),
-    Suborder    = C(4, 'Suborder'),
-    Family      = C(5, 'Family'),
-    Subfamily   = C(6, 'Subfamily'),
-    Genus       = C(7, 'Genus'),
-    Species     = C(8, 'Species'),
+    Kingdom     = C(0, 'Kingdom')
+    Phylum      = C(1, 'Phylum')
+    Class       = C(2, 'Class')
+    Order       = C(3, 'Order')
+    Suborder    = C(4, 'Suborder')
+    Family      = C(5, 'Family')
+    Subfamily   = C(6, 'Subfamily')
+    Genus       = C(7, 'Genus')
+    Species     = C(8, 'Species')
     Subspecies  = C(9, 'Subspecies')
 
 class DeletedMarkerManager(models.Manager):
@@ -37,12 +37,39 @@ class DeletedObjectManager(models.Manager):
     def get_query_set(self):
         return super(DeletedObjectManager, self).get_query_set().filter(deleted=True)
 
+
+
+TAXON_LABEL_CACHE = None
+def taxon_label_cache():
+    import radiograph.models
+    if radiograph.models.TAXON_LABEL_CACHE is None:
+        radiograph.models.TAXON_LABEL_CACHE = {
+            tid: ' '.join((ppname, pname, name)[TaxonomyLevels.Subspecies - tlevel:])
+            for ppname, pname, name, tid, tlevel
+            in (Taxon.objects
+                .filter(level__gte=TaxonomyLevels.Genus)
+                .values_list('parent__parent__name', 'parent__name', 'name', 'id', 'level'))
+            }
+    return radiograph.models.TAXON_LABEL_CACHE
+
+
+class TaxonManager(models.Manager):
+
+    def find_species(self, genus, species):
+        try:
+            return Taxon.objects.get(name=species, parent__name=genus)
+        except Taxon.DoesNotExist:
+            return None
+
+
 class Taxon(models.Model):
     parent = models.ForeignKey('self', null=True)
     level = models.IntegerField(choices=TaxonomyLevels.choices)
     name = models.CharField(max_length=255, null=True)
     common_name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
+
+    objects = TaxonManager()
 
     def __unicode__(self):
         return self.name
@@ -68,6 +95,15 @@ class Taxon(models.Model):
                 'description': self.description,
                 'children': [child.get_json_subtree() 
                              for child in self.children()]}
+
+    @property
+    def label(self):
+        label = taxon_label_cache().get(self.id)
+        if not label:
+            taxon = models.Taxon.objects.get(id=self.id)
+            label = ' '.join([t.name for t in taxon.hierarchy 
+                              if t.level >= models.TaxonomyLevels.Genus])
+        return label
 
 class Institution(models.Model):
     name = models.CharField(max_length=255)
@@ -109,9 +145,6 @@ class Specimen(models.Model):
     def __unicode__(self):
         return '%s - %s' % (self.taxon, self.specimen_id)
 
-    def get_taxon_display(self):
-        return 'TODO: implement get_taxon_display()'
-
 
 class ImageManager(DeletedMarkerManager):
 
@@ -122,6 +155,7 @@ class ImageManager(DeletedMarkerManager):
                 img.generate_derivatives(tmpdir=tmpdir, regenerate=regenerate)
             except Exception as e:
                 print 'Error generating image derivatives: %s' % e
+
 
 class Image(models.Model):
     objects = ImageManager()
@@ -135,7 +169,7 @@ class Image(models.Model):
     specimen = models.ForeignKey('Specimen', related_name='images')
 
     # image and derivative files
-    image_full = models.FileField(upload_to='images/full')
+    image_full = models.FileField(upload_to='images/full', max_length=1024)
     image_medium = models.FileField(upload_to='images/medium', null=True, blank=True)
     image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True, blank=True)
 

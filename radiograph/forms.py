@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator, InvalidPage
 from django.core.urlresolvers import reverse
 from django.forms import fields, models as form_models, widgets
 from djchoices import DjangoChoices as Choices, C
@@ -11,27 +12,8 @@ class InstitutionForm(forms.ModelForm):
         model = models.Institution
 
 class TaxonChoiceField(forms.ModelChoiceField):
-    _label_cache = None
-
-    @property
-    def label_cache(self):
-        if self._label_cache is None:
-            self._label_cache = {
-                tid: ' '.join((ppname, pname, name)[models.TaxonomyLevels.Subspecies - tlevel:])
-                for ppname, pname, name, tid, tlevel
-                in (models.Taxon.objects
-                    .filter(level__gte=models.TaxonomyLevels.Genus)
-                    .values_list('parent__parent__name', 'parent__name', 'name', 'id', 'level'))
-                }
-        return self._label_cache
-
     def label_from_instance(self, taxon):
-        label = self.label_cache.get(taxon.id)
-        if not label:
-            taxon = models.Taxon.objects.get(id=taxon.id)
-            label = ' '.join([t.name for t in taxon.hierarchy 
-                              if t.level >= models.TaxonomyLevels.Genus])
-        return label
+        return taxon.label
 
 class InstitutionChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, institution):
@@ -117,23 +99,67 @@ ImageFormSet = form_models.inlineformset_factory(models.Specimen,
                                                  extra=0)
 
 
-class SortFieldChoices(Choices):
+class SortField(Choices):
     Field1 = C('1', 'Field 1')
     Field2 = C('2', 'Field 2')
 
 
-class SortDirectionChoices(Choices):
+class SortDirection(Choices):
     Ascending  = C('asc')
     Descending = C('desc')
 
 
+class SearchResultsView(Choices):
+    StandardList = C('standard')
+    CompactList  = C('compact')
+    Tiles        = C('tiles')
+
+
 class SpecimenSearchForm(forms.Form):
     
-    taxon_filter = forms.ModelMultipleChoiceField(queryset=models.Taxon.objects.all(),
-                                                  required=False)
-    sex_filter = forms.MultipleChoiceField(choices=models.Specimen.SexChoices.choices
-                                           required=False)
-    sort_field = forms.ChoiceField(choices=SortFieldChoices.choices,
-                                   initial=SortFieldChoices.Field1)
-    sort_direction = forms.ChoiceField(choices=SortDirectionChoices.choices,
-                                       initial=SortDirectionChoices.Ascending)
+    taxa = forms.ModelMultipleChoiceField(queryset=models.Taxon.objects.all(),
+                                          required=False)
+    sex = forms.MultipleChoiceField(choices=models.Specimen.SexChoices.choices,
+                                    required=False)
+    sort = forms.ChoiceField(choices=SortField.choices,
+                             initial=SortField.Field1,
+                             required=False)
+    sort_direction = forms.ChoiceField(choices=SortDirection.choices,
+                                       initial=SortDirection.Ascending,
+                                       required=False)
+    view = forms.ChoiceField(choices=SearchResultsView.choices,
+                             initial=SearchResultsView.StandardList,
+                             required=False)
+    page = forms.IntegerField(initial=1, required=False)
+    results = forms.IntegerField(initial=10, required=False, max_value=100)
+
+    def results_page(self):
+        page = 1
+        results = 10
+        if self.is_bound and self.is_valid():
+            page = self.cleaned_data.get('page') or 1
+            results = self.cleaned_data.get('results') or 10
+        paginator = Paginator(self.get_query_set(), results)
+        return paginator.page(page)
+
+    def get_query_set(self):
+        qs = models.Specimen.objects.all()
+        if self.is_bound and self.is_valid():
+            if self.cleaned_data['taxa']:
+                qs = qs.filter(taxon__in=self.cleaned_data['taxa'])
+            if self.cleaned_data['sex']:
+                qs = qs.filter(sex__in=self.cleaned_data['sex'])
+            if self.cleaned_data['sort']:
+                order_by = self.cleaned_data['sort']
+                if self.cleaned_data.get('sort_direction') is SortDirection.Descending:
+                    order_by = '-' + order_by
+                qs = qs.order_by(order_by)
+        else:
+            pass
+
+        return qs
+
+
+
+
+

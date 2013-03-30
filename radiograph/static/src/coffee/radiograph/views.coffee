@@ -1,6 +1,6 @@
 _ = require('underscore')._
 Backbone = require('backbone')
-models = require('radioapp/models')
+models = require('radiograph/models')
 require('bootstrap')
 require('jquery.chosen')
 require('jquery.fileupload')
