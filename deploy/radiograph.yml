@@ -117,6 +117,8 @@
     sudo_user: ${user}
     tags:
     - deploy
+    notify:
+    - reload uwsgi
 
   # Necessary because the deploy scripts update the permissions of the
   # application code, but those changes shouldn't be tracked.
@@ -132,13 +134,13 @@
           recurse=true
           mode=2771
     tags:
-    - predeploy
+    - deploy
 
   - name: ${app_name} - create virtualenv
     shell: virtualenv --python=/usr/bin/python2.7 ${virtualenv}
            creates=${virtualenv}/bin/activate
     tags:
-    - predeploy
+    - deploy
 
   - name: ${app_name} - set appropriate permissions for virtualenv
     file: name=${virtualenv}
@@ -148,7 +150,7 @@
           recurse=true
           mode=2771
     tags:
-    - predeploy
+    - deploy
 
   - name: install dependencies
     pip: requirements=${app_directory}/requirements.txt
@@ -157,7 +159,7 @@
     sudo: true
     sudo_user: ${user}
     tags:
-    - predeploy
+    - deploy
 
   - name: enter maintenance mode
     copy: dest=${nginx.maintenance_file}
