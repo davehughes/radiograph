@@ -116,7 +116,7 @@
          dest=${app_directory}
     sudo_user: ${user}
     tags:
-    - predeploy
+    - deploy
 
   # Necessary because the deploy scripts update the permissions of the
   # application code, but those changes shouldn't be tracked.
