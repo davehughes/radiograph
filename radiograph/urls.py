@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 # from rest_framework.views import InstanceModelView
 from rest_framework import generics
