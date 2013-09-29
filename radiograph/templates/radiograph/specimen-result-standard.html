@@ -1,12 +1,11 @@
-<div class="specimen-result"
-     style="clear: both;">
+<div class="specimen-result">
 
 <ul class="specimen-result-images media-grid">
   {% for image in specimen.images.all %}
   <li>
-  <a href="{% url image image.id 'medium' %}"
+  <a href="{% url 'image' image.id 'medium' %}"
     style="text-decoration: none" title="{{ image.get_aspect_display }}">
-     <!--img class="thumbnail" src="{% url image image.id 'thumbnail' %}"/-->
+     <!--img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/-->
      <img class="thumbnail" src="//placekitten.com/100/100"/>
   </a>
   </li>
@@ -14,7 +13,7 @@
 </ul>
 
   <h4>
-    <span style="font-style: italic">
+    <span class="taxon-label" style="font-style: italic">
       {{ specimen.taxon.label }}
     </span>
     - {{ specimen.specimen_id }}

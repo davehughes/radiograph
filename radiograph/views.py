@@ -6,6 +6,7 @@ import math
 import mimetypes
 import os
 import types
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import views as authviews
@@ -184,3 +185,40 @@ def create_or_update_specimen(request, specimen_id=None):
     # (re)index specimen
     specimen_index.update_object(specimen)
     return specimen
+
+def download_zip(request):
+    # Write JSON config file
+    # Redirect
+    # TODO: swap in actual queryset functionality
+    specimens = models.Specimen.objects.all()[:3]
+
+    images = (models.Image.objects
+        .filter(image_full__isnull=False)
+        .filter(specimen__in=specimens)
+        .select_related('specimen', 'specimen_taxon')[:3])
+
+    # TODO: apply aspect filter
+
+    zip_mappings = {}
+    for image in images:
+        path_in_zip = 'Primate Radiographs/{taxon}/{filename}'.format(
+            taxon=image.specimen.taxon.label,
+            filename=os.path.basename(image.image_medium.path)
+            )
+        zip_mappings[path_in_zip] = image.image_medium.path
+
+    download_config = {
+        'filename': 'Primate Radiographs.zip',
+        'files': zip_mappings,
+        }
+
+    # Dump the mappings to a file in the download config directory
+    download_id = str(uuid.uuid4())
+    download_config_dir = '/tmp'
+    download_config_file = os.path.join(download_config_dir, download_id) + '.json'
+    json.dump(download_config, open(download_config_file, 'w'))
+
+    # Have nginx do an internal redirect to the zipper server
+    response = http.HttpResponse()
+    response['X-Accel-Redirect'] = '/zipper/{}'.format(download_id)
+    return response

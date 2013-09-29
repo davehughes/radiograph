@@ -178,7 +178,7 @@ class Specimen(serializers.HyperlinkedModelSerializer):
     modification_info = serializers.SerializerMethodField('get_modification_info')
     measurements = serializers.SerializerMethodField('get_measurements')
     sex_label = serializers.Field(source='get_sex_display')
-    taxon_label = serializers.Field(source='get_taxon_display')
+    taxon_label = serializers.Field(source='taxon.label')
 
     class Meta:
         depth = 1

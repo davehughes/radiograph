@@ -63,6 +63,7 @@ MEDIA_URL = '/'
 
 STATIC_ROOT = SITE_ROOT_DIR + '/static'
 STATIC_URL = '/static/'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '429hkGZkIdZHfI1vdck9ZNvSXdM6pqKhmdhBUjX9XoUDdXUCXu'
@@ -111,3 +112,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('radiograph.api.permissions.ReadOnly',),
     'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
 }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass

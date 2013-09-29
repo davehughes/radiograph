@@ -1,29 +1,33 @@
+{% load static from staticfiles %}
 <html>
-  <head>
-    <title>
-        {% block title %}Primate Radiograph Database - Terry Ritzman{% endblock %}
-    </title>
-    {% block header_resources %}
-    <link rel="stylesheet" href="/static/css/radiograph.css"/>
-    {% endblock %}
-  </head>
-  <body>
-    {% block header %}
-      <ul>
-      {% for item in mainmenu %}
-      <li><a href="{{ item.link }}">{{ item.label }}</a></li>  
-      {% endfor %}
-      </ul>
-    {% endblock %}
-    {% block content %}{% endblock %}
-    {% block footer %}{% endblock %}
-    {% block scripts %}
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js">type="text/javascript"></script>
-    <script src="/static/js/radiograph.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        require('bootstrap');
-    </script>
-    {% endblock %}
-  </body>
+    <head>
+        <title>
+            {% block title %}Primate Radiograph Database - Terry Ritzman{% endblock %}
+        </title>
+
+        {% block header_resources %}
+            <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+            <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css" rel="stylesheet">
+            <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+            <link href="{% static 'css/gen/radiograph.css' %}">
+        {% endblock %}
+    </head>
+    <body>
+        <div class="main-content-container">
+            {% block header %}
+                <ul>
+                    {% for item in mainmenu %}
+                        <li><a href="{{ item.link }}">{{ item.label }}</a></li>  
+                    {% endfor %}
+                </ul>
+            {% endblock %}
+            {% block content %}{% endblock %}
+            {% block footer %}{% endblock %}
+            {% block scripts %}
+                <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+                <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+                <script src="{% static 'js/radiograph.js' %}"></script>
+            {% endblock %}
+        </div>
+    </body>
 </html>

@@ -1,5 +1,6 @@
 {% extends "radiograph/base.html" %}
 {% load url from future %}
+{% load static from staticfiles %}
 
 {% block content %}
 
@@ -150,8 +151,8 @@
 
 {% block header_resources %}
 {{ block.super }}
-{# <link type="text/css" rel="stylesheet" href="/static/yui/build/treeview/assets/skins/sam/treeview.css"/> #}
-<link type="text/css" rel="stylesheet" href="static/css/radiograph.css"/>
+{# <link type="text/css" rel="stylesheet" href="{% static 'yui/build/treeview/assets/skins/sam/treeview.css' %}"/> #}
+<link type="text/css" rel="stylesheet" href={% static 'css/radiograph.css' %}"/>
 <style type="text/css">
 </style>
 {% endblock %}
@@ -201,11 +202,11 @@
 </script>
 
 <!--script type="text/javascript" 
-    src="/static/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+src="{% static 'yui/build/yahoo-dom-event/yahoo-dom-event.js' %}">
 </script>
 
 <script type="text/javascript"
-        src="/static/yui/build/treeview/treeview-min.js"></script>
+    src="{% static 'yui/build/treeview/treeview-min.js' %}"></script>
 
 <script type="text/javascript">
     var tv = new YAHOO.widget.TreeView("tree");
