@@ -40,6 +40,7 @@ def index(request):
 
 def specimens(request):
     # TODO: read initial values from user's session
+    search_form = forms.SpecimenSearchForm(request.REQUEST)
     return render(request, 'radiograph/specimen-list.html', {
             'search_form': forms.SpecimenSearchForm(request.GET)
         })
@@ -97,9 +98,8 @@ def image_file(request, image_id, derivative='full'):
         if not imgfile:
             raise http.Http404()
 
-        taxon = ' '.join([t.name for t in image.specimen.taxon.hierarchy if t.level >= 7])
         _, ext = os.path.splitext(imgfile.path)
-        filename = '%s-%s-%s-%s%s' % (taxon,
+        filename = '%s-%s-%s-%s%s' % (image.specimen.taxon.label,
                                       image.specimen.id,
                                       image.get_aspect_display(),
                                       derivative,
@@ -109,7 +109,8 @@ def image_file(request, image_id, derivative='full'):
         mime = mimetypes.guess_type(filepath)[0]
         response = http.HttpResponse(mimetype=mime)
         response['X-Sendfile'] = filepath            # for mod-xsendfile
-        response['X-Accel-Redirect'] = '/private-media/%s' % imgfile.path  # for nginx
+        response['X-Accel-Redirect'] = u'/private-media/{}'.format(imgfile.name) # for nginx
+        print 'X-Accel-Redirect: {}'.format(response['X-Accel-Redirect'])
 
         # Browsers seem to force a download for full images, due to their large
         # size, so set an appropriate descriptive filename.

@@ -8,9 +8,8 @@
     <div class="specimen-comments">{{ specimen.comments }}</div>
     <div class="specimen-images">
       {% for image in specimen.images.all %}
-      <a href="{% url image image.id 'medium' %}" style="text-decoration: none"
-        {#title="<img src='{% url image image.id "thumbnail" %}'/>">#}
-         title="<img src='http://placekitten.com/100/100'/>">
+      <a href="{% url 'image' image.id 'medium' %}" style="text-decoration: none"
+		 title="<img src='{% url 'image' image.id "thumbnail" %}'/>">
         {{ image.get_aspect_display }}
       </a>
       {% endfor %}

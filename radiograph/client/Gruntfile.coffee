@@ -6,7 +6,7 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files: [{
-          '../static/gen/js/radiograph.js': ['**/*.coffee'],
+          '../static/gen/js/radiograph.js': ['coffee/**/*.coffee'],
         }]
 
     less:

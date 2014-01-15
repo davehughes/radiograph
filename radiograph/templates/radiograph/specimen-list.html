@@ -1,46 +1,42 @@
 {% extends "radiograph/base.html" %}
 {% load url from future %}
 {% load static from staticfiles %}
+{% load paginate from radiograph %}
 
 {% block content %}
 
 <div id="results-target"></div>
 
-<div class="btn-toolbar">
-    <div class="btn-group">
-        <a class="btn btn-small" href="#">
-            <i class="icon-download"></i>
-            Download
-        </a>
-        <a class="btn btn-small show-modal" href="#">
-            Show Modal
-        </a>
-    </div>
-</div>
-
-<div class="container-fluid">
-    <div class="row-fluid">
+<div class="row">
+    <form class="search-form" method="GET">
         <div class="span12">
+
             <div class="pagination-toolbar">
-                <span class="pagination">
-                    {% include "radiograph/partials/pagination.html" with page=search_form.results_page %}
-                </span>
+
+                <ul class="pagination">
+                    {% for pnav in search_form.results_page|paginate %}
+                    <li {% if pnav.is_current %}class="active"{% endif %}>
+                                <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
 
                 {# Results per page selector #}
                 Showing 
-                <span class="dropdown">
+                <div class="results">
                     <a class="dropdown-toggle" data-toggle="dropdown">
                         <span class="results-per-page">20</span>
                         <span class="caret"></span>
                     </a>
                     
-                    <ul class="dropdown-menu">
-                        <li><a href="#">10</a></li>
-                        <li><a href="#">20</a></li>
-                        <li><a href="#">50</a></li>
-                        <li><a href="#">100</a></li>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#" data-value="10">10</a></li>
+                        <li><a href="#" data-value="20">20</a></li>
+                        <li><a href="#" data-value="50">50</a></li>
+                        <li><a href="#" data-value="100">100</a></li>
                     </ul>
-                </span> results per page
+                </div> results per page
+                <input type="hidden" name="results" value="{{ search_form.results.value }}"/>
 
                 {# Taxon Sort/Filter #}
                 <span class="dropdown">
@@ -49,13 +45,14 @@
                         <span class="caret"></span>
                     </a>
                     <div class="dropdown-menu">
-                        <h1>Surprise!!!</h1>
+                        <ul>
+                            <li>Tree</li>
+                            <li>Goes</li>
+                            <li>Here</li>
+                        </ul>
                     </div>
-                    <!--ul class="dropdown-menu">
-                        <li>Sort</li>
-                        <li>Filter</li>
-                    </ul-->
                 </span>
+                <input type="hidden" name="taxa" value="{{ search_form.taxa.value }}"/>
 
                 {# Sex Sort/Filter #}
                 <span class="dropdown">
@@ -84,19 +81,24 @@
                         </li>
                     </ul>
                 </span>
+                <input type="hidden" name="sex" value="{{ search_form.sex.value }}"/>
 
                 {# View Selector #}
-                <div class="btn-group">
-                    <a href="#" class="btn btn-small" title="Compact">
-                        <i class="icon-align-justify"></i>
+                <div class="btn-group select-view">
+                    <a href="#" title="Standard" data-value="standard" class="btn btn-small
+                        {% if search_form.view.value == 'standard' %}active{% endif %}">
+                        <i class="fa fa-th-list"></i>
                     </a>
-                    <a href="#" class="btn btn-small" title="Standard">
-                        <i class="icon-th-list"></i>
+                    <a href="#" title="Compact" data-value="compact" class="btn btn-small
+                        {% if search_form.view.value == 'compact' %}active{% endif %}">
+                        <i class="fa fa-align-justify"></i>
                     </a>
-                    <a href="#" class="btn btn-small" title="Tiled">
-                        <i class="icon-th"></i>
+                    <a href="#" title="Tiled" data-value="tiled" class="btn btn-small
+                        {% if search_form.view.value == 'tiled' %}active{% endif %}">
+                        <i class="fa fa-th"></i>
                     </a>
                 </div>
+                <input type="hidden" name="view" value="{{ search_form.view.value }}"/>
 
             </div>
 
@@ -109,7 +111,7 @@
                      <ul class="dropdown-menu">
                          <li>
                              <a href="#" class="item-selection-all">
-                                 <i class="icon-ok"></i>
+                                 <i class="fa fa-ok"></i>
                                  Select All
                              </a>
                          </li>
@@ -137,12 +139,8 @@
                   {% endwith %}
                 {% endfor %}
             </div>
-
-            <div class="pagination">
-                {% include "radiograph/partials/pagination.html" with page=search_form.results_page %}
-            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <div id="tree"></div>
@@ -150,70 +148,31 @@
 {% endblock %}
 
 {% block header_resources %}
-{{ block.super }}
-{# <link type="text/css" rel="stylesheet" href="{% static 'yui/build/treeview/assets/skins/sam/treeview.css' %}"/> #}
-<link type="text/css" rel="stylesheet" href={% static 'css/radiograph.css' %}"/>
-<style type="text/css">
-</style>
+    {{ block.super }}
+    {# <link type="text/css" rel="stylesheet" href="{% static 'yui/build/treeview/assets/skins/sam/treeview.css' %}"/> #}
 {% endblock %}
 
 {% block scripts %}
-{{ block.super }}
+    {{ block.super }}
 
-<script type="text/javascript">
-    $(function() {
-        var itemSelector = $('input.item-selector');
-        var itemSelections = $('input.item-selection');
-        var toggleItemSelection = function() {
-            return itemSelector.is(':checked') ? selectAll() : selectNone();
-        };
-        var selectAll = function() {
-            itemSelections.add(itemSelector).attr('checked', 'checked');
-        };
-        var selectNone = function() {
-            itemSelections.add(itemSelector).removeAttr('checked');
-        };
-        var invertSelection = function() {
-            itemSelections.each(function(idx, i) {
-                i = $(i);
-                if(i.is(':checked'))
-                    i.removeAttr('checked');
-                else
-                    i.attr('checked', 'checked');
-            });
-        };
-        $('input.item-selector').click(function(e) {
-            e.stopPropagation();
-            toggleItemSelection();
-        });
+    <script type="text/javascript">
+        var searchForm = new Radiograph.Views.SpecimenSearchForm({ el: 'form.search-form'});
+        searchForm.render();
+    </script>
 
-        $('.item-selection-all').click(function(e) { 
-            selectAll();
-            });
-        $('.item-selection-none').click(function(e) { 
-            selectNone();
-            });
-        $('.item-selection-invert').click(function(e) { 
-            invertSelection();
-            });
+    <!--script type="text/javascript" 
+    src="{% static 'yui/build/yahoo-dom-event/yahoo-dom-event.js' %}">
+    </script>
 
-        $('.specimen-result.results-compact .specimen-images a').tooltip({html: true});
-    });
-</script>
+    <script type="text/javascript"
+        src="{% static 'yui/build/treeview/treeview-min.js' %}"></script>
 
-<!--script type="text/javascript" 
-src="{% static 'yui/build/yahoo-dom-event/yahoo-dom-event.js' %}">
-</script>
-
-<script type="text/javascript"
-    src="{% static 'yui/build/treeview/treeview-min.js' %}"></script>
-
-<script type="text/javascript">
-    var tv = new YAHOO.widget.TreeView("tree");
-    var root = tv.getRoot();
-    var child1 = new YAHOO.widget.TextNode("Node 1", root, false);
-    var child2 = new YAHOO.widget.TextNode("Node 2", root, false);
-    tv.draw();
-</script-->
+    <script type="text/javascript">
+        var tv = new YAHOO.widget.TreeView("tree");
+        var root = tv.getRoot();
+        var child1 = new YAHOO.widget.TextNode("Node 1", root, false);
+        var child2 = new YAHOO.widget.TextNode("Node 2", root, false);
+        tv.draw();
+    </script-->
 {% endblock %}
 

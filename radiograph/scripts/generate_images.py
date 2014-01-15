@@ -86,7 +86,7 @@ def directory_to_s3(path, s3path):
                                        os.path.relpath(local_path, path))
             print 'Uploading {} -> {}'.format(local_path, remote_path)
             key = bucket.new_key(remote_path)
-            key.set_contents_from_filename(local_path)
+            key.set_contents_from_filename(local_path, replace=False)
 
 
 def get_file_hashes(path):

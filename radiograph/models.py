@@ -33,14 +33,18 @@ class DeletedMarkerManager(models.Manager):
     def get_query_set(self):
         return super(DeletedMarkerManager, self).get_query_set().filter(deleted=False)
 
+
 class DeletedObjectManager(models.Manager):
     def get_query_set(self):
         return super(DeletedObjectManager, self).get_query_set().filter(deleted=True)
 
 
-
 TAXON_LABEL_CACHE = None
 def taxon_label_cache():
+    '''
+    Walk taxon nodes below 'genus' level and cache a map of taxon_id -> label
+    so we don't need to walk this tree each time we display a specimen's taxon.
+    '''
     import radiograph.models
     if radiograph.models.TAXON_LABEL_CACHE is None:
         radiograph.models.TAXON_LABEL_CACHE = {
@@ -105,12 +109,13 @@ class Taxon(models.Model):
                               if t.level >= models.TaxonomyLevels.Genus])
         return label
 
+
 class Institution(models.Model):
     name = models.CharField(max_length=255)
     link = models.CharField(max_length=255, null=True)
     logo = models.FileField(upload_to='institutions', null=True)
 
-# Create your models here.
+
 class Specimen(models.Model):
 
     class SexChoices(Choices):
@@ -147,14 +152,7 @@ class Specimen(models.Model):
 
 
 class ImageManager(DeletedMarkerManager):
-
-    def generate_derivatives(self, tmpdir=None, regenerate=False):
-        tmpdir = tempfile.mkdtemp(dir=tmpdir)
-        for img in self.get_query_set():
-            try:
-                img.generate_derivatives(tmpdir=tmpdir, regenerate=regenerate)
-            except Exception as e:
-                print 'Error generating image derivatives: %s' % e
+    pass
 
 
 class Image(models.Model):
@@ -165,6 +163,8 @@ class Image(models.Model):
         Superior = C('S')
         Lateral  = C('L')
 
+    original_path = models.CharField(max_length=1024, null=True)
+    md5 = models.CharField(max_length=32, null=True)
     aspect = models.CharField(max_length=1, choices=AspectChoices.choices)
     specimen = models.ForeignKey('Specimen', related_name='images')
 
@@ -174,65 +174,3 @@ class Image(models.Model):
     image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True, blank=True)
 
     deleted = models.BooleanField(default=False)
-
-    def generate_derivatives(self, tmpdir=None, regenerate=False):
-        tmpdir = tmpdir or tempfile.mkdtemp()
-        
-        derivatives = [
-            ('image_thumbnail', 
-             ['-define', 'jpeg:size=300x300', 
-              '-rotate', '90',
-              '-resize', '150x150>']),
-              # '-thumbnail', '150x150>']),
-            ('image_medium', 
-             ['-resize', '1024x1024>', 
-              '-rotate', '90'])
-            ]
-
-        for attr, args in derivatives:
-            derivative = getattr(self, attr)
-            if (not derivative) or regenerate:
-                # write updated image to temp file
-                fd, resized_tmp = tempfile.mkstemp(suffix='.png', dir=tmpdir)
-                os.close(fd)
-
-                _imagemagick_convert(self.image_full.path, resized_tmp, args)
-
-                # clean up existing image
-                if derivative:
-                    path = derivative.path
-                    derivative.delete()
-                    if os.path.isfile(path):
-                        os.remove(path)
-
-                # set new image and save
-                setattr(self, attr, DjangoFile(open(resized_tmp, 'r'), 
-                                               '%s.png' % self.id))
-                self.save()
-
-                # finally, clean up the temporary image
-                if os.path.isfile(resized_tmp):
-                    os.remove(resized_tmp)
-
-def _imagemagick_convert(inpath, outpath, args=None):
-    
-    if not os.path.isfile(inpath):
-        LOG.warn('%s is not a file.', inpath)
-        return False
-    
-    command = ['convert', inpath]
-    command.extend(args)
-    command.append(outpath)
-    
-    LOG.debug('Calling imagemagick: %s.', command)
-
-    proc = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-    out, err = proc.communicate()
-    
-    if err:
-        LOG.error('Error calling imagemagick: %s', err)
-
-    return proc.returncode == 0

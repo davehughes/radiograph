@@ -65,7 +65,12 @@ MEDIA_URL = '/'
 
 STATIC_ROOT = SITE_ROOT_DIR + '/static'
 STATIC_URL = '/static/'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+# STATICFILES_STORAGE = 'radiograph.storage.S3StaticStorage'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3MediaStorage'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'primate-radiograph'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '429hkGZkIdZHfI1vdck9ZNvSXdM6pqKhmdhBUjX9XoUDdXUCXu'

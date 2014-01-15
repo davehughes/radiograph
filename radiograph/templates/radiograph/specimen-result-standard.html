@@ -5,8 +5,8 @@
   <li>
   <a href="{% url 'image' image.id 'medium' %}"
     style="text-decoration: none" title="{{ image.get_aspect_display }}">
-     <!--img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/-->
-     <img class="thumbnail" src="//placekitten.com/100/100"/>
+     <img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/>
+	 {# <img class="thumbnail" src="//placekitten.com/100/100"/> #}
   </a>
   </li>
   {% endfor %}

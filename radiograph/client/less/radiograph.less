@@ -1,426 +1,59 @@
 @import 'bootstrap/bootstrap';
 @import 'chosen.css.less';
-@import 'nv.d3.css.less';
-@import 'charts';
-
 
 body {
-    .container-fluid;
 }
 
-.main-content-container {
-    .row-fluid;
-    padding-left: 15%;
-    padding-right: 15%;
-    box-sizing: border-box;
-}
-
-.main-content {
-    // .row-fluid;
-    // .span(12);
-    // .offset(2);
-}
-
-.appview {
-    width: 950px;
-    margin: auto;
-    .box-shadow(0 0 40px 1px rgba(0,0,0,0.1));
-    padding: 10px;
-}
-
-.search-bar {
-    border-bottom: 1px solid #AAA;
-    box-shadow: 0px 0px 10px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px 0 0 10px;
-    background-color: rgba(0, 0, 0, 0.05);
-
-    .specimen-query {
-        display: inline;
-    }
-
-    .search-params {
-        display: inline-block;
-        margin-top: 8px;
-    }
-}
-
-.results-view {
-
-  // Add the 'loading' class to hide the results and display a loading dialog
-  .results-loading { display: none; }
-  .results-records { display: inherit; }
-
-  &.loading {
-    .results-loading { display: inherit; }
-    .results-records { display: none; }
-  }
-}
-
-.results-loading {
-    position: absolute;
-    width: 20%;
-    min-width: 10em;
-    left: 40%;
-    top: 40%;
-    padding: 1em;
-
-    border-radius: 5px;
-    border: 2px solid #AAA;
-    background-color: rgba(0, 0, 0, 0.1);
-    font-weight: bold;
-    text-align: center;
-}
-
-.specimen-list-item {
-    clear: both;
-
-    .images {
-        float: right;
+.about-us {
+    img {
+        float: left;
+        margin: 0.5em 1em;
+        display: none;
     }
 }
 
 .specimen-result {
-    img.specimen-image {
-        box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.1);
-        margin: 10px 0px 10px 4px;
-        .border-radius(5px);
-        background-color: whiteSmoke;
-        padding: 3px;
-    }
-}
-
-ul.specimen-result-images {
-    display: inline-block;
-    
-    li {
-        display: inline-block;
-    }
-}
-
-.specimen-metadata {
-  di { 
-    margin-bottom: 0.25em;
-    display: block;
-    &:nth-child(odd) {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-  }
-
-  dt {
-    width: 8em;
-    text-align: right;
-    padding-right: 1em;
-    display: inline-block;
-  }
-
-  dd { display: inline-block; }
-}
-
-.specimen-result.tile {
-  box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.1);
-  padding: 5px 15px 15px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  .makeColumn(3);
-  .item-selection { display: none; }
-
-  .images {
-    position: relative;
-  }
-
-  .overlay {
-    display: none;
-    position: absolute;
-    top: 0px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 5px;
-
-    &.active {
-        display: inherit;
-    }
-  }
-}
-
-.specimen-result-row {
-  .image-lateral, .image-superior {
-    display: inline;
-    img {
-      width: 75px;
-    }
-  }
-}
-
-// Show/hide images based on container view settings
-.specimen-results .superior { .specimen-image.lateral { display: none; } }
-
-
-.specimen-image-detail {
-  // Show image label on hover
-  h4 { visibility: hidden; }
-  &:hover h4 { visibility: visible; }
-
-  display: inline-block;
-  width: 48%;
-  text-align: center;
-  img {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 0.5em;
-    box-shadow: 4px 4px 9px 3px rgba(0, 0, 0, 0.1);
-  }
-
-  img.rot90 {
-    .rotate(90deg);
-    box-shadow: 4px -4px 9px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  img.rot180 {
-    .rotate(180deg);
-    box-shadow: -4px -4px 9px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  img.rot270 {
-    .rotate(270deg);
-    box-shadow: -4px 4px 9px 3px rgba(0, 0, 0, 0.1);
-  }
-}
-
-
-.slideContainer {
-  overflow: hidden;
-}
-
-ul.slides {
-  position: relative;
-  overflow: hidden;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 300%;
-
-  li {
-    float: left;
-    width: 33%;
-  }
-}
-
-.blurred {
-  .opacity(50);
-  img {
-    .opacity(30);
-  }
-  * {
-    text-shadow: 0 0 5px rgba(51, 51, 51, 0.9);
-    color: rgba(51, 51, 51, 0);
-  }
-
-}
-
-
-#taxon-filter-tree {
-    .ygtvlabel {
-        margin-left: 6px;
-        background-color: transparent;
-    }
-}
-
-// Specimen edit controls
-input {
-    box-sizing: content-box;
-}
-
-.form-horizontal .control-group {
-    margin-bottom: 9px;
-}
-
-[name=institution],
-[name=sex],
-[name=specimenId],
-[name=taxon] {
-    width: 300px;
-}
-
-[name=comments],
-[name=settings] {
-    width: 642px;
-}
-
-.submission-status {
-    margin-bottom: 8px;
-    margin-top: -8px;
-}
-
-.control-group.specimen-id {
-    input { width: 290px; }
-}
-
-.control-group.measurements {
-    .control-label {
-        margin-top: 16px;
-    }
-
-    th {
-        font-size: 12px;
-    }
-
-    td input {
-        width: 90px;
-        text-align: right;
-        &[name=neurocranial-height] { width: 120px; }
-    }
-}
-
-.image-view {
-    width: 642px;
-    padding-bottom: 2px;
-    margin-bottom: 2px;
-    border-bottom: 1px solid #DDD;
-
-    [rel=remove-image] {
-        .opacity(40);
-        float: right;
-        margin-top: 8px;
-        margin-right: 8px;
-
-        &:hover {
-            .opacity(100);
-        }
-    }
-}
-
-// hidden file inputs
-.fileinput-button {
-  position: relative;
-  overflow: hidden;
-  /* float: left; */
-  margin-right: 4px;
-  .ie7-inline-block;
-  display: inline-block;
-}
-
-.fileinput-button input {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 100px 200px;
-  .opacity(0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  cursor: pointer;
-}
-
-/* Fix for IE 6: */
-*html .fileinput-button {
-  line-height: 22px;
-  margin: 1px -3px 0 0;
-}
-
-/* Fix for IE 7: */
-*+html .fileinput-button {
-  margin: 1px 0 0 0;
-}
-
-// Cosmetic changes to chosen
-.control-group {
-    .chzn-single {
-        height: 26px;
-        background-image: none;
-        box-shadow: none;
-        border-radius: 3px;
-        border-color: #CCC;
-    }
-}
-
-// Login modal
-.login-form {
-    .modal-footer {
-        margin-top: 0;
-        text-align: center;
-    }
-}
-
-// Search form and filtering
-.specimen-query {
-    input {
-        padding-right: 24px;
-        padding-left: 4px;
-    }
-    i {
-        margin-left: -24px;
-        margin-top: -2px;
-        .opacity(30);
-        &:hover {
-          .opacity(100);
-          cursor: pointer;
-        }
-    }
-}
-
-.filter-section {
-    margin-left: 15px;
-    margin-top: 15px;
-    h4 {
-        border-bottom: 1px solid #DDD;
-    }
-}
-
-.pagination {
-    margin: 0 4px;
-    text-align: center;
-
-    a {
-        padding: 0 12px;
-        line-height: 28px;
-    }
-}
-
-table {
-    font-size: 14px;
-}
-
-.search-params {
-    .dropdown, .sort-direction-toggle {
-        .border-radius(8px);
-        background-color: #EEE;
-        padding: 4px 4px 4px 8px;
-        margin-right: 4px;
-        cursor: pointer;
-    }
-}
-
-// Specimen detail
-.specimen-detail {
-    h1,h2,h3,h4,h5,h6 { margin-left: 160px; }
-    .specimen-images {
-        margin-left: 140px;
-        img {
-            padding: 10px 20px;
-        }
-    }
-}
-
-.specimen-field {
-    clear: both;
-    .header {
+    &.tile {
+        width: 33%;
         float: left;
-        width: 140px;
-        text-align: right;
-        margin-right: 20px;
-        font-weight: bold;
-        margin-bottom: 8px;
+        margin: 20px 0;
+        border-radius: 10px;
+
+        img {
+            border-radius: 10px;
+        }
+
+        .item-selection {
+            float: left;
+        }
+        .taxon {
+            font-style: italic;
+        }
+        .institution {
+        }
+
+        .overlay-top, .overlay-bottom {
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 8px;
+            text-align: center;
+        }
     }
 }
 
-// Charting SVG styles
+.overlay-container {
+    position: relative;
+}
 
-.voronoi-polygons {
-    polygon {
-        fill: transparent;
-        stroke: transparent;
+.overlay-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
 
-        &:hover { fill: red; }
-    }
+.overlay-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }

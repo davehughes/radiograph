@@ -7,3 +7,4 @@ radiograph/apache.conf
 radiograph/client/node_modules/
 zipper/node_modules/
 env/
+xrays-converted/
