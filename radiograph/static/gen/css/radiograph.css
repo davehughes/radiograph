@@ -6373,19 +6373,31 @@ td.visible-print {
   direction: rtl;
 }
 /* @end */
+body {
+  background-image: url(/static/img/backgrounds/handmadepaper.png);
+}
 .about-us img {
   float: left;
   margin: 0.5em 1em;
   display: none;
 }
+a {
+  text-decoration: none;
+}
 .specimen-result.tile {
-  width: 33%;
+  width: 28%;
   float: left;
-  margin: 20px 0;
+  margin: 20px 2%;
   border-radius: 10px;
+  color: #428bca;
+}
+.specimen-result.tile:hover {
+  box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
 }
 .specimen-result.tile img {
-  border-radius: 10px;
+  width: 100%;
+  border-left: 1px solid #AAA;
+  border-right: 1px solid #AAA;
 }
 .specimen-result.tile .item-selection {
   float: left;
@@ -6395,22 +6407,42 @@ td.visible-print {
 }
 .specimen-result.tile .overlay-top,
 .specimen-result.tile .overlay-bottom {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(66, 139, 202, 0.1);
+  border: 1px solid #428bca;
+  text-shadow: 0px 2px 3px white;
+  font-weight: bold;
   padding: 8px;
   text-align: center;
 }
+.specimen-result.tile .overlay-top {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.specimen-result.tile .overlay-bottom {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.specimen-result.standard .specimen-images a,
+.specimen-result.standard .specimen-details {
+  display: inline-block;
+}
+.specimen-result.compact {
+  height: 50px;
+  border-radius: 8px;
+  margin-bottom: 3px;
+  background-color: #F6F6F6;
+}
+.specimen-result.compact > div {
+  display: inline-block;
+}
+.specimen-result.compact:hover {
+  box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.specimen-result.compact input.item-selection {
+  display: inline-block;
+  margin: 10px;
+}
 .overlay-container {
   position: relative;
-}
-.overlay-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-.overlay-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }

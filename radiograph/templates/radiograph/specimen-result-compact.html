@@ -1,11 +1,10 @@
-<div class="specimen-result results-compact" style="clear: both;">
+{% load static from staticfiles %}
 
-  <div class="specimen-result-details" style="display: inline-block">
-    <div class="specimen-id">{{ specimen.specimen_id }}</div>
-    <div class="specimen-taxon" style="font-style: italic">{{ specimen.taxon.label }}</div>
-    <div class="specimen-sex">{{ specimen.sex }}</div>
-    <div class="specimen-settings">{{ specimen.settings }}</div>
-    <div class="specimen-comments">{{ specimen.comments }}</div>
+<div class="specimen-result compact" style="clear: both;">
+
+	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
+
+	{% comment %}
     <div class="specimen-images">
       {% for image in specimen.images.all %}
       <a href="{% url 'image' image.id 'medium' %}" style="text-decoration: none"
@@ -14,6 +13,47 @@
       </a>
       {% endfor %}
     </div>
-  </div>
+	{% endcomment %}
 
+    <div class="specimen-images">
+	  <a href="#" style="text-decoration: none">
+		 <img src="{% static 'img/sample-lateral-thumbnail.png' %}" height="45px" />
+      </a>
+	  <a href="#" style="text-decoration: none">
+		 <img src="{% static 'img/sample-superior-thumbnail.png' %}" height="45px" />
+      </a>
+    </div>
+
+	<div>
+		<span class="specimen-taxon" style="font-style: italic">{{ specimen.taxon.label }}</span>
+	</div>
+	<div>
+		<span class="specimen-sex">{{ specimen.sex }}</span>
+	</div>
+	<div>
+		<span class="specimen-institution">{{ specimen.institution.name }}</span>
+		<span class="specimen-id">{{ specimen.specimen_id }}</span>
+	</div>
+	<div>
+		<span class="skull-length">{{ specimen.skull_length|default:"-" }}</span>
+	</div>
+	<div>
+		<span class="cranial-width">{{ specimen.cranial_width|default:"-" }}</span>
+	</div>
+	<div>
+		<span class="neurocranial-height">{{ specimen.neurocranial_height|default:"-" }}</span>
+	</div>
+	<div>
+		<span class="facial-height">{{ specimen.facial_height|default:"-" }}</span>
+	</div>
+	<div>
+		<span class="palate-length">{{ specimen.palate_length|default:"-" }}</span>
+	</div>
+	<div>
+		<span class="palate-width">{{ specimen.palate_width|default:"-" }}</span>
+	</div>
+	{% comment %}
+    <div class="specimen-settings">{{ specimen.settings }}</div>
+    <div class="specimen-comments">{{ specimen.comments }}</div>
+	{% endcomment %}
 </div>

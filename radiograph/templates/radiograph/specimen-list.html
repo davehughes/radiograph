@@ -131,13 +131,19 @@
                  </span>
             </div>
             <div class="search-results">
-                {% for specimen in search_form.results_page.object_list %}
-                  {% with search_form.view.value|default:search_form.view.field.initial as result_view %}
-                    {% with "radiograph/specimen-result-"|add:result_view|add:".html" as result_template %}
-                    {% include result_template %}
+                {% with search_form.view.value|default:search_form.view.field.initial as result_view %}
+                    {% comment %}
+                    {% with "radiograph/specimen-result-header-"|add:result_view|add:".html" as result_header_template %}
+                    {% include result_header_template %}
                     {% endwith %}
-                  {% endwith %}
-                {% endfor %}
+                    {% endcomment %}
+
+                    {% for specimen in search_form.results_page.object_list %}
+                        {% with "radiograph/specimen-result-"|add:result_view|add:".html" as result_template %}
+                        {% include result_template %}
+                        {% endwith %}
+                    {% endfor %}
+                {% endwith %}
             </div>
         </div>
     </form>

@@ -1,25 +1,41 @@
-<div class="specimen-result">
+{% load static from staticfiles %}
 
-<ul class="specimen-result-images media-grid">
-  {% for image in specimen.images.all %}
-  <li>
-  <a href="{% url 'image' image.id 'medium' %}"
-    style="text-decoration: none" title="{{ image.get_aspect_display }}">
-     <img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/>
-	 {# <img class="thumbnail" src="//placekitten.com/100/100"/> #}
-  </a>
-  </li>
-  {% endfor %}
-</ul>
+<div class="specimen-result standard">
 
-  <h4>
-    <span class="taxon-label" style="font-style: italic">
-      {{ specimen.taxon.label }}
-    </span>
-    - {{ specimen.specimen_id }}
-  </h4>
-  <div class="specimen-sex">{{ specimen.sex }}</div>
-  <div class="specimen-settings">{{ specimen.settings|default:"Unspecified/Unknown" }}</div>
-  <div class="specimen-comments">{{ specimen.comments }}</div>
+	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
+
+	{% comment %}
+	{% for image in specimen.images.all %}
+	<li>
+		<a href="{% url 'image' image.id 'medium' %}" title="{{ image.get_aspect_display }}">
+		   <img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/>
+		</a>
+	</li>
+	{% endfor %}
+	{% endcomment %}
+
+	<div class="specimen-images">
+		<a href="#">
+		   <img class="thumbnail" src="{% static 'img/sample-lateral-thumbnail.png' %}"/>
+		</a>
+
+		<a href="#">
+		   <img class="thumbnail" src="{% static 'img/sample-superior-thumbnail.png' %}"/>
+		</a>
+	</div>
+
+	<div class="specimen-details">
+		<h4>
+			<span class="taxon-label" style="font-style: italic">
+			  {{ specimen.taxon.label }}
+			</span>
+			- 
+			<span class="specimen-institution">{{ specimen.institution.name }}</span>
+			<span class="specimen-id">{{ specimen.specimen_id }}</span>
+		</h4>
+		<div class="specimen-sex">{{ specimen.sex }}</div>
+		<div class="specimen-settings">{{ specimen.settings|default:"Unspecified/Unknown" }}</div>
+		<div class="specimen-comments">{{ specimen.comments }}</div>
+	</div>
 
 </div>
