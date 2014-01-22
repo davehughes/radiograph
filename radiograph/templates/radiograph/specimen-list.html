@@ -7,21 +7,72 @@
 
 <div id="results-target"></div>
 
-<div class="row">
+<div class="row panel panel-default">
     <form class="search-form" method="GET">
         <div class="span12">
 
-            <div class="pagination-toolbar">
+            <div class="search-results-header row panel-heading">
+                <div class="search-results-header col-md-2">
+                     <span class="dropdown">
+                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                             <input type="checkbox" class="item-selector"/>
+                             <span class="caret"></span>
+                         </a>
+                         <ul class="dropdown-menu">
+                             <li>
+                                 <a href="#" class="item-selection-all">
+                                     <i class="fa fa-ok"></i>
+                                     Select All
+                                 </a>
+                             </li>
+                             <li>
+                                 <a href="#" class="item-selection-none">
+                                     <i class="icon-remove"></i>
+                                     Select None
+                                 </a>
+                             </li>
+                             <li>
+                                 <a href="#" class="item-selection-invert">
+                                     <i class="icon-resize-full"></i>
+                                     Invert Selection
+                                 </a>
+                             </li>
+                         </ul>
+                     </span>
+                </div>
 
-                <ul class="pagination">
-                    {% for pnav in search_form.results_page|paginate %}
-                    <li {% if pnav.is_current %}class="active"{% endif %}>
-                                <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <div class="pagination-toolbar col-md-6">
+
+                    <ul class="pagination">
+                        {% for pnav in search_form.results_page|paginate %}
+                        <li {% if pnav.is_current %}class="active"{% endif %}>
+                                    <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="col-md-3 pull-right">
+                    {# View Selector #}
+                    <div class="btn-group select-view">
+                        <a href="#" title="Standard" data-value="standard" class="btn btn-small
+                            {% if search_form.view.value == 'standard' %}active{% endif %}">
+                            <i class="fa fa-th-list"></i>
+                        </a>
+                        <a href="#" title="Compact" data-value="compact" class="btn btn-small
+                            {% if search_form.view.value == 'compact' %}active{% endif %}">
+                            <i class="fa fa-align-justify"></i>
+                        </a>
+                        <a href="#" title="Tiled" data-value="tiled" class="btn btn-small
+                            {% if search_form.view.value == 'tiled' %}active{% endif %}">
+                            <i class="fa fa-th"></i>
+                        </a>
+                    </div>
+                    <input type="hidden" name="view" value="{{ search_form.view.value }}"/>
+                </div>
 
                 {# Results per page selector #}
+                {% comment %}
                 Showing 
                 <div class="results">
                     <a class="dropdown-toggle" data-toggle="dropdown">
@@ -82,55 +133,11 @@
                     </ul>
                 </span>
                 <input type="hidden" name="sex" value="{{ search_form.sex.value }}"/>
-
-                {# View Selector #}
-                <div class="btn-group select-view">
-                    <a href="#" title="Standard" data-value="standard" class="btn btn-small
-                        {% if search_form.view.value == 'standard' %}active{% endif %}">
-                        <i class="fa fa-th-list"></i>
-                    </a>
-                    <a href="#" title="Compact" data-value="compact" class="btn btn-small
-                        {% if search_form.view.value == 'compact' %}active{% endif %}">
-                        <i class="fa fa-align-justify"></i>
-                    </a>
-                    <a href="#" title="Tiled" data-value="tiled" class="btn btn-small
-                        {% if search_form.view.value == 'tiled' %}active{% endif %}">
-                        <i class="fa fa-th"></i>
-                    </a>
-                </div>
-                <input type="hidden" name="view" value="{{ search_form.view.value }}"/>
+                {% endcomment %}
 
             </div>
-
-            <div class="search-results-header">
-                 <span class="dropdown">
-                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                         <input type="checkbox" class="item-selector"/>
-                         <span class="caret"></span>
-                     </a>
-                     <ul class="dropdown-menu">
-                         <li>
-                             <a href="#" class="item-selection-all">
-                                 <i class="fa fa-ok"></i>
-                                 Select All
-                             </a>
-                         </li>
-                         <li>
-                             <a href="#" class="item-selection-none">
-                                 <i class="icon-remove"></i>
-                                 Select None
-                             </a>
-                         </li>
-                         <li>
-                             <a href="#" class="item-selection-invert">
-                                 <i class="icon-resize-full"></i>
-                                 Invert Selection
-                             </a>
-                         </li>
-                     </ul>
-                 </span>
-            </div>
-            <div class="search-results">
+            
+            <div class="search-results panel-body">
                 {% with search_form.view.value|default:search_form.view.field.initial as result_view %}
                     {% comment %}
                     {% with "radiograph/specimen-result-header-"|add:result_view|add:".html" as result_header_template %}
@@ -144,6 +151,19 @@
                         {% endwith %}
                     {% endfor %}
                 {% endwith %}
+            </div>
+            
+            <div class="search-results-footer row">
+                <div class="pagination-toolbar col-md-6">
+
+                    <ul class="pagination">
+                        {% for pnav in search_form.results_page|paginate %}
+                        <li {% if pnav.is_current %}class="active"{% endif %}>
+                            <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </form>
