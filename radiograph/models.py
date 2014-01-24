@@ -18,13 +18,13 @@ LOG = logging.getLogger(__name__)
 # Animalia -> Chordata -> Mammalia -> Primates
 
 class TaxonomyLevels(Choices):
-    Kingdom     = C(0, 'Kingdom')
-    Phylum      = C(1, 'Phylum')
-    Class       = C(2, 'Class')
-    Order       = C(3, 'Order')
-    Suborder    = C(4, 'Suborder')
-    Family      = C(5, 'Family')
-    Subfamily   = C(6, 'Subfamily')
+    # Kingdom     = C(0, 'Kingdom')
+    # Phylum      = C(1, 'Phylum')
+    # Class       = C(2, 'Class')
+    # Order       = C(3, 'Order')
+    # Suborder    = C(4, 'Suborder')
+    # Family      = C(5, 'Family')
+    # Subfamily   = C(6, 'Subfamily')
     Genus       = C(7, 'Genus')
     Species     = C(8, 'Species')
     Subspecies  = C(9, 'Subspecies')
@@ -127,7 +127,7 @@ class Specimen(models.Model):
 
     specimen_id = models.CharField(max_length=255, null=True, verbose_name='Specimen ID')
     taxon = models.ForeignKey('Taxon', related_name='specimens')
-    institution = models.ForeignKey('Institution', related_name='specimens')
+    institution = models.ForeignKey('Institution', related_name='specimens', null=True)
     sex = models.CharField(max_length=10, choices=SexChoices.choices, null=True)
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
@@ -166,7 +166,7 @@ class Image(models.Model):
     original_path = models.CharField(max_length=1024, null=True)
     md5 = models.CharField(max_length=32, null=True)
     aspect = models.CharField(max_length=1, choices=AspectChoices.choices)
-    specimen = models.ForeignKey('Specimen', related_name='images')
+    specimen = models.ForeignKey('Specimen', related_name='images', null=True)
 
     # image and derivative files
     image_full = models.FileField(upload_to='images/full', max_length=1024)
