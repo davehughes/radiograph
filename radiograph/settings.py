@@ -1,6 +1,6 @@
 import os
 
-SITE_ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+SITE_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -56,14 +56,14 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/mnt/storage/radiograph/media'
+MEDIA_ROOT = os.path.join(SITE_ROOT_DIR, 'files/media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/'
 
-STATIC_ROOT = SITE_ROOT_DIR + '/static'
+STATIC_ROOT = os.path.join(SITE_ROOT_DIR, 'files/static')
 STATIC_URL = '/static/'
 # STATICFILES_STORAGE = 'radiograph.storage.S3StaticStorage'
 
