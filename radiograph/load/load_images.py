@@ -53,17 +53,3 @@ def get_images_missing_specimens():
 
     missing_ids = set(ids) - set(existing_ids)
     return [x for x in images if x.get('specimen_id') in missing_ids]
-
-def load_images_to_db():
-    recs = load_image_records()
-    for rec in recs:
-        if 'specimen_id' not in rec:
-            continue
-        specimen = Specimen.objects.filter(specimen_id=rec['specimen_id'])[0]
-        if specimen.images.filter(aspect=rec['aspect']).count() > 0:
-            # raise Exception('An image with that aspect already exists')
-            print 'Skipping specimen image with existing aspect'
-            
-        image = Image(aspect=rec['aspect'], specimen=specimen)
-        image.image_full.name = rec['path']
-        image.save()

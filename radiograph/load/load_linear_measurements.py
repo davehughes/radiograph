@@ -3,9 +3,12 @@ from decimal import Decimal
 import json
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db import transaction
+
 import pysolr
 from radiograph import models
+
 
 SPECIMENS_CSV = 'data/linear-measurements.csv'
 IMAGES_JSON = 'data/specimen-images.json'
@@ -126,6 +129,10 @@ def ingest_images(input_file=None):
                 specimen=specimen,
             )))
         if created:
+            image.image_full.name = img['full']
+            image.image_medium.name = img['medium']
+            image.image_thumbnail.name = img['thumbnail']
+            image.save()
             images.append(image)
 
     return images

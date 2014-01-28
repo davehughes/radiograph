@@ -5,6 +5,7 @@ import tempfile
 
 from django.contrib.auth.models import User
 from django.core.files import File as DjangoFile
+from django.core.files.storage import default_storage
 from django.db import models
 from djchoices import DjangoChoices as Choices, C
 
@@ -169,8 +170,8 @@ class Image(models.Model):
     specimen = models.ForeignKey('Specimen', related_name='images', null=True)
 
     # image and derivative files
-    image_full = models.FileField(upload_to='images/full', max_length=1024)
-    image_medium = models.FileField(upload_to='images/medium', null=True, blank=True)
-    image_thumbnail = models.FileField(upload_to='images/thumbnail', null=True, blank=True)
+    image_full = models.FileField(max_length=1024, storage=default_storage)
+    image_medium = models.FileField(null=True, blank=True, storage=default_storage)
+    image_thumbnail = models.FileField(null=True, blank=True, storage=default_storage)
 
     deleted = models.BooleanField(default=False)
