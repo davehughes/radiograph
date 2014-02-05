@@ -7,8 +7,9 @@
 		(<span class="sex">{{ specimen.get_sex_display }}</span>)
 	</div>
     <div class="images">
-        <!--img class="specimen-image lateral" src='http://placekitten.com/140/140' title="Lateral View"/-->
-		<img class="specimen-image superior" src="{% static 'img/sample-superior-medium.png' %}" title="Superior View"/>
+        {% for image in specimen.images.all %}
+        <img class="specimen-image superior" src="{{ image.image_medium.url }}" title="{{ image.get_aspect_display }} View"/>
+        {% endfor %}
     </div>
 	<div class="overlay-bottom">
 		<span class="institution">{{ specimen.institution.name }}</span>

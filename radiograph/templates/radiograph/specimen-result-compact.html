@@ -1,20 +1,19 @@
 {% load static from staticfiles %}
+{% load radiograph %}
 
 <div class="specimen-result compact" style="clear: both;">
 
 	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
 
-	{% comment %}
     <div class="specimen-images">
       {% for image in specimen.images.all %}
-      <a href="{% url 'image' image.id 'medium' %}" style="text-decoration: none"
-		 title="<img src='{% url 'image' image.id "thumbnail" %}'/>">
-        {{ image.get_aspect_display }}
+      <a href="#" style="text-decoration: none" title="">
+          <img src="{{ image.image_medium.url }}" height="45px" />
       </a>
       {% endfor %}
     </div>
-	{% endcomment %}
 
+	{% comment %}
     <div class="specimen-images">
 	  <a href="#" style="text-decoration: none">
 		 <img src="{% static 'img/sample-lateral-thumbnail.png' %}" height="45px" />
@@ -23,6 +22,7 @@
 		 <img src="{% static 'img/sample-superior-thumbnail.png' %}" height="45px" />
       </a>
     </div>
+	{% endcomment %}
 
 	<div>
 		<span class="specimen-taxon" style="font-style: italic">{{ specimen.taxon.label }}</span>

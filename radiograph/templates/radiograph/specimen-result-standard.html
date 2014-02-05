@@ -4,16 +4,15 @@
 
 	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
 
-	{% comment %}
 	{% for image in specimen.images.all %}
 	<li>
-		<a href="{% url 'image' image.id 'medium' %}" title="{{ image.get_aspect_display }}">
-		   <img class="thumbnail" src="{% url 'image' image.id 'thumbnail' %}"/>
+		<a href="#" title="{{ image.get_aspect_display }}">
+            <img class="thumbnail" src="{{ image.image_thumbnail.url }}"/>
 		</a>
 	</li>
 	{% endfor %}
-	{% endcomment %}
 
+    {% comment %}
 	<div class="specimen-images">
 		<a href="#">
 		   <img class="thumbnail" src="{% static 'img/sample-lateral-thumbnail.png' %}"/>
@@ -23,6 +22,7 @@
 		   <img class="thumbnail" src="{% static 'img/sample-superior-thumbnail.png' %}"/>
 		</a>
 	</div>
+    {% endcomment %}
 
 	<div class="specimen-details">
 		<h4>
