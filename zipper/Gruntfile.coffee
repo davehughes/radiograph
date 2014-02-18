@@ -6,15 +6,15 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files: 
-          'js/server.js': 'src/server.coffee'
-          'js/run.js': 'src/run.coffee'
+          'js/server.js': 'coffee/server.coffee'
+          'js/run.js': 'coffee/run.coffee'
 
     watch:
       options:
         livereload: true
 
       coffee:
-        files: 'src/**/*.coffee'
+        files: 'coffee/**/*.coffee'
         tasks: ['coffee']
 
   grunt.loadNpmTasks('grunt-contrib-coffee')

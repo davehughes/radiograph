@@ -156,6 +156,10 @@ class ImageManager(DeletedMarkerManager):
     pass
 
 
+def no_uploads(*args, **kwargs):
+    raise NotImplementedError('Image uploads are disabled')
+
+
 class Image(models.Model):
     objects = ImageManager()
     deleted = DeletedObjectManager()
@@ -170,8 +174,8 @@ class Image(models.Model):
     specimen = models.ForeignKey('Specimen', related_name='images', null=True)
 
     # image and derivative files
-    image_full = models.FileField(max_length=1024, storage=default_storage)
-    image_medium = models.FileField(null=True, blank=True, storage=default_storage)
-    image_thumbnail = models.FileField(null=True, blank=True, storage=default_storage)
+    image_full = models.FileField(max_length=1024, upload_to=no_uploads, storage=default_storage)
+    image_medium = models.FileField(null=True, blank=True, upload_to=no_uploads, storage=default_storage)
+    image_thumbnail = models.FileField(null=True, blank=True, upload_to=no_uploads, storage=default_storage)
 
     deleted = models.BooleanField(default=False)

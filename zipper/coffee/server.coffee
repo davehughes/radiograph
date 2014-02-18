@@ -10,18 +10,33 @@ _ = require 'lodash'
 #---------------------------------
 # Configuration and static setup
 #---------------------------------
-filesConfigRoot = '/tmp'
-awsConfigFile = 'aws.conf'
+app = express()
 
-AWS.config.loadFromPath(awsConfigFile)
-S3 = new AWS.S3()
-bucket = 'primate-radiograph'
+run = ->
+  app.listen(app.get('port'))
+  return app
+
+defaults =
+  port: 8001
+  filesConfigRoot: '/tmp/zipper'
+  awsConfigFile: 'aws.conf'
+
+configure = (opts) ->
+  opts = _.extend {}, defaults, opts
+  for k, v of opts
+    app.set(k, v)
+
+  AWS.config.loadFromPath(app.get('awsConfigFile'))
+  app.set('s3', new AWS.S3())
+  return app
+
 
 READ_STREAM_CREATORS =
   s3: (src, dest, opts) ->
     getOpts =
       Bucket: opts.bucket
       Key: src
+    S3 = app.get('s3')
     instream = S3.getObject(getOpts).createReadStream()
     return instream
 
@@ -70,46 +85,15 @@ sampleConfigs = [{
     ]
   }]
 
-
-listBucket = (bucket, prefix, cb) ->
-  opts =
-    Bucket: bucket
-    Prefix: prefix
-
-  keys = []
-  
-  handleObjects = (e, data) ->
-    if e
-      return cb(e, null)
-
-    Array::push.apply keys, data.Contents
-
-    if data.IsTruncated
-      opts.Marker = data.NextMarker or data.Contents[data.Contents.length - 1].Key
-      S3.listObjects opts, handleObjects
-    else
-      return cb(null, keys)
-
-  S3.listObjects opts, handleObjects
-
-
-printBucketList = (bucket, prefix) ->
-  listBucket bucket, prefix, (e, data) ->
-    if e
-      console.log e
-    console.log data
-
-
 #-------------------------------------------------
 # Express application configuration and handlers
 #-------------------------------------------------
-app = express()
 app.get '/:zipId', (req, res) ->
   console.log 'in request'
 
   # Try to load file based on zip ID, 404 if it isn't found
   try
-    config = require("#{filesConfigRoot}/#{req.params.zipId}.json")
+    config = require("#{app.get('filesConfigRoot')}/#{req.params.zipId}.json")
     console.log "loaded config: #{JSON.stringify(config)}"
   catch err
     console.log err
@@ -126,8 +110,6 @@ app.get '/:zipId', (req, res) ->
 
 _.extend module.exports, {
   app
-
-  # DEBUG, remove these
-  printBucketList
-  zipToFile
+  configure
+  run
   }
