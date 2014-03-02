@@ -6,12 +6,8 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files: 
-          'server.js': 'src/server.coffee'
-
-    # uglify:
-    #   build:
-    #     src: '../static/gen/js/*.js'
-    #     dest: '../static/gen/js/all.min.js'
+          'js/server.js': 'src/server.coffee'
+          'js/run.js': 'src/run.coffee'
 
     watch:
       options:

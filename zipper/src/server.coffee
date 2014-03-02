@@ -2,7 +2,7 @@ async = require 'async'
 express = require 'express'
 fs = require 'fs'
 grunt = require 'grunt'
-archiver = require 'archiver'
+archiver = require 'node-archiver'
 AWS = require 'aws-sdk'
 _ = require 'lodash'
 
