@@ -133,6 +133,10 @@ class Specimen(models.Model):
     settings = models.TextField(null=True)
     comments = models.TextField(null=True)
 
+    # images
+    image_lateral = models.ForeignKey('Image', null=True, related_name='+')
+    image_superior = models.ForeignKey('Image', null=True, related_name='+')
+
     # cranial measurements
     skull_length = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     cranial_width = models.DecimalField(max_digits=10, decimal_places=2, null=True)
