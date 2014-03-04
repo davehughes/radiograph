@@ -7,9 +7,11 @@
 		(<span class="sex">{{ specimen.get_sex_display }}</span>)
 	</div>
     <div class="images">
-        {% for image in specimen.images.all %}
-        <img class="specimen-image superior" src="{{ image.image_medium.url }}" title="{{ image.get_aspect_display }} View"/>
-        {% endfor %}
+        {% if aspect == 'superior' %}
+        <img class="specimen-image superior" src="{{ specimen.image_superior.image_medium.url }}" title="{{ specimen.image_superior.get_aspect_display }} View"/>
+        {% else %}
+        <img class="specimen-image lateral" src="{{ specimen.image_lateral.image_medium.url }}" title="{{ specimen.image_lateral.get_aspect_display }} View"/>
+        {% endif %}
     </div>
 	<div class="overlay-bottom">
 		<span class="institution">{{ specimen.institution.name }}</span>

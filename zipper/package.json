@@ -9,9 +9,9 @@
     "lodash": "~1.2.1",
     "express": "~3.2.6",
     "aws-sdk": "~2.0.0-rc9",
-    "node-archiver": "~0.2.0",
     "coffee-script": "~1.7.1",
-    "minimist": "0.0.7"
+    "minimist": "0.0.7",
+    "archiver": "~0.6.1"
   },
   "devDependencies": {
     "grunt": "~0.4.1"

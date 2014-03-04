@@ -2,7 +2,7 @@ async = require 'async'
 express = require 'express'
 fs = require 'fs'
 grunt = require 'grunt'
-archiver = require 'node-archiver'
+archiver = require 'archiver'
 AWS = require 'aws-sdk'
 _ = require 'lodash'
 
@@ -14,6 +14,7 @@ app = express()
 
 run = ->
   app.listen(app.get('port'))
+  console.log "Listening on port #{app.get('port')}"
   return app
 
 defaults =
@@ -101,7 +102,9 @@ app.get '/:zipId', (req, res) ->
     return
 
   format = 'zip'  # TODO: support multiple formats
+  console.log "Creating archive stream"
   archive = archiver(format)
+  console.log "Piping stream"
   archive.pipe(res)
   res.writeHeader 200,
     'Content-Type': 'application/zip'

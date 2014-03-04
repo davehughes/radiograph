@@ -1,5 +1,5 @@
 minimist = require 'minimist'
-zipserver = require './server.js'
+zipserver = require './server'
 
 # Parse args, pass to app, run
 args = minimist(process.argv)
