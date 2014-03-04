@@ -1,4 +1,5 @@
 {% extends "radiograph/base.html" %}
+{% load static from staticfiles %}
 
 {% block content %}
 
@@ -8,7 +9,7 @@
     <h2>About Us</h2>
 
     <div class="about-us-section col-md-6">
-        <img src="http://placekitten.com/100/100"/>
+        <img src="{% static 'img/terry-headshot.jpg' %}"/>
         <p>
           <strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of
           Human Evolution and Social Change</a> and the <a href="http://iho.asu.edu/">Institute
@@ -19,7 +20,7 @@
     </div>
 
     <div class="about-us-section col-md-6">
-        <img src="http://placekitten.com/101/101/"/>
+        <img src="{% static 'img/dave-headshot.jpg' %}"/>
         <p>
             <strong>Dave Hughes</strong> has designed the web architecture for the database. Formerly
             a software engineer in the Informatics and Cyberinfrastructure Services Department at
