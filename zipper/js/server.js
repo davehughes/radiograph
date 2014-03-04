@@ -10,7 +10,7 @@
 
   grunt = require('grunt');
 
-  archiver = require('archiver');
+  archiver = require('node-archiver');
 
   AWS = require('aws-sdk');
 
