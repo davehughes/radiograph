@@ -45,6 +45,7 @@ def specimens(request):
             'search_form': forms.SpecimenSearchForm(request.GET)
         })
 
+
 def specimen(request, specimen_id):
     specimen = get_object_or_404(models.Specimen, id=specimen_id)
     return http.HttpResponse('Found specimen')
@@ -190,33 +191,41 @@ def create_or_update_specimen(request, specimen_id=None):
 def download_zip(request):
     # Write JSON config file
     # Redirect
-    # TODO: swap in actual queryset functionality
-    specimens = models.Specimen.objects.all()[:3]
+    # TODO: apply user specified form/filter
+    # TODO: apply aspect filter
+    specimens = models.Specimen.objects.filter(image_lateral__isnull=False)[:20]
 
     images = (models.Image.objects
-        .filter(image_full__isnull=False)
-        .filter(specimen__in=specimens)
-        .select_related('specimen', 'specimen_taxon')[:3])
-
-    # TODO: apply aspect filter
-
-    zip_mappings = {}
+              .filter(specimen__in=specimens)
+              .select_related('specimen', 'specimen_taxon'))
+    files = []
+    size = 'full'
     for image in images:
-        path_in_zip = 'Primate Radiographs/{taxon}/{filename}'.format(
-            taxon=image.specimen.taxon.label,
-            filename=os.path.basename(image.image_medium.path)
-            )
-        zip_mappings[path_in_zip] = image.image_medium.path
+        format_args = {
+            'specimen_id': image.specimen.specimen_id,
+            'taxon': image.specimen.taxon.label,
+            'aspect': image.get_aspect_display(),
+            'size': size,
+            'ext': 'png',
+            }
+        image_deriv = getattr(image, 'image_{}'.format(size))
+        path = os.path.join(settings.AWS_LOCATION, image_deriv.name)
+        zip_path = u'{taxon}-{specimen_id}/{aspect}-{size}.{ext}'.format(**format_args)
+        files.append({'src': path, 'dest': zip_path})
 
     download_config = {
+        'type': 's3',
         'filename': 'Primate Radiographs.zip',
-        'files': zip_mappings,
-        }
+        'opts': {
+            'bucket': settings.AWS_STORAGE_BUCKET_NAME,
+            },
+        'files': files,
+    }
+    print u'Download config: {}'.format(download_config)
 
     # Dump the mappings to a file in the download config directory
     download_id = str(uuid.uuid4())
-    download_config_dir = '/tmp'
-    download_config_file = os.path.join(download_config_dir, download_id) + '.json'
+    download_config_file = os.path.join(settings.ZIPPER_DOWNLOAD_DIR, download_id) + '.json'
     json.dump(download_config, open(download_config_file, 'w'))
 
     # Have nginx do an internal redirect to the zipper server

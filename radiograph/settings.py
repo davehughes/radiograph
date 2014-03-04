@@ -78,6 +78,8 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = 'primate-radiograph'
 AWS_LOCATION = 'media'
 
+ZIPPER_DOWNLOAD_DIR = '/tmp/zipper'
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
