@@ -210,7 +210,7 @@ def download_zip(request):
             }
         image_deriv = getattr(image, 'image_{}'.format(size))
         path = os.path.join(settings.AWS_LOCATION, image_deriv.name)
-        zip_path = u'{taxon}-{specimen_id}/{aspect}-{size}.{ext}'.format(**format_args)
+        zip_path = u'Primate Radiographs/{taxon}-{specimen_id}/{aspect}-{size}.{ext}'.format(**format_args)
         files.append({'src': path, 'dest': zip_path})
 
     download_config = {

@@ -22,25 +22,25 @@
             <div class="search-results-header row panel-heading">
                 <div class="search-results-header col-md-2">
                      <span class="dropdown">
-                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                         <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                              <input type="checkbox" class="item-selector"/>
                              <span class="caret"></span>
                          </a>
                          <ul class="dropdown-menu">
                              <li>
-                                 <a href="#" class="item-selection-all">
+                                 <a href="#" data-selection="all">
                                      <i class="fa fa-ok"></i>
                                      Select All
                                  </a>
                              </li>
                              <li>
-                                 <a href="#" class="item-selection-none">
+                                 <a href="#" data-selection="none">
                                      <i class="icon-remove"></i>
                                      Select None
                                  </a>
                              </li>
                              <li>
-                                 <a href="#" class="item-selection-invert">
+                                 <a href="#" data-selection="invert">
                                      <i class="icon-resize-full"></i>
                                      Invert Selection
                                  </a>
@@ -61,20 +61,28 @@
                 </div>
 
                 <div class="col-md-3 pull-right">
+
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#download-dialog">
+                        <i class="fa fa-cloud-download"></i> Download
+                    </button>
+
                     {# View Selector #}
-                    <div class="btn-group select-view">
-                        <a href="#" title="Standard" data-value="standard" class="btn btn-small
+                    <div class="btn-group select-view" data-toggle="buttons">
+                        <label class="btn btn-primary" title="Standard"
                             {% if search_form.view.value == 'standard' %}active{% endif %}">
+                            <input type="radio" name="view" value="standard"/>
                             <i class="fa fa-th-list"></i>
-                        </a>
-                        <a href="#" title="Compact" data-value="compact" class="btn btn-small
+                        </label>
+                        <label class="btn btn-primary" title="Compact"
                             {% if search_form.view.value == 'compact' %}active{% endif %}">
+                            <input type="radio" name="view" value="compact"/>
                             <i class="fa fa-align-justify"></i>
-                        </a>
-                        <a href="#" title="Tiled" data-value="tiles" class="btn btn-small
+                        </label>
+                        <label class="btn btn-primary" title="Tiles"
                             {% if search_form.view.value == 'tiles' %}active{% endif %}">
+                            <input type="radio" name="view" value="tiles"/>
                             <i class="fa fa-th-large"></i>
-                        </a>
+                        </label>
                     </div>
                 </div>
 
@@ -167,6 +175,33 @@
     </form>
 </div>
 
+{# Download dialog #}
+<div id="download-dialog" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Which data would you like to download?</h4>
+            </div>
+            <div class="modal-body">
+                <label class="download-range-option">
+                    <input type="radio" name="download-range-type" value="this-page"/>
+                    Only selections on this page (20 images, approximately 34 MB)
+                </label>
+
+                <label class="download-range-option">
+                    <input type="radio" name="download-range-type" value="all"/>
+                    Selections for this query on all pages (123 images, approximately 178 MB)
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Nevermind</button>
+                <button type="button" class="btn btn-primary">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="tree"></div>
 
 {% endblock %}
@@ -199,6 +234,44 @@
                 $(e.currentTarget).siblings('a').removeClass('active');
                 $(e.currentTarget).addClass('active');
                 form.submit();
+            });
+    
+            //=====================================
+            // Search result selection tools
+            //=====================================
+            var selectAll = function() {
+                $('.item-selection[type=checkbox]').prop('checked', true)
+            }
+
+            var selectNone = function() {
+                $('.item-selection[type=checkbox]').prop('checked', false)
+            }
+
+            var invertSelection = function() {
+                $('.item-selection[type=checkbox]').each(function(idx, elt) {
+                    var $elt = $(elt)
+                    $elt.prop('checked', !$elt.prop('checked'))
+                })
+            }
+
+            $('[data-selection]').on('click', function(e) {
+                var selectionOp = $(e.currentTarget).data('selection')
+                if(selectionOp == 'all') {
+                    selectAll()
+                } else if(selectionOp == 'none') {
+                    selectNone()
+                } else if (selectionOp == 'invert') {
+                    invertSelection()
+                }
+            });
+
+            $('.item-selector[type=checkbox]').on('click', function(e) {
+                e.stopPropagation()
+                if($(e.currentTarget).is(':checked')) {
+                    selectAll()
+                } else {
+                    selectNone()
+                }
             });
         });
     </script>
