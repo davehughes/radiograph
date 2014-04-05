@@ -133,67 +133,13 @@ def get_model_from_uri(model_class, uri, pkarg=0, target_route_name=None):
 
     return model_class.objects.get(pk=pk)
 
-@user_passes_test(lambda u: u.is_staff)
-@transaction.commit_on_success
-def create_or_update_specimen(request, specimen_id=None):
-
-    specimen = None
-    specimen_data = json.loads(request.POST.get('specimen'))
-    specimen_data = util.underscorize(specimen_data)
-    images = specimen_data.pop('images', [])
-
-    if specimen_id:
-        specimen = get_object_or_404(models.Specimen, id=specimen_id)
-        specimen_data['last_modified_by'] = request.user.id
-        specimen_data['created_by'] = specimen.created_by.id
-        del specimen_data['last_modified']
-        del specimen_data['created']
-    else:
-        specimen_data['created_by'] = request.user.id
-        specimen_data['last_modified_by'] = request.user.id
-
-    # create new specimen from values
-    specimen_form = forms.SpecimenForm(specimen_data, instance=specimen)
-    if not specimen_form.is_valid():
-        errors = specimen_form.errors
-        raise Exception('Form validation failed')
-
-    specimen = specimen_form.save()
-    images_seen = []
-
-    # Process and save specimen images
-    for image_data in images:
-        if image_data.get('href'):
-            image = get_model_from_uri(models.Image, image_data['href'], 'image_id', 'image')
-            if image.specimen != specimen:
-                raise Exception('Cannot reassign image to new specimen')
-        else:
-            image = models.Image(specimen=specimen)
-
-        image.aspect = image_data.get('aspect', image.aspect)
-        if not image.aspect in [x for x, _ in models.Image.AspectChoices.choices]:
-            raise ValueError('Invalid aspect value: %s' % image.aspect)
-        if image_data.get('replacement_file'):
-            image.image_full = request.FILES.get(image_data['replacement_file'])
-
-        image.save()
-        images_seen.append(image.id)
-
-    # delete unreferenced images
-    for img in specimen.images.exclude(id__in=images_seen):
-        img.deleted = True
-        img.save()
-
-    # (re)index specimen
-    specimen_index.update_object(specimen)
-    return specimen
 
 def download_zip(request):
     # Write JSON config file
     # Redirect
     # TODO: apply user specified form/filter
     # TODO: apply aspect filter
-    specimens = models.Specimen.objects.filter(image_lateral__isnull=False)[:20]
+    specimens = models.Specimen.objects.filter(image_lateral__isnull=False)[:1]
 
     images = (models.Image.objects
               .filter(specimen__in=specimens)

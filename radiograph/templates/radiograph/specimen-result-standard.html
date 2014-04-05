@@ -4,31 +4,28 @@
 
 	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
 
-    <ul>
+    <ul class="image-thumbnails">
         <li>
-            <a href="#" title="{{ specimen.image_superior.get_aspect_display }}">
-                <img class="thumbnail" src="{{ specimen.image_superior.image_thumbnail.url }}"/>
-            </a>
+            <figure  class="specimen-image superior" data-image-detail="{{ specimen.image_superior.image_full.url }}" style="background-image:url('{{specimen.image_superior.image_thumbnail.url }}')"></figure>
         </li>
         <li>
-            <a href="#" title="{{ specimen.image_lateral.get_aspect_display }}">
-                <img class="thumbnail" src="{{ specimen.image_lateral.image_thumbnail.url }}"/>
-            </a>
+            <figure class="specimen-image lateral" data-image-detail="{{ specimen.image_lateral.image_full.url }}" style="background-image:url('{{specimen.image_lateral.image_thumbnail.url }}')"></figure>
         </li>
     </ul>
 
 	<div class="specimen-details">
 		<h4>
-			<span class="taxon-label" style="font-style: italic">
-			  {{ specimen.taxon.label }}
-			</span>
-			- 
 			<span class="specimen-institution">{{ specimen.institution.name }}</span>
 			<span class="specimen-id">{{ specimen.specimen_id }}</span>
+			- 
+            <span class="taxon-label">{{ specimen.taxon.label }}</span>
 		</h4>
 		<div class="specimen-sex">{{ specimen.sex }}</div>
-		<div class="specimen-settings">{{ specimen.settings|default:"Unspecified/Unknown" }}</div>
+        {% if specimen.settings %}
+		<div class="specimen-settings">Settings: {{ specimen.settings }}</div>
+        {% endif %}
 		<div class="specimen-comments">{{ specimen.comments }}</div>
 	</div>
 
 </div>
+{% if not forloop.last %}<hr/>{% endif %}

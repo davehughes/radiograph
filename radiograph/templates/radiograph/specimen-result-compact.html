@@ -5,35 +5,26 @@
 
 	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
 
-    <div class="specimen-images">
-      {% for image in specimen.images.all %}
-      <a href="#" style="text-decoration: none" title="">
-          <img src="{{ image.image_medium.url }}" height="45px" />
-      </a>
-      {% endfor %}
-    </div>
+    <ul class="image-thumbnails">
+        <li>
+            <figure class="specimen-image superior" data-image-detail="{{ specimen.image_superior.image_full.url}}" style="background-image:url('{{specimen.image_superior.image_thumbnail.url }}')"></figure>
+        </li>
+        <li>
+            <figure clas="specimen-image lateral" data-image-detail="{{ specimen.image_lateral.image_full.url}}" style="background-image:url('{{specimen.image_lateral.image_thumbnail.url }}')"></figure>
+        </li>
+    </ul>
 
-	{% comment %}
-    <div class="specimen-images">
-	  <a href="#" style="text-decoration: none">
-		 <img src="{% static 'img/sample-lateral-thumbnail.png' %}" height="45px" />
-      </a>
-	  <a href="#" style="text-decoration: none">
-		 <img src="{% static 'img/sample-superior-thumbnail.png' %}" height="45px" />
-      </a>
-    </div>
-	{% endcomment %}
-
+	<div>
+		<span class="specimen-institution">{{ specimen.institution.name }}</span>
+		<span class="specimen-id">{{ specimen.specimen_id }}</span>
+	</div>
 	<div>
 		<span class="specimen-taxon" style="font-style: italic">{{ specimen.taxon.label }}</span>
 	</div>
 	<div>
 		<span class="specimen-sex">{{ specimen.sex }}</span>
 	</div>
-	<div>
-		<span class="specimen-institution">{{ specimen.institution.name }}</span>
-		<span class="specimen-id">{{ specimen.specimen_id }}</span>
-	</div>
+	{% comment %}
 	<div>
 		<span class="skull-length">{{ specimen.skull_length|default:"-" }}</span>
 	</div>
@@ -52,8 +43,8 @@
 	<div>
 		<span class="palate-width">{{ specimen.palate_width|default:"-" }}</span>
 	</div>
-	{% comment %}
     <div class="specimen-settings">{{ specimen.settings }}</div>
     <div class="specimen-comments">{{ specimen.comments }}</div>
 	{% endcomment %}
 </div>
+{% if not forloop.last %}<hr/>{% endif %}

@@ -6383,6 +6383,42 @@ body {
 a {
   text-decoration: none;
 }
+.taxon-label {
+  font-style: italic;
+}
+[data-image-detail] {
+  cursor: pointer;
+}
+.specimen-result.standard {
+  clear: both;
+  min-height: 160px;
+}
+.specimen-result.standard .item-selection {
+  float: left;
+}
+.specimen-result.standard ul.image-thumbnails {
+  float: left;
+  list-style: none;
+}
+.specimen-result.standard ul.image-thumbnails li {
+  display: inline-block;
+}
+.specimen-result.standard ul.image-thumbnails figure {
+  background-size: cover;
+  background-repeat: none;
+  display: inline-block;
+  width: 200px;
+  height: 150px;
+}
+.specimen-result.standard ul.image-thumbnails figure:hover {
+  box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
+}
+.specimen-result.standard .specimen-details {
+  margin-left: 20px;
+}
+.specimen-result.standard .specimen-details h4 {
+  margin-top: 0;
+}
 .specimen-result.tile {
   width: 28%;
   float: left;
@@ -6392,6 +6428,12 @@ a {
 }
 .specimen-result.tile:hover {
   box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+}
+.specimen-result.tile figure {
+  height: 230px;
+  background-size: contain;
+  border-left: 1px solid #AAA;
+  border-right: 1px solid #AAA;
 }
 .specimen-result.tile img {
   width: 100%;
@@ -6421,22 +6463,31 @@ a {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
-.specimen-result.standard .specimen-images a,
-.specimen-result.standard .specimen-details {
+.specimen-result.compact {
+  min-height: 60px;
+}
+.specimen-result.compact .item-selection {
+  float: left;
+}
+.specimen-result.compact ul.image-thumbnails {
+  float: left;
+  list-style: none;
+}
+.specimen-result.compact ul.image-thumbnails li {
   display: inline-block;
 }
-.specimen-result.compact {
-  height: 50px;
-  border-radius: 8px;
-  margin-bottom: 3px;
-  background-color: #F6F6F6;
+.specimen-result.compact ul.image-thumbnails figure {
+  background-size: cover;
+  background-repeat: none;
+  display: inline-block;
+  width: 80px;
+  height: 60px;
+}
+.specimen-result.compact ul.image-thumbnails figure:hover {
+  box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
 }
 .specimen-result.compact > div {
   display: inline-block;
-}
-.specimen-result.compact:hover {
-  box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
-  background-color: rgba(0, 0, 0, 0.1);
 }
 .specimen-result.compact input.item-selection {
   display: inline-block;

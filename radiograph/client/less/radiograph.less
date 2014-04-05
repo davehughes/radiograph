@@ -18,6 +18,45 @@ a {
     text-decoration: none;
 }
 
+.taxon-label {
+    font-style: italic;
+}
+
+[data-image-detail] {
+    cursor: pointer;
+}
+
+.specimen-result.standard {
+    clear: both;
+    min-height: 160px;
+    .item-selection {
+        float: left;
+    }
+    ul.image-thumbnails {
+        float: left;
+        list-style: none;
+        li {
+            display: inline-block;
+        }
+        figure {
+            background-size: cover;
+            background-repeat: none;
+            display: inline-block;
+            width: 200px;
+            height: 150px;
+            &:hover {
+                box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
+            }
+        }
+    }
+    .specimen-details {
+        margin-left: 20px;
+        h4 {
+            margin-top: 0;
+        }
+    }
+}
+
 .specimen-result.tile {
     width: 28%;
     float: left;
@@ -29,6 +68,12 @@ a {
         box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
     }
 
+    figure {
+        height: 230px;
+        background-size: contain;
+        border-left: 1px solid #AAA;
+        border-right: 1px solid #AAA;
+    }
     img {
         width: 100%;
         border-left: 1px solid #AAA;
@@ -63,27 +108,38 @@ a {
     }
 }
 
-.specimen-result.standard {
-    .specimen-images a,
-    .specimen-details {
-        display: inline-block;
-    }
-}
-
 .specimen-result.compact {
-    height: 50px;
-    border-radius: 8px;
-    margin-bottom: 3px;
-    background-color: #F6F6F6;
+    min-height: 60px;
+
+    .item-selection {
+        float: left;
+    }
+    ul.image-thumbnails {
+        float: left;
+        list-style: none;
+        li {
+            display: inline-block;
+        }
+        figure {
+            background-size: cover;
+            background-repeat: none;
+            display: inline-block;
+            width: 80px;
+            height: 60px;
+            &:hover {
+                box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
+            }
+        }
+    }
 
     & > div {
         display: inline-block;
     }
 
-    &:hover {
-        box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
-        background-color: rgba(0, 0, 0, 0.1);
-    }
+    // &:hover {
+    //     box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+    //     background-color: rgba(0, 0, 0, 0.1);
+    // }
 
     input.item-selection {
         display: inline-block;

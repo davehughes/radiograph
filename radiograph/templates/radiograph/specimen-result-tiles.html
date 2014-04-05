@@ -8,13 +8,13 @@
 	</div>
     <div class="images">
         {% if aspect == 'superior' %}
-        <img class="specimen-image superior" src="{{ specimen.image_superior.image_medium.url }}" title="{{ specimen.image_superior.get_aspect_display }} View"/>
+        <figure class="specimen-image superior" data-image-detail="{{ specimen.image_superior.image_full.url }}" style="background-image:url('{{ specimen.image_superior.image_medium.url }}');"></figure>
         {% else %}
-        <img class="specimen-image lateral" src="{{ specimen.image_lateral.image_medium.url }}" title="{{ specimen.image_lateral.get_aspect_display }} View"/>
+        <figure class="specimen-image lateral"  data-image-detail="{{ specimen.image_lateral.image_full.url }}" style="background-image:url('{{ specimen.image_lateral.image_medium.url }}');"></figure>
         {% endif %}
     </div>
 	<div class="overlay-bottom">
 		<span class="institution">{{ specimen.institution.name }}</span>
-		(<span class="specimen-id">{{ specimen.specimen_id }}</span>)
+		<span class="specimen-id">{{ specimen.specimen_id }}</span>
 	</div>
 </div>

@@ -20,7 +20,7 @@
         <div class="span12">
 
             <div class="search-results-header row panel-heading">
-                <div class="search-results-header col-md-2">
+                <div class="search-results-header">
                      <span class="dropdown">
                          <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                              <input type="checkbox" class="item-selector"/>
@@ -47,24 +47,31 @@
                              </li>
                          </ul>
                      </span>
-                </div>
-
-                <div class="pagination-toolbar col-md-6">
-
-                    <ul class="pagination">
-                        {% for pnav in search_form.results_page|paginate %}
-                        <li {% if pnav.is_current %}class="active"{% endif %}>
-                            <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <div class="col-md-3 pull-right">
 
                     <button class="btn btn-primary" data-toggle="modal" data-target="#download-dialog">
                         <i class="fa fa-cloud-download"></i> Download
                     </button>
+
+                    <button class="btn btn-primary">
+                        <i class="fa fa-filter"></i> Filter: Taxon
+                    </button>
+
+                    <button class="btn btn-primary">
+                        <i class="fa fa-filter"></i> Filter: Sex
+                    </button>
+
+                    Show 
+                    <div class="btn-group"> <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown">
+                            20 <span class="caret"></span>
+                        </button>
+
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">20</a></li>
+                            <li><a href="#">50</a></li>
+                            <li><a href="#">100</a></li>
+                        </ul>
+                    </div>
+                    results per page.
 
                     {# View Selector #}
                     <div class="btn-group select-view" data-toggle="buttons">
@@ -84,6 +91,17 @@
                             <i class="fa fa-th-large"></i>
                         </label>
                     </div>
+                </div>
+
+                <div class="pagination-toolbar col-md-6">
+
+                    <ul class="pagination">
+                        {% for pnav in search_form.results_page|paginate %}
+                        <li {% if pnav.is_current %}class="active"{% endif %}>
+                            <a href="?page={{ pnav.page_number }}" data-value="{{ pnav.page_number }}">{{ pnav.display }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
                 {# Results per page selector #}
@@ -202,6 +220,21 @@
     </div>
 </div>
 
+{# Image detail dialog #}
+<div id="image-detail-dialog" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                Image Detail
+            </div>
+            <div class="modal-body">
+                <figure style="background-image:url('http://placekitten.com/1024/1024')"></figure>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="tree"></div>
 
 {% endblock %}
@@ -272,6 +305,12 @@
                 } else {
                     selectNone()
                 }
+            });
+
+            $('[data-image-detail]').on('click', function(e) {
+                var imageDetailModal = $('#image-detail-dialog')
+                imageDetailModal.find('.modal-body figure')
+                imageDetailModal.modal();
             });
         });
     </script>
