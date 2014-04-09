@@ -8,9 +8,15 @@
 	</div>
     <div class="images">
         {% if aspect == 'superior' %}
-        <figure class="specimen-image superior" data-image-detail="{{ specimen.image_superior.image_full.url }}" style="background-image:url('{{ specimen.image_superior.image_medium.url }}');"></figure>
+        <figure class="specimen-image superior"
+                data-image-preview="{{ specimen.image_superior.image_medium.url }}"
+                data-image-full="{{ specimen.image_superior.image_full.url }}"
+                style="background-image:url('{{ specimen.image_superior.image_medium.url }}');"></figure>
         {% else %}
-        <figure class="specimen-image lateral"  data-image-detail="{{ specimen.image_lateral.image_full.url }}" style="background-image:url('{{ specimen.image_lateral.image_medium.url }}');"></figure>
+        <figure class="specimen-image lateral"
+                data-image-preview="{{ specimen.image_lateral.image_medium.url }}"
+                data-image-full="{{ specimen.image_lateral.image_full.url }}"
+                style="background-image:url('{{ specimen.image_lateral.image_medium.url }}');"></figure>
         {% endif %}
     </div>
 	<div class="overlay-bottom">

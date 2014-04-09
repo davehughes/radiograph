@@ -1,4 +1,4 @@
-@import 'bootstrap/bootstrap';
+//@import 'bootstrap/bootstrap';
 @import 'chosen.css.less';
 
 body {
@@ -165,3 +165,30 @@ a {
 //     left: 0;
 //     right: 0;
 // }
+
+.image-fill-by (@size) {
+    background-size: @size;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+#image-detail-dialog {
+    .modal-header {
+        .image-full-link {
+            margin-right: 15px;
+            margin-top: 0;
+        }
+    }
+    .modal-body figure {
+        min-height: 600px;
+        .image-fill-by(cover);
+        width: 100%;
+    }
+}
+
+#taxon-filter-dialog {
+    .taxa-choices {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+}

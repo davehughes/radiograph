@@ -114,11 +114,16 @@ class SearchResultsView(Choices):
     CompactList  = C('compact')
     Tiles        = C('tiles')
 
+TAXON_LABEL_CACHE = models.taxon_label_cache()
+TAXON_FILTER_CHOICES = [
+    (t.id, TAXON_LABEL_CACHE[t.id])
+    for t in models.Taxon.objects.filter(level=models.TaxonomyLevels.Species)
+]
+TAXON_FILTER_CHOICES.sort(key=lambda(k, v): v)
 
 class SpecimenSearchForm(forms.Form):
     
-    taxa = forms.ModelMultipleChoiceField(queryset=models.Taxon.objects.all(),
-                                          required=False)
+    taxa = forms.MultipleChoiceField(choices=TAXON_FILTER_CHOICES, required=False)
     sex = forms.MultipleChoiceField(choices=models.Specimen.SexChoices.choices,
                                     required=False)
     sort = forms.ChoiceField(choices=SortField.choices,
@@ -131,7 +136,11 @@ class SpecimenSearchForm(forms.Form):
                              initial=SearchResultsView.StandardList,
                              required=False)
     page = forms.IntegerField(initial=1, required=False)
-    results = forms.IntegerField(initial=10, required=False, max_value=100)
+    results = forms.ChoiceField(
+	initial=10,
+	choices=[(x, x) for x in [10, 20, 50, 100]],
+	required=False,
+	)
 
     def results_page(self):
         page = 1
@@ -158,8 +167,3 @@ class SpecimenSearchForm(forms.Form):
             pass
 
         return qs
-
-
-
-
-
