@@ -1,6 +1,8 @@
 //@import 'bootstrap/bootstrap';
 @import 'chosen.css.less';
 
+@faint-gray-highlight: rgba(0, 0, 0, 0.05);
+
 body {
     background-image: url(/static/img/backgrounds/handmadepaper.png);
     padding-top: 70px;
@@ -8,9 +10,22 @@ body {
 
 .light-header {
     h1, h2, h3, h4, h5, h6 {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: @faint-gray-highlight;
         border-radius: 5px;
         padding: 0.1em 1em;
+    }
+}
+
+.navbar-brand {
+    .fa {
+        margin-left: 1em;
+        margin-right: 0.5em;
+    }
+}
+
+.navbar-fixed-top {
+    li.active {
+        background-color: @faint-gray-highlight;
     }
 }
 

@@ -429,6 +429,13 @@ body {
   border-radius: 5px;
   padding: 0.1em 1em;
 }
+.navbar-brand .fa {
+  margin-left: 1em;
+  margin-right: 0.5em;
+}
+.navbar-fixed-top li.active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
 body.about h1,
 body.about h2,
 body.about h3,

@@ -24,12 +24,25 @@ from radiograph import forms, models, util
 
 #---------------------{ Context processors }-----------------------------------
 def main_menu(request):
+    menu_items = [
+        {'label': 'About', 'link': reverse('index'), 'route': 'index'},
+        {'label': 'Specimens', 'link': reverse('specimen-list'), 'route': 'specimen-list'},
+        {'label': 'Download', 'link': reverse('download-dataset'), 'route': 'download-dataset'},
+        ]
+    try:
+        route = resolve(request.path)
+    except:
+        route = None
+
+    if route:
+        url_name = route.url_name
+        for item in menu_items:
+            if item.get('route') == url_name:
+                item['active'] = True
+                break
+
     return {
-        'mainmenu': [
-            {'label': 'About', 'link': reverse('index')},
-            {'label': 'Specimens', 'link': reverse('specimen-list')},
-            {'label': 'Download', 'link': reverse('download-dataset')},
-            ]
+        'mainmenu': menu_items,
     }
 
 
