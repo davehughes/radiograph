@@ -142,6 +142,10 @@ class SpecimenSearchForm(forms.Form):
 	required=False,
 	)
 
+    def __init__(self, *args, **kwargs):
+        self.queryset = kwargs.pop('queryset', models.Specimen.objects.all())
+        super(SpecimenSearchForm, self).__init__(*args, **kwargs)
+
     def results_page(self):
         page = 1
         results = 10
@@ -152,7 +156,7 @@ class SpecimenSearchForm(forms.Form):
         return paginator.page(page)
 
     def get_query_set(self):
-        qs = models.Specimen.objects.all()
+        qs = self.queryset
         if self.is_bound and self.is_valid():
             if self.cleaned_data['taxa']:
                 qs = qs.filter(taxon__in=self.cleaned_data['taxa'])

@@ -28,6 +28,7 @@ def main_menu(request):
         'mainmenu': [
             {'label': 'About', 'link': reverse('index')},
             {'label': 'Specimens', 'link': reverse('specimen-list')},
+            {'label': 'Download', 'link': reverse('download-dataset')},
             ]
     }
 
@@ -40,15 +41,27 @@ def index(request):
 
 def specimens(request):
     # TODO: read initial values from user's session
-    search_form = forms.SpecimenSearchForm(request.REQUEST)
+    queryset = (models.Specimen.objects
+        .exclude(image_lateral__isnull=True)
+        .exclude(image_superior__isnull=True))
+    search_form = forms.SpecimenSearchForm(request.REQUEST, queryset=queryset)
     return render(request, 'radiograph/specimen-list.html', {
-            'search_form': forms.SpecimenSearchForm(request.GET)
+            'search_form': search_form,
         })
 
 
 def specimen(request, specimen_id):
     specimen = get_object_or_404(models.Specimen, id=specimen_id)
     return http.HttpResponse('Found specimen')
+
+
+def download(request):
+    queryset = (models.Specimen.objects
+        .exclude(image_lateral__isnull=True)
+        .exclude(image_superior__isnull=True))
+    return render(request, 'radiograph/download.html', {
+        'sample_image': queryset[0].image_lateral,
+        })
 
 
 def build_dataset_csv(request):

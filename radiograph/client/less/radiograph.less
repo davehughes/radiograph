@@ -13,9 +13,16 @@ body {
         border-radius: 50%;
     }
 }
+.about-us-section {
+    // clear: both;
+}
 
 a {
     text-decoration: none;
+}
+
+hr {
+    border-top: 1px solid #CCC;
 }
 
 .taxon-label {
@@ -47,6 +54,7 @@ a {
             &:hover {
                 box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
             }
+            border-radius: 1em;
         }
     }
     .specimen-details {
@@ -192,3 +200,101 @@ a {
         overflow-y: auto;
     }
 }
+
+// Start search page header styles
+.search-results-header-controls {
+    margin: 0 1em; 
+
+    .results-per-page {
+        display: inline-block;
+        margin-right: 1em;
+    }
+}
+
+.dropdown-menu li {
+    text-align: left; 
+}
+
+.standard-view-header {
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    width: 100%;
+    background-color: #FAFAFA;
+    height: 2em;
+    line-height: 1.8em;
+    color: slategray;
+    font-weight: bold;
+
+    .header-column {
+        float: left;
+        // border-top: 1px solid gray;
+        // border-bottom: 1px solid gray;
+        text-align: center;
+    }
+    .selector {
+        width: 50px; 
+    }
+    .superior {
+        width: 206px;
+    }
+    .lateral {
+        width: 206px;
+    }
+    .details {
+        width: 674px; 
+    }
+}
+// End search page header styles
+
+// Start download page styles
+.dataset-option {
+    border: 1px solid #DDD;
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.1);
+    padding: 0.5em;
+    margin: 0.5em;
+    cursor: pointer;
+    display: block;
+    background-color: whitesmoke;
+
+    &.selected {
+        box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, 0.1);
+        background-color: aliceblue;
+    }
+
+    .radio-container {
+        float: left;
+        margin-top: 3.4em;
+        margin-left: 2em;
+    }
+
+    dl {
+        margin-bottom: 0.75em;
+    }
+    dt, dd {
+        display: inline-block;
+    }
+
+    .info {
+        display: inline-block;
+        margin-left: 2em;
+    }
+        
+    p {
+        font-weight: lighter;    
+    }
+}
+
+.dataset-download-controls {
+    text-align: center;
+    margin: 0.5em 0 2em 0;
+}
+
+.btn.dataset-download {
+    padding: 0;
+    line-height: 2em;
+    font-size: 2em;
+    width: 50%;
+}
+
+// End download page styles

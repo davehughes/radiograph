@@ -89,4 +89,5 @@ urlpatterns = patterns('',
     url(r'^images/(?P<image_id>[0-9]+)/(?P<derivative>[^/]+)$',
         'radiograph.views.image_file',
         name='image'),
+    url(r'^download$', 'radiograph.views.download', name='download-dataset'),
 )

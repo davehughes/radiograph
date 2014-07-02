@@ -2,13 +2,11 @@
 {% load static from staticfiles %}
 
 {% block content %}
-
-
 <div class="about-us row">
     <a name="about-us"></a>
     <h2>About Us</h2>
 
-    <div class="about-us-section col-xs-6">
+    <div class="about-us-section col-sm-6 col-xs-12">
         <img src="{% static 'img/terry-headshot.jpg' %}"/>
         <p>
           <strong>Terry Ritzman</strong> is a PhD. candidate at the <a href="http://shesc.asu.edu/">School of
@@ -19,7 +17,7 @@
         </p>
     </div>
 
-    <div class="about-us-section col-xs-6">
+    <div class="about-us-section col-sm-6 col-xs-12">
         <img src="{% static 'img/dave-headshot.jpg' %}"/>
         <p>
             <strong>Dave Hughes</strong> has designed the web architecture for the database. Formerly
@@ -31,7 +29,7 @@
 </div>
 
 
-  <div class="about-section">
+<div class="row">
   <a name="about-the-database"></a>
   <h2>About the Database</h2>
   <p>
@@ -52,9 +50,9 @@
     can be included in PowerPoint or Keynote presentations (for this application, we
     recommend converting the files to a smaller format, e.g., jpeg).
   </p>
-  </div>
+</div>
 
-  <div class="about-section">
+<div class="row">
   <a name="materials"></a>
   <h2>Materials</h2>
   <p>
@@ -73,9 +71,9 @@
     of males and females were included; all information on sex distribution is provided in the
     database.
   </p>
-  </div>
+</div>
 
-  <div class="about-section">
+<div class="row">
   <a name="methods"></a>
   <h2>Methods</h2>
   <p>
@@ -93,9 +91,9 @@
     available as part of the information on each individual specimens, and spreadsheets
     including all of these measurements are available on request.
   </p>
-  </div>
+</div>
 
-  <div class="about-section">
+<div class="row">
   <a name="funding"></a>
   <h2>Funding</h2>
   <p>
@@ -112,9 +110,9 @@
     Finally, Judy Chupasko (Museum of Comparative Zoology, Harvard University)
     graciously provided supplies used in creating the radiographs.
   </p>
-  </div>
+</div>
 
-  <div class="about-section">
+<div class="row">
   <a name="contact-us"></a>
   <h2>Contact Us</h2>
   <p>
@@ -126,5 +124,5 @@
      <li><a href="mailto:d@vidhughes.com">Dave Hughes (d@vidhughes.com)</a></li>
     </ul>
   </p>
-  </div>
+</div>
 {% endblock %}

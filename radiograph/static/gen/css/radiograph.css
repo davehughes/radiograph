@@ -427,6 +427,9 @@ body {
 a {
   text-decoration: none;
 }
+hr {
+  border-top: 1px solid #CCC;
+}
 .taxon-label {
   font-style: italic;
 }
@@ -453,6 +456,7 @@ a {
   display: inline-block;
   width: 200px;
   height: 150px;
+  border-radius: 1em;
 }
 .specimen-result.standard ul.image-thumbnails figure:hover {
   box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.1);
@@ -554,4 +558,83 @@ a {
 #taxon-filter-dialog .taxa-choices {
   max-height: 400px;
   overflow-y: auto;
+}
+.search-results-header-controls {
+  margin: 0 1em;
+}
+.search-results-header-controls .results-per-page {
+  display: inline-block;
+  margin-right: 1em;
+}
+.dropdown-menu li {
+  text-align: left;
+}
+.standard-view-header {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  width: 100%;
+  background-color: #FAFAFA;
+  height: 2em;
+  line-height: 1.8em;
+  color: slategray;
+  font-weight: bold;
+}
+.standard-view-header .header-column {
+  float: left;
+  text-align: center;
+}
+.standard-view-header .selector {
+  width: 50px;
+}
+.standard-view-header .superior {
+  width: 206px;
+}
+.standard-view-header .lateral {
+  width: 206px;
+}
+.standard-view-header .details {
+  width: 674px;
+}
+.dataset-option {
+  border: 1px solid #DDD;
+  border-radius: 0.5em;
+  box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.1);
+  padding: 0.5em;
+  margin: 0.5em;
+  cursor: pointer;
+  display: block;
+  background-color: whitesmoke;
+}
+.dataset-option.selected {
+  box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, 0.1);
+  background-color: aliceblue;
+}
+.dataset-option .radio-container {
+  float: left;
+  margin-top: 3.4em;
+  margin-left: 2em;
+}
+.dataset-option dl {
+  margin-bottom: 0.75em;
+}
+.dataset-option dt,
+.dataset-option dd {
+  display: inline-block;
+}
+.dataset-option .info {
+  display: inline-block;
+  margin-left: 2em;
+}
+.dataset-option p {
+  font-weight: lighter;
+}
+.dataset-download-controls {
+  text-align: center;
+  margin: 0.5em 0 2em 0;
+}
+.btn.dataset-download {
+  padding: 0;
+  line-height: 2em;
+  font-size: 2em;
+  width: 50%;
 }
