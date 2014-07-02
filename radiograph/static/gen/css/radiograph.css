@@ -419,10 +419,33 @@ body {
   background-image: url(/static/img/backgrounds/handmadepaper.png);
   padding-top: 70px;
 }
-.about-us img {
+.light-header h1,
+.light-header h2,
+.light-header h3,
+.light-header h4,
+.light-header h5,
+.light-header h6 {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  padding: 0.1em 1em;
+}
+body.about h1,
+body.about h2,
+body.about h3,
+body.about h4,
+body.about h5,
+body.about h6 {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  padding: 0.1em 1em;
+}
+body.about .about-us img {
   float: left;
   margin: 0.5em 1em;
   border-radius: 50%;
+}
+body.about p {
+  padding: 0.1em 2em;
 }
 a {
   text-decoration: none;
@@ -577,7 +600,6 @@ hr {
   height: 2em;
   line-height: 1.8em;
   color: slategray;
-  font-weight: bold;
 }
 .standard-view-header .header-column {
   float: left;
@@ -594,6 +616,22 @@ hr {
 }
 .standard-view-header .details {
   width: 674px;
+}
+.search-results-footer {
+  text-align: center;
+}
+body.download h1,
+body.download h2,
+body.download h3,
+body.download h4,
+body.download h5,
+body.download h6 {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  padding: 0.1em 1em;
+}
+body.download p {
+  padding: 0.1em 2em;
 }
 .dataset-option {
   border: 1px solid #DDD;
@@ -630,7 +668,7 @@ hr {
 }
 .dataset-download-controls {
   text-align: center;
-  margin: 0.5em 0 2em 0;
+  margin: 1em 0 2em 0;
 }
 .btn.dataset-download {
   padding: 0;

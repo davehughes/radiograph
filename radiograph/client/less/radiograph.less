@@ -6,15 +6,31 @@ body {
     padding-top: 70px;
 }
 
-.about-us {
-    img {
-        float: left;
-        margin: 0.5em 1em;
-        border-radius: 50%;
+.light-header {
+    h1, h2, h3, h4, h5, h6 {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+        padding: 0.1em 1em;
     }
 }
-.about-us-section {
-    // clear: both;
+
+body.about {
+    .light-header;
+
+    .about-us {
+        img {
+            float: left;
+            margin: 0.5em 1em;
+            border-radius: 50%;
+        }
+    }
+    .about-us-section {
+        // clear: both;
+    }
+
+    p {
+        padding: 0.1em 2em;
+    }
 }
 
 a {
@@ -223,7 +239,6 @@ hr {
     height: 2em;
     line-height: 1.8em;
     color: slategray;
-    font-weight: bold;
 
     .header-column {
         float: left;
@@ -246,7 +261,21 @@ hr {
 }
 // End search page header styles
 
+// Start search page footer styles 
+.search-results-footer {
+    text-align: center;
+}
+// End search page footer styles 
+
 // Start download page styles
+
+body.download {
+    .light-header;
+    p {
+        padding: 0.1em 2em;
+    }
+}
+
 .dataset-option {
     border: 1px solid #DDD;
     border-radius: 0.5em;
@@ -287,7 +316,7 @@ hr {
 
 .dataset-download-controls {
     text-align: center;
-    margin: 0.5em 0 2em 0;
+    margin: 1em 0 2em 0;
 }
 
 .btn.dataset-download {
