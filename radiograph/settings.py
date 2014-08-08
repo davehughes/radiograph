@@ -27,13 +27,13 @@ DATABASES = {
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'johnny.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-        'JOHNNY_CACHE': True,
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'johnny.backends.memcached.MemcachedCache',
+#         'LOCATION': '127.0.0.1:11211',
+#         'JOHNNY_CACHE': True,
+#     }
+# }
 JOHNNY_MIDDLEWARE_KEY_PREFIX='jc'
 
 # Local time zone for this installation. Choices can be found here:

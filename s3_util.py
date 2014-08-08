@@ -45,15 +45,15 @@ def get_joined_name_from_path(path):
     '''
     path_dir = os.path.dirname(path)
     taxon, specimen_id, aspect = path_dir.split('/')[-3:]
-    return '{}-{}-{}.png'.format(taxon, specimen_id, aspect)
+    return 'images/{}-{}-{}.png'.format(taxon, specimen_id, aspect)
 
 
 def generate_medium_zip(output_path='radiograph-medium.zip'):
-    return generate_image_zip(output_path='radiograph-medium.zip', target_image_name='medium.png')
+    return generate_image_zip(output_path=output_path, target_image_name='medium.png')
 
 
-def generate_full_zip():
-    return generate_image_zip(output_path='radiograph-full.zip', target_image_name='full.png')
+def generate_full_zip(output_path='radiograph-full.zip'):
+    return generate_image_zip(output_path=output_path, target_image_name='full.png')
 
 
 def generate_image_zip(output_path='radiograph-full.zip', target_image_name='full.png'):
