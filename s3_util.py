@@ -70,3 +70,71 @@ def generate_file_mappings(target_filename, map_func):
         for target in targets:
             path = os.path.join(dirname, target)
             yield path, map_func(path)
+
+
+def dump_specimen_csv(output_path, download_type='compact'):
+    qs = (Specimen.objects
+        .filter(image_superior__isnull=False)
+        .filter(image_lateral__isnull=False))
+    rows = get_specimen_rows(qs, download_type=download_type)
+    # ...
+
+
+def get_specimen_rows(specimens, download_type='compact'):
+    header = [
+        'Specimen ID',
+        'Taxon',
+        'Sex',
+        'Cranial Width (mm)',
+        'Facial Height (mm)',
+        'Neurocranial Height (mm)',
+        'Skull Length (mm)',
+        'Palate Width (mm)',
+        'Palate Length (mm)',
+        'Lateral Image URL',
+        'Superior Image URL',
+        ]
+
+    if download_type == 'medium':
+        header.extend([
+            'Lateral Image Path',
+            'Superior Image Path',
+            ])
+    elif download_type == 'full':
+        header.extend([
+            'Lateral Image Path',
+            'Superior Image Path',
+            ])
+
+    rows = [header]
+    for s in specimens:
+        row = [
+            s.specimen_id,
+            s.taxon.label,
+            s.sex,
+            str(s.cranial_width or '-'),
+            str(s.facial_height or '-'),
+            str(s.neurocranial_height or '-'),
+            str(s.skull_length or '-'),
+            str(s.palate_width or '-'),
+            str(s.palate_length or '-'),
+            s.image_lateral.image_full.url,
+            s.image_superior.image_full.url,
+        ]
+
+        if download_type in ['medium', 'full']:
+            row.extend([
+                u'{}-{}-{}.png'.format(
+                    s.taxon.label,
+                    s.specimen_id.lower().replace(' ', '_'),
+                    aspect,
+                    )
+                for aspect in ['lateral', 'superior']
+                ])
+        rows.append(row)
+
+    return rows
+
+
+def get_specimen_image_local_path(s, aspect):
+    pass

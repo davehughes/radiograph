@@ -29,9 +29,11 @@
                         <i class="fa fa-filter"></i> Filter: Sex
                     </button>
 
+                    {% comment %}
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#download-dialog">
                         <i class="fa fa-cloud-download"></i> Download
                     </button>
+                    {% endcomment %}
 
                     {# View Selector #}
                     <div class="btn-group select-view pull-right" data-toggle="buttons">
@@ -159,8 +161,8 @@
                 {% endfor %}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default">Clear Filter</button>
-                <button type="button" class="btn btn-primary">Apply Filter</button>
+                <button type="button" class="btn btn-default" data-action="clear-sex-filter">Clear Filter</button>
+                <button type="button" class="btn btn-primary" data-action="apply-sex-filter">Apply Filter</button>
             </div>
         </div>
     </div>
@@ -182,8 +184,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default">Clear Filter</button>
-                <button type="button" class="btn btn-primary">Apply Filter</button>
+                <button type="button" class="btn btn-default" data-action="clear-taxon-filter">Clear Filter</button>
+                <button type="button" class="btn btn-primary" data-action="apply-taxon-filter">Apply Filter</button>
             </div>
         </div>
     </div>
@@ -327,6 +329,25 @@
                 imageFigure.css('background-image', 'url("' + imageMediumURL + '")')
                 imageFullLink.attr('href', imageFullURL)
                 imageDetailModal.modal();
+            });
+
+            // Set up filter dialogs
+            $('[data-action=apply-taxon-filter]').on('click', function(e) {
+                var selected = $(e.currentTarget)
+                    .parents('.modal').find('input[type=checkbox]:checked');
+                var selectedValues =_.map(selected, function(s) {
+                    return s.value;
+                });
+                console.log(selectedValues);
+            });
+
+            $('[data-action=apply-sex-filter]').on('click', function(e) {
+                var selected = $(e.currentTarget)
+                    .parents('.modal').find('input[type=checkbox]:checked');
+                var selectedValues =_.map(selected, function(s) {
+                    return s.value;
+                });
+                console.log(selectedValues);
             });
         });
     </script>

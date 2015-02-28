@@ -670,6 +670,13 @@ body.download p {
   display: inline-block;
   margin-left: 2em;
 }
+.dataset-option .info h4 {
+  background-color: inherit;
+  padding: 0;
+}
+.dataset-option .info p {
+  padding: 0;
+}
 .dataset-option p {
   font-weight: lighter;
 }
