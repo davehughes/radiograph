@@ -1,0 +1,99 @@
+{% extends "radiograph/base.html" %}
+{% load url from future %}
+{% load static from staticfiles %}
+{% load paginate from radiograph %}
+
+{% block body_class %}download{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xs-12 col-md-8 col-md-offset-2">
+        <h1><i class="fa fa-file-archive-o pull-right"></i> Download Dataset</h1>
+        <p>
+        Please choose a download option below.  All downloads contain a CSV file
+        with data for each specimen and references to image files.
+        </p>
+        <hr/>
+
+        <label class="dataset-option selected" data-download-file="https://s3.amazonaws.com/primate-radiograph/media/downloads/specimen-data-compact.csv">
+            <div class="radio-container">
+                <input type="radio" name="dataset" value="small" checked="checked"/>
+            </div>
+            <div class="info">
+                <h4>Compact</h4>
+                <p>
+                Spreadsheet only, with URL links to specimen images on this site.
+                </p>
+                <dl>
+                    <dt>Download Size:</dt>
+                    <dd>380 KB</dd>
+                </dl>
+            </div>
+        </label>
+
+        <label class="dataset-option" data-download-file="https://s3.amazonaws.com/primate-radiograph/media/downloads/specimen-data-medium.zip">
+            <div class="radio-container">
+                <input type="radio" name="dataset" value="medium"/>
+            </div>
+            <div class="info">
+                <h4>Medium</h4>
+                <p>
+                Spreadsheet and images optimized for quick downloading.
+                (<a href="{{ sample_image.image_medium.url }}" target="_blank">View sample image <i class="fa fa-external-link"></i></a>)
+                </p>
+                <dl>
+                    <dt>Download Size:</dt>
+                    <dd>614 MB</dd>
+                </dl>
+            </div>
+        </label>
+
+        <label class="dataset-option" data-download-file="https://s3.amazonaws.com/primate-radiograph/media/downloads/specimen-data-full.zip">
+            <div class="radio-container">
+                <input type="radio" name="dataset" value="full"/>
+            </div>
+            <div class="info">
+                <h4>Full</h4>
+                <p>
+                Spreadsheet and full-sized images. 
+                (<a href="{{ sample_image.image_full.url }}" target="_blank">View sample image <i class="fa fa-external-link"></i></a>)
+                </p>
+                <dl>
+                    <dt>Download Size:</dt>
+                    <dd>1.9 GB</dd>
+                </dl>
+            </div>
+        </label>
+
+        <div class="dataset-download-controls">
+            <a href="#" class="btn btn-primary dataset-download">
+                <i class="fa fa-download"></i> Download Now
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+
+<script>
+    $(function() {
+        var options = $('.dataset-option')
+            optionsRadio = options.find('input')
+            downloadBtn = $('.dataset-download')
+
+        optionsRadio.on('change', function(e) {
+            options.removeClass('selected')
+            optionsRadio.andSelf().find(':checked').parents('.dataset-option').addClass('selected')
+        });
+    
+        downloadBtn.on('click', function(e) {
+            var selectedOption = options.andSelf().find('.selected');
+            var downloadFile = selectedOption.data('download-file');
+            console.log('TODO: kick off download:', downloadFile);
+            window.open(downloadFile, 'Download');
+        });
+    });
+</script>
+{% endblock %}
