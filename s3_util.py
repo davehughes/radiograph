@@ -37,27 +37,18 @@ def download_all():
     for key in get_keys():
         download_key(key)
 
+# Size should be either 'medium' or 'full' here
+def generate_image_zip(size):
+    output_path = 'radiograph-{}.zip'.format(size)
+    image_file_mappings = generate_file_mappings('{}.png'.format(size), get_joined_name_from_path)
+    csv_path = dump_specimen_csv('specimen-data-{}.csv'.format(size), download_type=size)
+    csv_file_mappings = [(csv_path, csv_path)]
 
-def get_joined_name_from_path(path):
-    '''
-    Convert from .../{taxon}/{specimen-id}/{aspect}/image.png to 
-    {taxon}_{specimen_id}_{aspect}.png
-    '''
-    path_dir = os.path.dirname(path)
-    taxon, specimen_id, aspect = path_dir.split('/')[-3:]
-    return 'images/{}-{}-{}.png'.format(taxon, specimen_id, aspect)
-
-
-def generate_medium_zip(output_path='radiograph-medium.zip'):
-    return generate_image_zip(output_path=output_path, target_image_name='medium.png')
+    all_file_mappings = itertools.chain(image_file_mappings, csv_file_mappings)
+    return generate_zip(output_path, all_file_mappings)
 
 
-def generate_full_zip(output_path='radiograph-full.zip'):
-    return generate_image_zip(output_path=output_path, target_image_name='full.png')
-
-
-def generate_image_zip(output_path='radiograph-full.zip', target_image_name='full.png'):
-    mappings = generate_file_mappings(target_image_name, get_joined_name_from_path)
+def generate_zip(output_path, mappings):
     with zipfile.ZipFile(output_path, 'w', allowZip64=True) as z:
         for path, target in mappings:
             z.write(path, target)
@@ -72,12 +63,27 @@ def generate_file_mappings(target_filename, map_func):
             yield path, map_func(path)
 
 
+def get_joined_name_from_path(path):
+    '''
+    Convert from .../{taxon}/{specimen-id}/{aspect}/image.png to 
+    {taxon}_{specimen_id}_{aspect}.png
+    '''
+    path_dir = os.path.dirname(path)
+    taxon, specimen_id, aspect = path_dir.split('/')[-3:]
+    return 'images/{}-{}-{}.png'.format(taxon, specimen_id, aspect)
+
+
 def dump_specimen_csv(output_path, download_type='compact'):
     qs = (Specimen.objects
         .filter(image_superior__isnull=False)
         .filter(image_lateral__isnull=False))
     rows = get_specimen_rows(qs, download_type=download_type)
-    # ...
+    
+    with open(output_path, 'w') as f:
+        w = csv.writer(f)
+        w.writerows(rows)
+
+    return output_path
 
 
 def get_specimen_rows(specimens, download_type='compact'):
