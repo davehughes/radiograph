@@ -1,11 +1,14 @@
 {% load static from staticfiles %}
 
 <div class="specimen-result tile">
-	<div class="overlay-top">
-		<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
-		<span class="taxon">{{ specimen.taxon.label }}</span>
-		(<span class="sex">{{ specimen.get_sex_display }}</span>)
-	</div>
+    <div class="overlay-top">
+        {% if enable_selection %}
+        <input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
+        {% endif %}
+        <span class="taxon">{{ specimen.taxon.label }}</span>
+        (<span class="sex">{{ specimen.get_sex_display }}</span>)
+    </div>
+
     <div class="images">
         {% if aspect == 'superior' %}
         <figure class="specimen-image superior"
@@ -19,8 +22,9 @@
                 style="background-image:url('{{ specimen.image_lateral.image_medium.url }}');"></figure>
         {% endif %}
     </div>
-	<div class="overlay-bottom">
-		<span class="institution">{{ specimen.institution.name }}</span>
-		<span class="specimen-id">{{ specimen.specimen_id }}</span>
-	</div>
+
+    <div class="overlay-bottom">
+            <span class="institution">{{ specimen.institution.name }}</span>
+            <span class="specimen-id">{{ specimen.specimen_id }}</span>
+    </div>
 </div>

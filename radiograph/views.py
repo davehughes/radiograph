@@ -59,7 +59,8 @@ def specimens(request):
         .exclude(image_superior__isnull=True))
     search_form = forms.SpecimenSearchForm(request.REQUEST, queryset=queryset)
     return render(request, 'radiograph/specimen-list.html', {
-            'search_form': search_form,
+        'search_form': search_form,
+        'enable_selection': False,
         })
 
 

@@ -87,8 +87,10 @@
             </div>
 
             {# Header for standard view #}
-            <div class="standard-view-header">
+            {% with search_form.view.value|default:search_form.view.field.initial as result_view %}
+            <div class="{{result_view}}-view-header">
                 <div class="header-column selector dropdown">
+                    {% if enable_selection %}
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                       <input type="checkbox" class="item-selector">
                       <span class="caret"></span>
@@ -113,11 +115,13 @@
                              </a>
                          </li>
                      </ul>
+                     {% endif %}
                 </div>
                 <div class="header-column superior">Superior</div>
                 <div class="header-column lateral">Lateral</div>
                 <div class="header-column details">Details</div>
             </div>
+            {% endwith %}
             
             <div class="search-results panel-body">
 

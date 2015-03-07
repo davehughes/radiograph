@@ -3,7 +3,9 @@
 
 <div class="specimen-result compact" style="clear: both;">
 
+    {% if enable_selection %}
 	<input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
+    {% endif %}
 
     <ul class="image-thumbnails">
         <li>

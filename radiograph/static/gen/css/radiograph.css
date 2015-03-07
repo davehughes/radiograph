@@ -624,6 +624,41 @@ hr {
 .standard-view-header .details {
   width: 674px;
 }
+.compact-view-header {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  width: 100%;
+  background-color: #FAFAFA;
+  height: 2em;
+  line-height: 1.8em;
+  color: slategray;
+}
+.compact-view-header .header-column {
+  float: left;
+  text-align: center;
+}
+.compact-view-header .selector {
+  width: 50px;
+}
+.compact-view-header .superior {
+  margin-left: 68px;
+}
+.compact-view-header .lateral {
+  margin-left: 35px;
+}
+.compact-view-header .details {
+  margin-left: 33%;
+}
+.tiles-view-header {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  width: 100%;
+  background-color: #FAFAFA;
+  height: 2em;
+  line-height: 1.8em;
+  color: slategray;
+  color: transparent;
+}
 .search-results-footer {
   text-align: center;
 }

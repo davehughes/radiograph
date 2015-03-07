@@ -246,7 +246,7 @@ hr {
     text-align: left; 
 }
 
-.standard-view-header {
+.base-view-header() {
     border-top: 1px solid gray;
     border-bottom: 1px solid gray;
     width: 100%;
@@ -254,6 +254,10 @@ hr {
     height: 2em;
     line-height: 1.8em;
     color: slategray;
+}
+
+.standard-view-header {
+    .base-view-header();
 
     .header-column {
         float: left;
@@ -273,6 +277,34 @@ hr {
     .details {
         width: 674px; 
     }
+}
+
+.compact-view-header {
+    .base-view-header();
+
+    .header-column {
+        float: left;
+        // border-top: 1px solid gray;
+        // border-bottom: 1px solid gray;
+        text-align: center;
+    }
+    .selector {
+        width: 50px; 
+    }
+    .superior {
+        margin-left: 68px;
+    }
+    .lateral {
+        margin-left: 35px;
+    }
+    .details {
+        margin-left: 33%;
+    }
+}
+
+.tiles-view-header {
+    .base-view-header();
+    color: transparent;
 }
 // End search page header styles
 
