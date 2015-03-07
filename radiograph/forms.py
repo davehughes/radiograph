@@ -159,6 +159,7 @@ class SpecimenSearchForm(forms.Form):
         qs = self.queryset
         if self.is_bound and self.is_valid():
             if self.cleaned_data['taxa']:
+                print 'Taxa: {}'.format(self.cleaned_data['taxa'])
                 qs = qs.filter(taxon__in=self.cleaned_data['taxa'])
             if self.cleaned_data['sex']:
                 qs = qs.filter(sex__in=self.cleaned_data['sex'])

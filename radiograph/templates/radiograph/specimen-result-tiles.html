@@ -6,7 +6,7 @@
         <input type="checkbox" class="item-selection" value="{{ specimen.id }}"/>
         {% endif %}
         <span class="taxon">{{ specimen.taxon.label }}</span>
-        (<span class="sex">{{ specimen.get_sex_display }}</span>)
+        (<span class="sex">{{ specimen.get_sex_display|default:"?" }}</span>)
     </div>
 
     <div class="images">

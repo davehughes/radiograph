@@ -28,11 +28,11 @@
 			- 
             <span class="taxon-label">{{ specimen.taxon.label }}</span>
 		</h4>
-		<div class="specimen-sex">{{ specimen.sex }}</div>
+		<div class="specimen-sex">{{ specimen.sex|default:"Unknown/Unspecified" }}</div>
         {% if specimen.settings %}
 		<div class="specimen-settings">Settings: {{ specimen.settings }}</div>
         {% endif %}
-		<div class="specimen-comments">{{ specimen.comments }}</div>
+		<div class="specimen-comments">{{ specimen.comments|default:"" }}</div>
 	</div>
 
 </div>

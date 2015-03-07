@@ -30,7 +30,7 @@
 		<span class="specimen-taxon" style="font-style: italic">{{ specimen.taxon.label }}</span>
 	</div>
 	<div>
-		<span class="specimen-sex">{{ specimen.sex }}</span>
+		<span class="specimen-sex">{{ specimen.sex|default:"Unknown/Unspecified" }}</span>
 	</div>
 	{% comment %}
 	<div>
