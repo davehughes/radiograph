@@ -1,7 +1,0 @@
----
-- name: assemble postgres auth file
-  assemble: src=${postgresql.data_dir}/pg_hba.conf.d dest=${postgresql.data_dir}/pg_hba.conf
-
-- name: reload postgres
-  shell: ${postgresql.service_script} reload
-  sudo: True

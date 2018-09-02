@@ -1,4 +1,0 @@
----
-- name: update supervisor
-  shell: supervisorctl update
-  sudo: true

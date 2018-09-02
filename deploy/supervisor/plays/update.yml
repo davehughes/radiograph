@@ -1,6 +1,0 @@
----
-- name: ensure that supervisord is running
-  service: name=supervisord state=running enabled=true
-
-- name: update supervisor services
-  shell: supervisorctl update

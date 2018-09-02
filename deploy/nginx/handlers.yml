@@ -1,4 +1,0 @@
----
-- name: reload nginx
-  shell: service nginx reload
-  sudo: true
