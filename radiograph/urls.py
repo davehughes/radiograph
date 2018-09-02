@@ -1,4 +1,5 @@
 from django.conf.urls import *
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 # from rest_framework.views import InstanceModelView
 from rest_framework import generics
@@ -91,3 +92,5 @@ urlpatterns = patterns('',
         name='image'),
     url(r'^download$', 'radiograph.views.download', name='download-dataset'),
 )
+
+urlpatterns += staticfiles_urlpatterns()

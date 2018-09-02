@@ -1,6 +1,6 @@
 import os
 
-SITE_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+SITE_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 ALLOWED_HOSTS = [
     '.primate-radiograph.com',
