@@ -1,0 +1,34 @@
+version: '3'
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+
+    ports:
+     - "80:5000"
+
+    environment:
+      DB_NAME: radiograph
+      DB_USER: radiograph
+      DB_PASSWORD: radiograph
+      DB_HOST: postgres
+      DB_PORT: 5432
+
+      # S3 access creds
+      AWS_ACCESS_KEY_ID: <access-key-for-s3-access>
+      AWS_SECRET_ACCESS_KEY: <secret-key-for-s3-access>
+      SECRET_KEY: <django-secret-key>
+
+  postgres:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.postgres
+      args:
+        PG_USER: radiograph
+        PG_PASSWORD: radiograph
+        PG_DATABASE: radiograph
+
+    ports:
+     - "5432:5432"

@@ -7,7 +7,7 @@ ALLOWED_HOSTS = [
     '.localhost',
 ]
 
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', False)
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

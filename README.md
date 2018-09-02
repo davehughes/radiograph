@@ -1,3 +1,11 @@
+Quickstart:
+-----------
+Requirements: docker, docker-compose
+```
+git clone <this repo>
+docker-compose up
+```
+
 File storage patterns:
 ----------------------
 - original files stored as /[Genus] [species]/[institution]_[id]_[Genus]_[species]_[aspect].tif

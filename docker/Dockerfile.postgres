@@ -1,0 +1,24 @@
+FROM ubuntu:bionic
+
+ARG PG_USER=radiograph
+ARG PG_PASSWORD=radiograph
+ARG PG_DATABASE=radiograph
+ARG PG_BACKUP_FILE=radiograph-2018.09.01.sql
+
+RUN apt update && apt install -y postgresql
+COPY ${PG_BACKUP_FILE} /tmp/backup.sql
+RUN service postgresql start \
+ && su -c "createuser ${PG_USER}" postgres \
+ && su -c "createdb ${PG_DATABASE}" postgres \
+ && su -c "psql -c \"alter role ${PG_USER} with password '${PG_PASSWORD}'\"" postgres \
+ && echo "localhost:5432:${PG_DATABASE}:${PG_USER}:${PG_PASSWORD}" >> ~/.pgpass \
+ && chmod 0600 ~/.pgpass \
+ && psql -h localhost -U ${PG_USER} ${PG_DATABASE} </tmp/backup.sql \
+ && echo "host  ${PG_DATABASE}  ${PG_USER}  172.19.0.0/16   md5" >> /etc/postgresql/10/main/pg_hba.conf \
+ && sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/10/main/postgresql.conf
+
+EXPOSE 5432
+
+CMD su -c "/usr/lib/postgresql/10/bin/postgres \
+    -D /var/lib/postgresql/10/main \
+    -c config_file=/etc/postgresql/10/main/postgresql.conf" postgres

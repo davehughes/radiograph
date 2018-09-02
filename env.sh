@@ -2,6 +2,7 @@
 export SECRET_KEY=
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
+export DJANGO_DEBUG=
 
 export DB_NAME=radiograph
 export DB_USER=radiograph
