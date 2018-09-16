@@ -3,7 +3,8 @@ FROM ubuntu:bionic
 ARG PG_USER=radiograph
 ARG PG_PASSWORD=radiograph
 ARG PG_DATABASE=radiograph
-ARG PG_BACKUP_FILE=radiograph-2018.09.01.sql
+ARG PG_BACKUP_FILE=radiograph-backup.sql
+ARG ACCESS_WHITELIST_CIDR=172.18.0.0/16
 
 RUN apt update && apt install -y postgresql
 COPY ${PG_BACKUP_FILE} /tmp/backup.sql
@@ -14,7 +15,7 @@ RUN service postgresql start \
  && echo "localhost:5432:${PG_DATABASE}:${PG_USER}:${PG_PASSWORD}" >> ~/.pgpass \
  && chmod 0600 ~/.pgpass \
  && psql -h localhost -U ${PG_USER} ${PG_DATABASE} </tmp/backup.sql \
- && echo "host  ${PG_DATABASE}  ${PG_USER}  172.19.0.0/16   md5" >> /etc/postgresql/10/main/pg_hba.conf \
+ && echo "host  ${PG_DATABASE}  ${PG_USER}  ${ACCESS_WHITELIST_CIDR}   md5" >> /etc/postgresql/10/main/pg_hba.conf \
  && sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/10/main/postgresql.conf
 
 EXPOSE 5432
