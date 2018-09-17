@@ -37,6 +37,7 @@ sudo virtualenv env
 sudo env/bin/pip install docker-compose
 # Edit docker-compose.yml to add secrets/config as appropriate
 # Download database backup to root directory, named 'radiograph-backup.sql'
+sudo env/bin/docker-compose build
 sudo env/bin/docker-compose up -d
 ```
 
